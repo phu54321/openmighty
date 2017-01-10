@@ -1,7 +1,10 @@
 doctype html
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        script(src='/bower_components/jquery/dist/jquery.min.js')
+    body
+        .gameMain
+            block content
