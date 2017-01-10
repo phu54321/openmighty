@@ -1,6 +1,7 @@
 html, body {
   width: 100%;
-  height: 100%; }
+  height: 100%;
+  background-color: #fcfcfc; }
 
 body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; }
@@ -14,4 +15,14 @@ a {
   bottom: 0;
   right: 0;
   left: 0;
-  padding: 10px; }
+  width: 100vw;
+  height: 56.25vw;
+  /* height:width ratio = 9/16 = .5625  */
+  max-height: 100vh;
+  max-width: 177.78vh;
+  /* 16/9 = 1.778 */
+  margin: auto;
+  padding: 5%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }

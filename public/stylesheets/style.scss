@@ -3,6 +3,7 @@
 html, body {
   width: 100%;
   height: 100%;
+  background-color: #fcfcfc;
 }
 
 body {
@@ -14,10 +15,21 @@ a {
 }
 
 .gameMain {
+  // Fill whole screen by default
   position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  padding: 10px;
+  top: 0;  bottom: 0;
+  right: 0;  left: 0;
+
+  // Preserve 16:9 aspect ratio
+  width: 100vw;
+  height: 56.25vw; /* height:width ratio = 9/16 = .5625  */
+  max-height: 100vh;
+  max-width: 177.78vh; /* 16/9 = 1.778 */
+  margin: auto;
+
+  // Add padding
+  padding: 5%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
