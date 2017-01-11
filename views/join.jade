@@ -2,7 +2,7 @@ extends layout
 
 block content
     h1 openMighty
-    p 처음 이 서버에 접속하셨습니다. 이름을 입력해주세요.
+    p 이름을 입력해주세요.
     form#registerForm(action='javascript:issueRegister();', method="POST")
         .row.input-field
             input(id='username', type='text', required)

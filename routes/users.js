@@ -8,7 +8,10 @@ router.get('/register', function (req,res) {
 });
 
 router.post('/logout', function (req, res) {
-    res.clearCookie('identity');
+    const keyList = ['identity', 'roomID'];
+    keyList.forEach((prop) => {
+        res.clearCookie(prop);
+    });
     res.json({error: 0});
 });
 
@@ -26,7 +29,7 @@ router.post('/register', function(req, res) {
         username: username,
         useridf: useridf
     };
-    res.cookie('identity', JSON.stringify(identity), {signed: true, httpOnly: false});
+    res.cookie('identity', JSON.stringify(identity), {signed: true});
     return res.json({error: 0});
 });
 

@@ -69,8 +69,12 @@ MightyRoom.prototype.listUsers = function () {
 };
 
 
+/**
+ * Check if room is empty - Empty room should be garbage-collected.
+ * @returns {boolean}
+ */
 MightyRoom.prototype.isEmpty = function () {
-    return this.users.length == 0;
+    return this.users.length === 0;
 };
 
 /**
@@ -80,6 +84,7 @@ MightyRoom.prototype.removeUser = function (useridf, cb) {
     const index = this.getUserIndex(useridf);
     if(index === null) return cb(new Error('방에 존재하지 않는 인원입니다.'));
     this.users.splice(index, 1);
+    return cb(null);
 };
 
 

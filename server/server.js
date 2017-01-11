@@ -32,7 +32,11 @@ module.exports = function(io) {
 
         const room = getRoom(socket.roomID);
         room.addUser(socket, socket.username, socket.useridf, function(err, userEntry) {
-            if(err) return io.emit('info', '룸 입장이 거부되었습니다 : ' + err.message);
+            if (err) {
+                io.emit('info', '룸 입장이 거부되었습니다 : ' + err.message);
+                if (room.isEmpty()) delete roomMap[socket.roomID];
+                return socket.disconnect();
+            }
 
             // Show user list
             {
@@ -51,7 +55,11 @@ module.exports = function(io) {
             // Process disconnection
             socket.on('disconnect', function(){
                 console.log('user disconnected');
-                room.removeUser(socket.useridf);
+                room.removeUser(socket.useridf, (err) => {});
+                if(room.isEmpty()) {
+                    console.log('Room ' + socket.roomID + ' empty : removing');
+                    delete roomMap[socket.roomID];
+                }
             });
 
         });
@@ -60,7 +68,9 @@ module.exports = function(io) {
 };
 
 
-
+/**
+ * Cookie validator
+ */
 function validateCookie(socket, next) {
     let identity = socket.request.signedCookies.identity;
     let roomID = socket.request.signedCookies.roomID;
