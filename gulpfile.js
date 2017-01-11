@@ -1,18 +1,10 @@
 // Include gulp
-var gulp = require('gulp');
+const gulp = require('gulp');
 
 // Include Our Plugins
-var jshint = require('gulp-jshint');
-var sass = require('gulp-sass');
-var nodemon = require('gulp-nodemon');
-var browserSync = require('browser-sync');
-
-// Lint Task
-gulp.task('lint', function () {
-    return gulp.src(['app.js', 'routes/**/*.js', 'models/**/*.js', 'config/**/*.js'])
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'));
-});
+const sass = require('gulp-sass');
+const nodemon = require('gulp-nodemon');
+const browserSync = require('browser-sync');
 
 // Compile Our Sass
 gulp.task('sass', function () {
@@ -34,7 +26,7 @@ gulp.task('watch', function () {
 });
 
 
-var BROWSER_SYNC_RELOAD_DELAY = 2000;
+const BROWSER_SYNC_RELOAD_DELAY = 2000;
 
 // Nodemon
 gulp.task('nodemon', function (cb) {
@@ -44,10 +36,10 @@ gulp.task('nodemon', function (cb) {
         proxy: "http://localhost:3000",
         files: ["views/**/*.*, public/**/*.*"],
         port: 7000,
-        notify: true
+        notify: false
     });
 
-    var started = false;
+    let started = false;
     return nodemon({
         script: 'bin/www'
     }).on('start', function () {
@@ -67,4 +59,4 @@ gulp.task('nodemon', function (cb) {
 });
 
 // Default Task
-gulp.task('default', ['lint', 'sass', 'watch', 'nodemon']);
+gulp.task('default', ['sass', 'watch', 'nodemon']);

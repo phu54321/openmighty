@@ -5,9 +5,19 @@ html
         link(rel='stylesheet', href='/stylesheets/style.css')
         link(rel='stylesheet', href='/bower_components/materialize/dist/css/materialize.css')
         meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"')
+        link(rel='stylesheet', href='https://fonts.googleapis.com/icon?family=Material+Icons')
         script(src='/javascripts/formIssuer.js')
+        script(src='/javascripts/utils.js')
         script(src='/bower_components/jquery/dist/jquery.min.js')
         script(src='/bower_components/materialize/dist/js/materialize.js')
     body
-        .gameMain
-            block content
+        .valign-wrapper.center-align
+            .gameMain.valign.left-align
+                .card.topStrip.indigo.white-text
+                    .left openMighty
+                    if request.username
+                        .right
+                            | #{request.username} &nbsp;
+                            span(onclick='javscript:issueLogout();') Logout
+
+                block content

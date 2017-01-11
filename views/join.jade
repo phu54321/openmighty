@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    h1 openMighty
+    p 처음 이 서버에 접속하셨습니다. 이름을 입력해주세요.
+    form#registerForm(action='javascript:issueRegister();', method="POST")
+        .row.input-field
+            input(id='username', type='text')
+            label(for='username') 이름
+
+    .row
+            button.waves-effect.btn.waves-effect.waves-light.right(type='submit') 로그인

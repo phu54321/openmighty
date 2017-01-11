@@ -1,7 +1,16 @@
+.topStrip {
+  position: absolute !important;
+  display: block !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 !important;
+  padding: .5em; }
+
 html, body {
   width: 100%;
   height: 100%;
-  background-color: #fcfcfc; }
+  background-color: #eee; }
 
 body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; }
@@ -15,6 +24,7 @@ a {
   bottom: 0;
   right: 0;
   left: 0;
+  background-color: #fcfcfc;
   width: 100vw;
   height: 56.25vw;
   /* height:width ratio = 9/16 = .5625  */
@@ -22,6 +32,7 @@ a {
   max-width: 177.78vh;
   /* 16/9 = 1.778 */
   margin: auto;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
   padding: 5%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;

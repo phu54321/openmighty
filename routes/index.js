@@ -1,13 +1,13 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const users = require('./users');
+let router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res) {
-    res.render('index', { title: 'openMighty' });
+router.get('/', users.checkLogon, function(req, res) {
+    res.render('index', {title: '방 찾기'});
 });
 
-router.get('/login', function(req, res) {
-    res.render('login', { title: 'openMighty' });
+router.get('/:room', users.checkLogon, (req, res) => {
+    res.redirect('/');
 });
-
 module.exports = router;
