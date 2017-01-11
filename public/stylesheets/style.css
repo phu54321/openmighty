@@ -17,6 +17,12 @@
   bottom: 0;
   padding: 2em 3% 4em 3%;
   overflow: scroll; }
+  .chatbox .chat-messages .chat-info {
+    color: #e25b60; }
+  .chatbox .chat-messages .chat-cmd {
+    color: #0D47A1; }
+  .chatbox .chat-messages .chat-chat {
+    color: #111; }
 
 .chatbox .chat-input {
   position: absolute;

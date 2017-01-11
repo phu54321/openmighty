@@ -11,5 +11,6 @@ router.get('/', users.checkLogon, function(req, res) {
 // Room
 router.get('/:room', users.checkLogon, (req, res) => {
     const roomID = req.params.room;
+    res.cookie('roomID', roomID, {signed: true, httpOnly: false});
     res.render('room');
 });

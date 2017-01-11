@@ -76,14 +76,6 @@ app.use(function(err, req, res, next) {
 app.initSocketIO = function (io) {
     const socketIOCookieParser = require('socket.io-cookie-parser');
     io.use(socketIOCookieParser(cookieSecret));
-    io.use(function(socket, next) {
-        let identity = socket.request.signedCookies.identity;
-        if(!identity) return next(new Error('Invalid access'));
-        identity = JSON.parse(identity);
-        socket.username = identity.username;
-        socket.useridf = identity.useridf;
-        next();
-    });
     require('./server/server')(io);
 };
 

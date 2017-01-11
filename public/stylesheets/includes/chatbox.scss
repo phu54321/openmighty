@@ -4,6 +4,15 @@
     top: 0; left: 0; right: 0; bottom: 0;
     padding: 2em 3% 4em 3%;
     overflow: scroll;
+    .chat-info {
+      color: #e25b60;
+    }
+    .chat-cmd {
+      color: #0D47A1;
+    }
+    .chat-chat {
+      color: #111;
+    }
   }
   .chat-input {
     position: absolute;
