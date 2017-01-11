@@ -1,0 +1,22 @@
+.chatbox {
+  .chat-messages {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    padding: 2em 3% 4em 3%;
+    overflow: scroll;
+  }
+  .chat-input {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-left: 3%;
+    padding-right: 3%;
+    background: #eaeaea;
+    height: 4em;
+
+    input {
+      margin-bottom: 10px;
+    }
+  }
+}

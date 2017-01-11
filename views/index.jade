@@ -6,8 +6,10 @@ block content
 
             form#joinRoom(action='javascript:enterRoom()')
                 .input-field
-                    input(id='roomURL', type='text', placeholder='이 칸을 비우면 새로운 방을 만듭니다.')
-                    label(for='roomURL') 기존 방 URL
+                    input.validate(id='roomURL', type='text', placeholder='이 칸을 비우면 새로운 방을 만듭니다.', title="올바른 방 URL을 입력하세요.")
+                    script.
+                        enableRoomURLValidator();
+                    label.active(for='roomURL') 기존 방 URL
 
                 button.right.btn(type='submit') 입장
 

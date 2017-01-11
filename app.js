@@ -73,11 +73,18 @@ app.use(function(err, req, res, next) {
 
 ////
 
-// Sockets
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
-
-io.use(cookieParser(cookieSecret));
-require('./server/server')(io);
+app.initSocketIO = function (io) {
+    const socketIOCookieParser = require('socket.io-cookie-parser');
+    io.use(socketIOCookieParser(cookieSecret));
+    io.use(function(socket, next) {
+        let identity = socket.request.signedCookies.identity;
+        if(!identity) return next(new Error('Invalid access'));
+        identity = JSON.parse(identity);
+        socket.username = identity.username;
+        socket.useridf = identity.useridf;
+        next();
+    });
+    require('./server/server')(io);
+};
 
 module.exports = app;

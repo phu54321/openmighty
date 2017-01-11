@@ -14,7 +14,10 @@ router.post('/logout', function (req, res) {
 
 router.post('/register', function(req, res) {
     const username = req.body.username;
-    if(!username) {
+    if(username === '') {
+        return res.json({error: '이름을 입력하세요.'});
+    }
+    else if(!username || typeof username != 'string') {
         return res.json({error: '잘못된 접근입니다'});
     }
 

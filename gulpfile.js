@@ -33,7 +33,10 @@ gulp.task('nodemon', function (cb) {
     // Serve files from the root of this project
 
     browserSync.init({
-        proxy: "http://localhost:3000",
+        proxy: {
+            target: "http://localhost:3000",
+            ws: true
+        },
         files: ["views/**/*.*, public/**/*.*"],
         port: 7000,
         notify: false
