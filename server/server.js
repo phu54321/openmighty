@@ -22,49 +22,23 @@ function getRoom(roomID) {
     return room;
 }
 
+/**
+ * Remove room if it should be.
+ */
+
+function gcRoom(roomID) {
+    const room = getRoom(roomID);
+    if(room.isEmpty()) {
+        console.log('Room ' + roomID + ' empty : removing');
+        delete roomMap[roomID];
+    }
+}
+
 module.exports = function(io) {
     io.use(validateCookie);
 
     // Add connection handler
-    io.on('connection', function(socket) {
-        console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
-        socket.emit('info', 'Welcome to openMighty server');
-
-        const room = getRoom(socket.roomID);
-        room.addUser(socket, socket.username, socket.useridf, function(err, userEntry) {
-            if (err) {
-                io.emit('info', '룸 입장이 거부되었습니다 : ' + err.message);
-                if (room.isEmpty()) delete roomMap[socket.roomID];
-                return socket.disconnect();
-            }
-
-            // Show user list
-            {
-                const users = _.map(room.listUsers(), (user) => user.username);                io.emit('info', '현재 입장인원 : ' + users.join(', '));
-                io.emit('cmd', 'userList ' + JSON.stringify(users));
-            }
-
-            // Process chatting
-            socket.on('chat', function(msg) {
-                const users = room.listUsers();
-                _.map(users, (user) => {
-                    user.socket.emit('chat', '[' + socket.username + '] ' + msg);
-                });
-            });
-
-            // Process disconnection
-            socket.on('disconnect', function(){
-                console.log('user disconnected');
-                room.removeUser(socket.useridf, (err) => {});
-                if(room.isEmpty()) {
-                    console.log('Room ' + socket.roomID + ' empty : removing');
-                    delete roomMap[socket.roomID];
-                }
-            });
-
-        });
-
-    });
+    io.on('connection', onConnect);
 };
 
 
@@ -89,4 +63,50 @@ function validateCookie(socket, next) {
     socket.useridf = identity.useridf;
     socket.roomID = roomID;
     next();
+}
+
+
+function onConnect(socket) {
+    console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
+    socket.emit('info', 'Welcome to openMighty server');
+
+    const room = getRoom(socket.roomID);
+    let userEntry;
+    async.waterfall([
+        (cb) => room.addUser(socket, socket.username, socket.useridf, cb),
+        (userEntry_, cb) => {
+            userEntry = userEntry_;
+            const users = _.map(room.listUsers(), (user) => user.username);
+            socket.emit('info', '현재 입장인원 : ' + users.join(', '));
+            socket.emit('cmd', 'userList ' + JSON.stringify(users));
+            cb(null);
+        }
+    ], (err) => {
+        if (err) {
+            socket.emit('info', '룸 입장이 거부되었습니다 : ' + err.message);
+            gcRoom(socket.roomID);
+            return socket.disconnect();
+        }
+    });
+
+    // Process chatting
+    socket.on('chat', function(msg) {
+        // Ignore chat from non-fully-connected user
+        if(!userEntry) return;
+
+        const users = room.listUsers();
+        _.map(users, (user) => {
+            user.socket.emit('chat', '[' + socket.username + '] ' + msg);
+        });
+    });
+
+    // Process disconnection
+    socket.on('disconnect', function(){
+        // Ignore disconnection from non-fully-connected user
+        if(!userEntry) return;
+
+        console.log('user disconnected');
+        room.removeUser(socket.useridf, (err) => {});
+        gcRoom(socket.roomID);
+    });
 }
