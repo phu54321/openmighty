@@ -55,18 +55,22 @@ MightyRoom.prototype.addUser = function(socket, username, useridf, cb) {
         useridf: useridf
     };
     this.users.push(userEntry);
-    cb(null);
+    cb(null, userEntry);
 };
 
 
 
 /**
  * Get user list
- * @param cb
  * @returns {*}
  */
-MightyRoom.prototype.listUsers = function (cb) {
-    return cb(null, this.users);
+MightyRoom.prototype.listUsers = function () {
+    return this.users;
+};
+
+
+MightyRoom.prototype.isEmpty = function () {
+    return this.users.length == 0;
 };
 
 /**
@@ -78,9 +82,5 @@ MightyRoom.prototype.removeUser = function (useridf, cb) {
     this.users.splice(index, 1);
 };
 
-
-MightyRoom.test = function() {
-
-};
 
 module.exports = MightyRoom;

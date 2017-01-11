@@ -4,6 +4,7 @@
 
 const MightyGame = require('./mighty');
 const _ = require('underscore');
+const async = require('async');
 
 let roomMap = {};
 
@@ -30,28 +31,29 @@ module.exports = function(io) {
         socket.emit('info', 'Welcome to openMighty server');
 
         const room = getRoom(socket.roomID);
-        room.addUser(socket, socket.username, socket.useridf, function(err) {
+        room.addUser(socket, socket.username, socket.useridf, function(err, userEntry) {
             if(err) return io.emit('info', '룸 입장이 거부되었습니다 : ' + err.message);
 
-            room.listUsers(function (err, users) {
-                const userList = _.map(users, (user) => user.username);
-                io.emit('info', '현재 입장인원 : ' + userList.join(', '));
-                io.emit('cmd', 'userList ' + JSON.stringify(userList));
-            });
+            // Show user list
+            {
+                const users = _.map(room.listUsers(), (user) => user.username);                io.emit('info', '현재 입장인원 : ' + users.join(', '));
+                io.emit('cmd', 'userList ' + JSON.stringify(users));
+            }
 
+            // Process chatting
             socket.on('chat', function(msg) {
-                room.listUsers((err, users) => {
-                    _.map(users, (user) => {
-                        const userSocket = user.socket;
-                        userSocket.emit('chat', '[' + socket.username + '] ' + msg);
-                    });
+                const users = room.listUsers();
+                _.map(users, (user) => {
+                    user.socket.emit('chat', '[' + socket.username + '] ' + msg);
                 });
             });
 
+            // Process disconnection
             socket.on('disconnect', function(){
                 console.log('user disconnected');
                 room.removeUser(socket.useridf);
             });
+
         });
 
     });
