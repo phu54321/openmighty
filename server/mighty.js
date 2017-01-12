@@ -16,6 +16,18 @@ function MightyRoom(roomID, owner) {
     this.playingUsers = null;
 }
 
+/**
+ * Broadcast socket message to room.
+ * @param msgType
+ * @param msg
+ */
+MightyRoom.prototype.emit = function (msgType, msg) {
+    "use strict";
+    _.map(this.users, (user) => {
+        user.socket.emit(msgType, msg);
+    });
+};
+
 
 ///////////////////////////////////////////////////////////////
 // Room related

@@ -5,7 +5,9 @@
 const roomsys = require('./roomsys');
 const _ = require('underscore');
 const async = require('async');
-const cmdProc = require("./cmdproc");
+const cmdproc = require("./cmdproc");
+const cmdout = require('./cmdout');
+
 
 module.exports = function(io) {
     "use strict";
@@ -64,7 +66,7 @@ function onConnect(socket) {
     function afterJoin(err, userEntry) {
         if (err) {
             socket.emit('err', '룸 입장이 거부되었습니다 : ' + err.message);
-            gcRoom(socket.roomID);
+            roomsys.gcRoom(socket.roomID);
             return socket.disconnect();
         }
 
@@ -73,10 +75,7 @@ function onConnect(socket) {
 
         const users = _.map(room.listUsers(), (user) => user.username);
         socket.emit('info', '현재 입장인원 : ' + users.join(', '));
-        socket.emit('cmd', 'userList ' + JSON.stringify({
-            owner: room.getOwnerIndex(),
-            users: users
-        }));
+        cmdout.emitRoominfo(room);
 
         onRoomJoin(socket);
     }
@@ -94,16 +93,15 @@ function onRoomJoin(socket) {
 
     // Process chatting
     socket.on('chat', function(msg) {
-        const users = room.listUsers();
-        _.map(users, (user) => {
-            user.socket.emit('chat', '[' + socket.username + '] ' + msg);
-        });
+        console.log('chat from ' + socket.useridf + ' : ' + msg);
+        room.emit('chat', '[' + socket.username + '] ' + msg);
     });
 
     // Process disconnection
     socket.on('disconnect', function(){
         console.log('user disconnected : ' + socket.useridf);
         room.removeUser(socket.useridf, (err) => {});
+        cmdout.emitRoominfo(room);
         roomsys.gcRoom(socket.roomID);
     });
 
@@ -114,10 +112,15 @@ function onRoomJoin(socket) {
             return socket.emit('err', '잘못된 명령입니다.');
         }
 
-        const cmdProcessor = cmdProc[obj.type];
+        const cmdProcessor = cmdproc[obj.type];
         if(!cmdProcessor) {
             return socket.emit('err', '알 수 없는 명령입니다.');
         }
         return cmdProcessor(socket, room, userEntry, msg);
     });
+
 }
+
+
+/////////
+// utility functions
