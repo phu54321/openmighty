@@ -15,6 +15,12 @@ exports.start = function (socket, room, userEntry) {
     if(!room.startGame()) return socket.emit('err', '모든 플레이어가 레디했지만 게임 시작을 하지 못했습니다');
 };
 
+
 exports.bid = function (socket, room, userEntry, msg) {
     if(!room.onUserBid(userEntry, msg)) return socket.emit('err', '공약을 걸 수 없습니다.');
+};
+
+
+exports.bidch1 = function (socket, room, userEntry, msg) {
+    if(!room.onBidChange1(userEntry, msg)) return socket.emit('err', '공약 변경을 할 수 없습니다.');
 };

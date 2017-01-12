@@ -121,18 +121,7 @@ MightyRoom.prototype.initGame = function () {
         cmdout.emitGamePlayerDeck(this, player);
     }
 
-
-    // Remaining deck
-    this.playState = 'bidding';
-    this.bidding = {
-        passStatus: [false, false, false, false, false],
-        currentBidder: 0,
-        lastBidder: null,
-        remainingDeck: deck.slice(50)
-    };
-    cmdout.emitGameBidRequest(this, 0);
-
-    return true;
+    return this.startBidding(deck.slice(50));
 };
 
 require('./bidding')(MightyRoom);

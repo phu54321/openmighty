@@ -29,6 +29,8 @@
     margin-bottom: 0.5em; }
   .chatbox .chat-messages .chat-chat {
     color: #111; }
+  .chatbox .chat-messages .chat-cmdin {
+    color: #00bfa5; }
 
 .chatbox .chat-input {
   position: absolute;
