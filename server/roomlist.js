@@ -2,7 +2,7 @@
  * Created by whyask37 on 2017. 1. 12..
  */
 
-const MightyGame = require('./mighty');
+const MightyGame = require('./logic/mighty');
 
 
 let roomMap = {};
@@ -28,7 +28,7 @@ exports.getRoom = getRoom;
 function gcRoom(roomID) {
     "use strict";
     const room = getRoom(roomID);
-    if(room && room.isEmpty()) {
+    if(room && room.hasNoUser()) {
         console.log('Room ' + roomID + ' empty : removing');
         delete roomMap[roomID];
     }

@@ -3,7 +3,7 @@
  */
 "use strict";
 
-const roomsys = require('./roomsys');
+const roomsys = require('./../roomlist');
 
 exports.start = function (socket, room, userEntry) {
     if(room.playing) return socket.emit('err', '이미 게임이 진행중입니다.');

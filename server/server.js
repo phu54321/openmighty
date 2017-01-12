@@ -3,11 +3,11 @@
  */
 
 
-const roomsys = require('./roomsys');
+const roomsys = require('./roomlist');
 const _ = require('underscore');
 const async = require('async');
-const cmdproc = require("./cmdproc");
-const cmdout = require('./cmdout');
+const cmdproc = require("./io/cmdproc");
+const cmdout = require('./io/cmdout');
 
 module.exports = function(io) {
     "use strict";

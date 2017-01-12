@@ -41,7 +41,7 @@ AISocket.prototype.onCommand = function (msg) {
                 shape: 'pass'
             });
         }
-    }, 0);
+    }, 1);
 };
 
 module.exports = AISocket;

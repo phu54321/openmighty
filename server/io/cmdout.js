@@ -42,11 +42,20 @@ exports.emitGameBidRequest = function (room, userIdx) {
     user.socket.emit('cmd', {type: 'bidrq'});
 };
 
-exports.emitGameBiddingInfo = function (room) {
-    room.emit('cmd', {
-        type: 'bidinfo',
-        bidder: room.lastBidder,
-        shape: room.lastBidShape,
-        num: room.lastBidCount
-    });
+exports.emitGameBiddingInfo = function (room, bidder, bidShape, bidCount) {
+    if(bidShape == 'pass') {
+        room.emit('cmd', {
+            type: 'bidinfo',
+            bidder: bidder,
+            shape: bidShape,
+        });
+    }
+    else {
+        room.emit('cmd', {
+            type: 'bidinfo',
+            bidder: bidder,
+            shape: bidShape,
+            num: bidCount
+        });
+    }
 };
