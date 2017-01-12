@@ -5,6 +5,9 @@
     padding: 2em 3% 4em 3%;
     overflow: scroll;
     .chat-info {
+      color: #1a9e51;
+    }
+    .chat-err {
       color: #e25b60;
     }
     .chat-cmd {

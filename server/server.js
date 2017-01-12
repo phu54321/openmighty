@@ -2,38 +2,15 @@
  * Created by whyask37 on 2017. 1. 11..
  */
 
-const MightyGame = require('./mighty');
+const roomsys = require('./roomsys');
 const _ = require('underscore');
 const async = require('async');
-
-let roomMap = {};
-
-
-/**
- * Get room from room ID
- * @param roomID
- * @returns {*}
- */
-function getRoom(roomID) {
-    return roomMap[roomID];
-}
-
-/**
- * Remove room if it should be.
- */
-
-function gcRoom(roomID) {
-    const room = getRoom(roomID);
-    if(room && room.isEmpty()) {
-        console.log('Room ' + roomID + ' empty : removing');
-        delete roomMap[roomID];
-    }
-}
+const cmdProc = require("./cmdproc");
 
 module.exports = function(io) {
-    io.use(validateCookie);
+    "use strict";
 
-    // Add connection handler
+    io.use(validateCookie);
     io.on('connection', onConnect);
 };
 
@@ -42,6 +19,8 @@ module.exports = function(io) {
  * Cookie validator
  */
 function validateCookie(socket, next) {
+    "use strict";
+
     let identity = socket.request.signedCookies.identity;
     let roomID = socket.request.signedCookies.roomID;
 
@@ -67,22 +46,29 @@ function validateCookie(socket, next) {
  * @param socket
  */
 function onConnect(socket) {
+    "use strict";
+
     console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
     socket.emit('info', 'Welcome to openMighty server');
 
     const roomID = socket.roomID;
 
     // Create room if nessecary
-    let room = roomMap[roomID];
-    if(!room) room = roomMap[roomID] = new MightyGame(roomID, socket.useridf);
+    let room = roomsys.getRoom(roomID);
+    if(!room) roomsys.createRoom(roomID, socket, (err, room_, userEntry) => {
+        room = room_;
+        afterJoin(err, userEntry);
+    });
+    else room.addUser(socket, socket.username, socket.useridf, afterJoin);
 
-    room.addUser(socket, socket.username, socket.useridf, (err, userEntry) => {
+    function afterJoin(err, userEntry) {
         if (err) {
-            socket.emit('info', '룸 입장이 거부되었습니다 : ' + err.message);
+            socket.emit('err', '룸 입장이 거부되었습니다 : ' + err.message);
             gcRoom(socket.roomID);
             return socket.disconnect();
         }
 
+        socket.room = room;
         socket.userEntry = userEntry;
 
         const users = _.map(room.listUsers(), (user) => user.username);
@@ -93,16 +79,17 @@ function onConnect(socket) {
         }));
 
         onRoomJoin(socket);
-    });
+    }
 }
-
 
 /**
  * Process after room joining
  * @param socket
  */
 function onRoomJoin(socket) {
-    const room = getRoom(socket.roomID);
+    "use strict";
+
+    const room = socket.room;
     const userEntry = socket.userEntry;
 
     // Process chatting
@@ -117,6 +104,20 @@ function onRoomJoin(socket) {
     socket.on('disconnect', function(){
         console.log('user disconnected : ' + socket.useridf);
         room.removeUser(socket.useridf, (err) => {});
-        gcRoom(socket.roomID);
+        roomsys.gcRoom(socket.roomID);
+    });
+
+    // Process commands
+    socket.on('cmd', function (msg) {
+        msg = JSON.parse(msg);
+        if(!msg || !msg.type) {
+            return socket.emit('err', '잘못된 명령입니다.');
+        }
+
+        const cmdProcessor = cmdProc[obj.type];
+        if(!cmdProcessor) {
+            return socket.emit('err', '알 수 없는 명령입니다.');
+        }
+        return cmdProcessor(socket, room, userEntry, msg);
     });
 }

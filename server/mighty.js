@@ -4,12 +4,13 @@
 
 const _ = require('underscore');
 
-
 function MightyRoom(roomID, owner) {
+    "use strict";
     this.roomID = roomID;
     this.users = [];
     this.owner = owner;
     this.playing = false;
+    this.playTurn = 0;
 
     // Game-related
     this.playingUsers = null;
@@ -24,6 +25,7 @@ function MightyRoom(roomID, owner) {
  * Get user index
  */
 MightyRoom.prototype.getUserIndex = function (useridf) {
+    "use strict";
     for(let i = 0 ; i < this.users.length ; i++) {
         const userEntry = this.users[i];
         if(userEntry.useridf == useridf) return i;
@@ -35,6 +37,7 @@ MightyRoom.prototype.getUserIndex = function (useridf) {
  * Get room owner index
  */
 MightyRoom.prototype.getOwnerIndex = function () {
+    "use strict";
     return this.getUserIndex(this.owner);
 };
 
@@ -42,6 +45,7 @@ MightyRoom.prototype.getOwnerIndex = function () {
  * Check if room has user
  */
 MightyRoom.prototype.hasUser = function (useridf) {
+    "use strict";
     return this.getUserIndex(useridf) !== null;
 };
 
@@ -50,6 +54,8 @@ MightyRoom.prototype.hasUser = function (useridf) {
  * Add user to room
  */
 MightyRoom.prototype.addUser = function(socket, username, useridf, cb) {
+    "use strict";
+
     // No re-entering
     if(this.hasUser(useridf)) {
         return cb(new Error('이미 들어간 방에 재입장할 수 없습니다.'));
@@ -82,6 +88,7 @@ MightyRoom.prototype.addUser = function(socket, username, useridf, cb) {
  * @returns {*}
  */
 MightyRoom.prototype.listUsers = function () {
+    "use strict";
     return this.users;
 };
 
@@ -91,6 +98,7 @@ MightyRoom.prototype.listUsers = function () {
  * @returns {boolean}
  */
 MightyRoom.prototype.isEmpty = function () {
+    "use strict";
     return this.users.length === 0;
 };
 
@@ -98,6 +106,7 @@ MightyRoom.prototype.isEmpty = function () {
  * Remove user from room
  */
 MightyRoom.prototype.removeUser = function (useridf, cb) {
+    "use strict";
     const index = this.getUserIndex(useridf);
     if(index === null) return cb(new Error('방에 존재하지 않는 인원입니다.'));
     this.users.splice(index, 1);
@@ -120,10 +129,12 @@ MightyRoom.prototype.removeUser = function (useridf, cb) {
  */
 
 MightyRoom.prototype.isAllPlayerReady = function () {
+    "use strict";
     return _.every(this.users, (user) => user.ready);
 };
 
-MightyRoom.prototype.start = function () {
+MightyRoom.prototype.startGame = function () {
+    "use strict";
     if(this.playing) return false;
     else if(!this.isAllPlayerReady()) return false;
 
@@ -145,8 +156,11 @@ MightyRoom.prototype.start = function () {
     _.map(this.playingUsers, (user) => {
         user.score = 20;
     });
+
+    this.playTurn = 0;
     return true;
 };
+
 
 
 

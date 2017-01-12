@@ -18,6 +18,8 @@
   padding: 2em 3% 4em 3%;
   overflow: scroll; }
   .chatbox .chat-messages .chat-info {
+    color: #1a9e51; }
+  .chatbox .chat-messages .chat-err {
     color: #e25b60; }
   .chatbox .chat-messages .chat-cmd {
     color: #0D47A1; }
