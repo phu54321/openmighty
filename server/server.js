@@ -2,12 +2,12 @@
  * Created by whyask37 on 2017. 1. 11..
  */
 
+
 const roomsys = require('./roomsys');
 const _ = require('underscore');
 const async = require('async');
 const cmdproc = require("./cmdproc");
 const cmdout = require('./cmdout');
-
 
 module.exports = function(io) {
     "use strict";
@@ -107,12 +107,11 @@ function onRoomJoin(socket) {
 
     // Process commands
     socket.on('cmd', function (msg) {
-        msg = JSON.parse(msg);
         if(!msg || !msg.type) {
             return socket.emit('err', '잘못된 명령입니다.');
         }
 
-        const cmdProcessor = cmdproc[obj.type];
+        const cmdProcessor = cmdproc[msg.type];
         if(!cmdProcessor) {
             return socket.emit('err', '알 수 없는 명령입니다.');
         }

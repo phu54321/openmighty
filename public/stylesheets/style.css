@@ -22,7 +22,11 @@
   .chatbox .chat-messages .chat-err {
     color: #e25b60; }
   .chatbox .chat-messages .chat-cmd {
-    color: #0D47A1; }
+    color: #0D47A1;
+    white-space: pre;
+    border: 1px solid #aaa;
+    padding: 1em;
+    margin-bottom: 0.5em; }
   .chatbox .chat-messages .chat-chat {
     color: #111; }
 

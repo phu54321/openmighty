@@ -12,6 +12,10 @@
     }
     .chat-cmd {
       color: #0D47A1;
+      white-space: pre;
+      border: 1px solid #aaa;
+      padding: 1em;
+      margin-bottom: 0.5em;
     }
     .chat-chat {
       color: #111;
