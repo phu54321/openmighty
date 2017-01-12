@@ -15,15 +15,18 @@ module.exports = function (MightyRoom) {
      * @returns {boolean} - 아무도 추가 공약을 할 수 없으면 false, 아니면 true
      */
     MightyRoom.prototype.findNextBidder = function () {
-        const initialBidder = this.currentBidder;
-        let nextBidder = (this.currentBidder + 1) % 5;
-        while(nextBidder != initialBidder && this.passStatus[nextBidder] === true) {
+        if(!this.playing || this.playState != 'bidding') return false;
+        const bidding = this.bidding;
+
+        const initialBidder = bidding.currentBidder;
+        let nextBidder = (bidding.currentBidder + 1) % 5;
+        while(nextBidder != initialBidder && bidding.passStatus[nextBidder] === true) {
             nextBidder = (nextBidder + 1) % 5;
         }
 
         // All passed or only initialBidder left
         if(nextBidder == initialBidder) return false;
-        this.currentBidder = nextBidder;
+        bidding.currentBidder = nextBidder;
         return true;
     };
 
@@ -31,27 +34,28 @@ module.exports = function (MightyRoom) {
      * 유저가 공약 거는걸 처리합니다
      */
     MightyRoom.prototype.onUserBid = function (userEntry, bidType) {
-        if(!this.playing) return false;
+        if(!this.playing || this.playState != 'bidding') return false;
+        const bidding = this.bidding;
 
         let bidShape = bidType.shape;
         const bidCount = bidType.num;
 
         // 다른 사람이 공약을 걸려고 한다 - 패스
-        if(userEntry !== this.gameUsers[this.currentBidder]) {
+        if(userEntry !== this.gameUsers[bidding.currentBidder]) {
             console.log('Invalid currentBidder');
             return false;
         }
 
         // 패스 처리
         if(bidShape == 'pass') {
-            this.passStatus[this.currentBidder] = true;
-            cmdout.emitGameBiddingInfo(this, this.currentBidder, 'pass');
+            bidding.passStatus[bidding.currentBidder] = true;
+            cmdout.emitGameBiddingInfo(this, bidding.currentBidder, 'pass');
             return passBidding(this);
         }
 
         // 공약 처리
-        const lastBidShape = this.lastBidShape || 'none';
-        const lastBidCount = this.lastBidCount || 12;
+        const lastBidShape = bidding.lastBidShape || 'none';
+        const lastBidCount = bidding.lastBidCount || 12;
 
         if(!bidShape || !bidCount || typeof bidCount !== 'number') return false;
         if(bidShapes.indexOf(bidShape) == -1) return false;  // Invalid shape
@@ -65,20 +69,29 @@ module.exports = function (MightyRoom) {
         else if(lastBidCount >= bidCount) return false;
 
         // 공약 업데이트
-        this.lastBidder = this.currentBidder;
-        this.lastBidCount = bidCount;
-        this.lastBidShape = bidShape;
-        cmdout.emitGameBiddingInfo(this, this.currentBidder, bidShape, bidCount);
+        bidding.lastBidder = this.currentBidder;
+        bidding.lastBidCount = bidCount;
+        bidding.lastBidShape = bidShape;
+        cmdout.emitGameBiddingInfo(this, bidding.currentBidder, bidShape, bidCount);
         return passBidding(this);
 
         function passBidding(room) {
             if(!room.findNextBidder()) return room.submitBidder();
-            cmdout.emitGameBidRequest(room, room.currentBidder);
+            cmdout.emitGameBidRequest(room, room.bidding.currentBidder);
             return true;
         }
     };
 
     MightyRoom.prototype.submitBidder = function() {
+        if(!this.playing || this.playState != 'bidding') return false;
+        const bidding = this.bidding;
+
+        if(bidding.lastBidder === null) {
+            // 아무도 공약을 걸지 않았으므로 폐지
+            this.emit('info', '아무도 공약을 걸지 않았으므로 게임을 종료합니다.');
+            return this.endGame();
+        }
+
         this.president = this.lastBidder;
         this.gameBidCount = this.lastBidCount;
         this.gameBidShape = this.lastBidShape;

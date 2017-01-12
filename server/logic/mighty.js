@@ -16,6 +16,7 @@ function MightyRoom(roomID, owner) {
     this.users = [];
     this.owner = owner;
     this.playing = false;
+    this.playState = null;
     this.playTurn = 0;
 }
 
@@ -112,21 +113,23 @@ function createDeck() {
 MightyRoom.prototype.initGame = function () {
     if(!this.playing) return false;
 
-    this.playTurn = 0;
-
-    const deck = createDeck();
-
     // Distribute deck
+    const deck = createDeck();
     for(let player = 0 ; player < 5 ; player++) {
         const playerDeck = deck.slice(player * 10, (player + 1) * 10);
         this.gameUsers[player].deck = playerDeck.sort((a, b) => a - b);
         cmdout.emitGamePlayerDeck(this, player);
     }
+
+
     // Remaining deck
-    this.remainingDeck = deck.slice(50);
-    this.passStatus = [false, false, false, false, false];
-    this.currentBidder = 0;
-    this.lastBidder = null;
+    this.playState = 'bidding';
+    this.bidding = {
+        passStatus: [false, false, false, false, false],
+        currentBidder: 0,
+        lastBidder: null,
+        remainingDeck: deck.slice(50)
+    };
     cmdout.emitGameBidRequest(this, 0);
 
     return true;
