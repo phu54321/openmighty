@@ -2,13 +2,23 @@
  * Created by whyask37 on 2017. 1. 12..
  */
 
-function MightyRoom() {
+const _ = require('underscore');
+
+
+function MightyRoom(roomID, owner) {
+    this.roomID = roomID;
     this.users = [];
+    this.owner = owner;
     this.playing = false;
+
+    // Game-related
+    this.playingUsers = null;
 }
 
 
-// Logic relating room entry
+///////////////////////////////////////////////////////////////
+// Room related
+
 
 /**
  * Get user index
@@ -19,6 +29,13 @@ MightyRoom.prototype.getUserIndex = function (useridf) {
         if(userEntry.useridf == useridf) return i;
     }
     return null;
+};
+
+/**
+ * Get room owner index
+ */
+MightyRoom.prototype.getOwnerIndex = function () {
+    return this.getUserIndex(this.owner);
 };
 
 /**
@@ -84,8 +101,54 @@ MightyRoom.prototype.removeUser = function (useridf, cb) {
     const index = this.getUserIndex(useridf);
     if(index === null) return cb(new Error('방에 존재하지 않는 인원입니다.'));
     this.users.splice(index, 1);
+
+    if(useridf == this.owner && this.users.length > 0) {
+        const newOwnerEntry = this.users[Math.floor(Math.random() * this.users.length)];
+        this.owner = newOwnerEntry.useridf;
+    }
     return cb(null);
 };
+
+
+
+///////////////////////////////////////////////////////////////
+// Game start related
+
+/**
+ * Check if all users are ready
+ * @returns {boolean}
+ */
+
+MightyRoom.prototype.isAllPlayerReady = function () {
+    return _.every(this.users, (user) => user.ready);
+};
+
+MightyRoom.prototype.start = function () {
+    if(this.playing) return false;
+    else if(!this.isAllPlayerReady()) return false;
+
+    this.playing = true;
+
+    // Initialize game-related variables.
+    // Add AI user if nessecary
+    let playingUsers = this.users.slice(0);
+    for(let i = 1 ; i <= 5 - playingUsers.length ; i++) {
+        const aiUser = {
+            socket: null,
+            username: 'Computer ' + i,
+            useridf: this.roomID + '_AI' + i
+        };
+        playingUsers.push(aiUser);
+    }
+    this.playingUsers = _.shuffle(playingUsers);
+
+    _.map(this.playingUsers, (user) => {
+        user.score = 20;
+    });
+    return true;
+};
+
+
 
 
 module.exports = MightyRoom;
