@@ -5,7 +5,7 @@
 "use strict";
 
 const cmdout = require('../io/cmdout');
-const bidShapes = ['space', 'diamond', 'clover', 'heart', 'none'];
+const bidShapes = ['spade', 'diamond', 'clover', 'heart', 'none'];
 
 module.exports = function (MightyRoom) {
     "use strict";
@@ -75,14 +75,14 @@ module.exports = function (MightyRoom) {
         if(!this.playing || this.playState != 'bidding') return false;
         const bidding = this.bidding;
 
-        let bidShape = bidType.shape;
-        const bidCount = bidType.num;
-
         // 다른 사람이 공약을 걸려고 한다 - 패스
         if(userEntry !== this.gameUsers[bidding.currentBidder]) {
             console.log('Invalid currentBidder');
             return false;
         }
+
+        const bidShape = bidType.shape;
+        const bidCount = bidType.num;
 
         // 패스 처리
         if(bidShape == 'pass') {

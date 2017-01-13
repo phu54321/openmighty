@@ -47,7 +47,7 @@ module.exports = function (MightyRoom) {
         cmdout.emitGamePlayerDeck(this, this.president);
 
         this.playState = 'fselect';
+        cmdout.emitFriendSelectRequest(this);
         return true;
     };
-
 };

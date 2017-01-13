@@ -21,8 +21,6 @@ module.exports = function(io) {
  * Cookie validator
  */
 
-let x = 0;
-
 function validateCookie(socket, next) {
     "use strict";
 
@@ -39,10 +37,9 @@ function validateCookie(socket, next) {
         return next(new Error('Invalid roomID'));
     }
     identity = JSON.parse(identity);
-    socket.username = 'user_' + x;
+    socket.username = identity.username;
     socket.useridf = socket.id;
     socket.roomID = roomID;
-    x += 1;
     next();
 }
 

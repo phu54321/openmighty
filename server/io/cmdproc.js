@@ -26,3 +26,7 @@ exports.bidch1 = function (socket, room, userEntry, msg) {
 exports.discard3 = function (socket, room, userEntry, msg) {
     if(!room.onCardDiscard(userEntry, msg.cards)) return socket.emit('err', '해당 카드를 버릴 수 없습니다.');
 };
+
+exports.fsel = function (socket, room, userEntry, msg) {
+    if(!room.onFriendSelect(userEntry, msg)) return socket.emit('err', '프렌드 선택을 하지 못했습니다.');
+};

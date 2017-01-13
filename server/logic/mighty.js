@@ -61,7 +61,7 @@ MightyRoom.prototype.emit = function (msgType, msg) {
  */
 
 
-const cardShapes = ['space', 'diamond', 'clover', 'heart', 'joker'];
+const cardShapes = ['spade', 'diamond', 'clover', 'heart', 'joker'];
 
 // Game start related
 MightyRoom.prototype.startGame = function () {

@@ -89,6 +89,13 @@ exports.emitGameBidChange1Request = function (room) {
     room.gameUsers[president].socket.emit('cmd', {type: 'bidch1rq'});
 };
 
+
 exports.emitGameDiscardComplete = function (room) {
     room.emit('cmd', {type: 'discard3end'});
+};
+
+
+exports.emitFriendSelectRequest = function (room) {
+    const president = room.president;
+    room.gameUsers[president].socket.emit('cmd', {type: 'fselrq'});
 };
