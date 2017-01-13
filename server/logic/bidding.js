@@ -135,6 +135,7 @@ module.exports = function (MightyRoom) {
         this.president = bidding.lastBidder;
         this.gameBidCount = bidding.lastBidCount;
         this.gameBidShape = bidding.lastBidShape;
+        this.remainingDeck = bidding.remainingDeck;
         delete this.bidding;
 
         // 카드를 받기 전에 공약을 변경할지 본다
@@ -151,7 +152,7 @@ module.exports = function (MightyRoom) {
         // Preserve shape
         if(newbid.shape == 'pass') {
             cmdout.emitGameBidding(this);
-            this.startCardDiscard();
+            this.startCardDiscard(this.remainingDeck);
             return true;
         }
         else {

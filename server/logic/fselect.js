@@ -8,11 +8,11 @@ const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
 
 module.exports = function (MightyRoom) {
-    MightyRoom.prototype.startCardDiscard = function () {
+    MightyRoom.prototype.startCardDiscard = function (remainingDeck) {
         if(!this.playing || this.playState != 'bidchange1') return false;
 
         const pUser = this.gameUsers[this.president];
-        pUser.deck = pUser.deck.concat(this.remainingDeck);
+        pUser.deck = pUser.deck.concat(remainingDeck);
         pUser.deck.sort((a, b) => (a - b));
         delete this.remainingDeck;
 
