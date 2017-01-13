@@ -43,6 +43,7 @@ module.exports = function (MightyRoom) {
             lastBidder: null,
             remainingDeck: remainingDeck
         };
+        cmdout.emitGameBidRequest(this, 0);
         return true;
     };
 
@@ -111,6 +112,9 @@ module.exports = function (MightyRoom) {
         function passBidding(room) {
             if(!room.findNextBidder()) {
                 room.submitBidder();
+            }
+            else {
+                cmdout.emitGameBidRequest(room, room.bidding.currentBidder);
             }
         }
     };

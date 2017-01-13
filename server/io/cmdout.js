@@ -70,6 +70,11 @@ exports.emitGamePlayerBidding = function (room, bidder, bidShape, bidCount) {
     room.emit('cmd', obj);
 };
 
+exports.emitGameBidRequest = function (room, userIdx) {
+    const user = room.gameUsers[userIdx];
+    user.socket.emit('cmd', {type: 'bidrq'});
+};
+
 exports.emitGameBidding = function (room) {
     room.emit('cmd', {
         type: 'bidinfo',
@@ -77,6 +82,11 @@ exports.emitGameBidding = function (room) {
         shape: room.gameBidShape,
         num: room.gameBidCount
     });
+};
+
+exports.emitGameBidChange1Request = function (room) {
+    const president = room.president;
+    room.gameUsers[president].socket.emit('cmd', {type: 'bidch1rq'});
 };
 
 exports.emitGameDiscardComplete = function (room) {
