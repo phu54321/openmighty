@@ -28,5 +28,5 @@ exports.discard3 = function (socket, room, userEntry, msg) {
 };
 
 exports.fsel = function (socket, room, userEntry, msg) {
-    if(!room.onFriendSelect(userEntry, msg)) return socket.emit('err', '프렌드 선택을 하지 못했습니다.');
+    if(!room.onFriendSelectAndBidChange2(userEntry, msg)) return socket.emit('err', '프렌드 선택을 하지 못했습니다.');
 };

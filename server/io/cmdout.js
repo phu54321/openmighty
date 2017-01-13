@@ -99,3 +99,11 @@ exports.emitFriendSelectRequest = function (room) {
     const president = room.president;
     room.gameUsers[president].socket.emit('cmd', {type: 'fselrq'});
 };
+
+exports.emitFriendSelection = function (room, friendType, arg) {
+    room.emit('cmd', {
+        type: 'fsel',
+        friendType: friendType,
+        arg: arg
+    });
+};

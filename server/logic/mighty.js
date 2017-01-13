@@ -5,7 +5,6 @@
 "use strict";
 
 const _ = require('underscore');
-const sprintf = require('sprintf-js').sprintf;
 const cmdout = require('./../io/cmdout');
 const AISocket = require('./../io/aisocket');
 
@@ -89,6 +88,7 @@ MightyRoom.prototype.startGame = function () {
     return true;
 };
 
+
 MightyRoom.prototype.endGame = function () {
     if(!this.playing) return false;
     this.playing = false;
@@ -97,7 +97,7 @@ MightyRoom.prototype.endGame = function () {
 
 
 /**
- * List in-game users
+ * 게임 유저들을 봅니다.
  * @returns {*}
  */
 MightyRoom.prototype.listGameUsers = function () {
@@ -108,8 +108,7 @@ MightyRoom.prototype.listGameUsers = function () {
 
 
 /**
- * Create deck
- * @returns {Array}
+ * 랜덤으로 덱을 생성합니다.
  */
 function createDeck() {
     const deck = [];
@@ -123,7 +122,7 @@ function createDeck() {
 }
 
 /**
- * Initialize created game
+ * 게임을 초기화합니다.
  */
 MightyRoom.prototype.initGame = function () {
     if(!this.playing) return false;
@@ -138,6 +137,18 @@ MightyRoom.prototype.initGame = function () {
 
     return this.startBidding(deck.slice(50));
 };
+
+/**
+ * 카드가 올바른 카드인지 체크합니다
+ */
+MightyRoom.prototype.isValidCard = function (card) {
+    if(0 <= card && card < 400) {  // 일반 카드
+        const cardNum = card % 100;  // 카드의 숫자
+        return 2 <= cardNum && cardNum <= 14;
+    }
+    else return card == 400;  // 조커
+}
+
 
 require('./bidding')(MightyRoom);
 require('./roomsys')(MightyRoom);

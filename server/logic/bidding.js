@@ -7,27 +7,24 @@
 const cmdout = require('../io/cmdout');
 const bidShapes = ['spade', 'diamond', 'clover', 'heart', 'none'];
 
+function isHigherBid(lastBidShape, lastBidCount, bidShape, bidCount) {
+    if(bidShape == 'none') {
+        if(lastBidShape == 'none' && lastBidCount >= bidCount) return false;
+        else if(lastBidShape != 'none' && lastBidCount > bidCount) return false;
+    }
+    else if(lastBidCount >= bidCount) return false;
+
+    return true;
+}
+
+function isValidBid(bidShape, bidCount) {
+    if(!bidShape || !bidCount || typeof bidCount !== 'number') return false;
+    if(bidShapes.indexOf(bidShape) == -1) return false;  // Invalid shape
+    if(bidCount > 20 || bidCount < 12) return false; // Invalid count
+    return true;
+}
+
 module.exports = function (MightyRoom) {
-    "use strict";
-
-    function isHigherBid(lastBidShape, lastBidCount, bidShape, bidCount) {
-        if(bidShape == 'none') {
-            if(lastBidShape == 'none' && lastBidCount >= bidCount) return false;
-            else if(lastBidShape != 'none' && lastBidCount > bidCount) return false;
-        }
-        else if(lastBidCount >= bidCount) return false;
-
-        return true;
-    }
-
-    function isValidBid(bidShape, bidCount) {
-        if(!bidShape || !bidCount || typeof bidCount !== 'number') return false;
-        if(bidShapes.indexOf(bidShape) == -1) return false;  // Invalid shape
-        if(bidCount > 20 || bidCount < 12) return false; // Invalid count
-        return true;
-    }
-
-
     /**
      * Start bidding
      * @param remainingDeck
@@ -119,6 +116,11 @@ module.exports = function (MightyRoom) {
         }
     };
 
+
+    /**
+     * 공약 단계가 끝났을 때를 처리합니다. 공약이 한명만 남았거나 공약이 없습니다.
+     * @returns {boolean}
+     */
     MightyRoom.prototype.submitBidder = function() {
         if(!this.playing || this.playState != 'bidding') return false;
         const bidding = this.bidding;
@@ -159,17 +161,11 @@ module.exports = function (MightyRoom) {
             const bidShape = newbid.shape;
             const bidCount = newbid.num;
             if(!isValidBid(bidShape, bidCount)) return false;
-
-            // 노기루다 -> 기루다 전환시에 1개 이상 공약을 더 걸어야함
-            if(this.gameBidShape == 'none' && bidShape != 'none') {
-                if(bidCount < this.gameBidCount + 1) return false;
-            }
-
-            // 그 외에는 2개 이상 공약을 더 걸어야함
-            else {
-                if(bidCount < this.gameBidCount + 2) return false;
-            }
+            if(!isHigherBid(this.lastBidShape, this.lastBidCount, bidShape, bidCount)) return false;
         }
     };
 };
+
+exports.isHigherBid = isHigherBid;
+exports.isValidBid = isValidBid;
 
