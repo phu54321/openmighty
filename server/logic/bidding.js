@@ -43,7 +43,6 @@ module.exports = function (MightyRoom) {
             lastBidder: null,
             remainingDeck: remainingDeck
         };
-        cmdout.emitGameBidRequest(this, 0);
         return true;
     };
 
@@ -112,9 +111,7 @@ module.exports = function (MightyRoom) {
         function passBidding(room) {
             if(!room.findNextBidder()) {
                 room.submitBidder();
-                return true;
             }
-            cmdout.emitGameBidRequest(room, room.bidding.currentBidder);
         }
     };
 
@@ -138,7 +135,6 @@ module.exports = function (MightyRoom) {
 
         // 카드를 받기 전에 공약을 변경할지 본다
         this.playState = 'bidchange1';
-        cmdout.emitGameBidChange1Request(this);
         return true;
     };
 
@@ -150,7 +146,7 @@ module.exports = function (MightyRoom) {
         // Preserve shape
         if(newbid.shape == 'pass') {
             cmdout.emitGameBidding(this);
-            this.startFriendSelect();
+            this.startCardDiscard();
             return true;
         }
         else {
@@ -168,6 +164,6 @@ module.exports = function (MightyRoom) {
                 if(bidCount < this.gameBidCount + 2) return false;
             }
         }
-    }
+    };
 };
 

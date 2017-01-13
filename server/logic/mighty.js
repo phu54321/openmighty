@@ -126,6 +126,7 @@ MightyRoom.prototype.initGame = function () {
 
 require('./bidding')(MightyRoom);
 require('./roomsys')(MightyRoom);
+require('./fselect')(MightyRoom);
 
 
 module.exports = MightyRoom;
