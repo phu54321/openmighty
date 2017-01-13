@@ -139,6 +139,7 @@ module.exports = function (MightyRoom) {
 
         // 카드를 받기 전에 공약을 변경할지 본다
         this.playState = 'bidchange1';
+        cmdout.emitGameBidChange1Request(this);
         return true;
     };
 
