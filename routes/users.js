@@ -3,7 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 
 router.get('/register', function (req,res) {
-    let newUserIdf = crypto.randomBytes(20).toString('hex');
+    let newUserIdf = crypto.randomBytes(8).toString('hex');
     return res.render('join', {useridf: newUserIdf});
 });
 

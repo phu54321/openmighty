@@ -9,6 +9,8 @@ function AISocket(room, userEntry) {
 
     this.room = room;
     this.userEntry = userEntry;
+    this.gameUsers = [];
+    this.deck = null;
 }
 
 AISocket.prototype.cmd = function (msg) {

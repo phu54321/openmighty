@@ -27,8 +27,23 @@ function MightyRoom(roomID, owner) {
  */
 MightyRoom.prototype.emit = function (msgType, msg) {
     "use strict";
+    const sentUsers = new Set();
+
+    // 모든 사람 유저에게 emit.
     _.map(this.users, (user) => {
-        user.socket.emit(msgType, msg);
+        if(!sentUsers.has(user)) {
+            user.socket.emit(msgType, msg);
+            sentUsers.add(user);
+        }
+    });
+
+
+    // gameUser에게도 emit. ex) AI
+    _.map(this.gameUsers, (user) => {
+        if(!sentUsers.has(user)) {
+            user.socket.emit(msgType, msg);
+            sentUsers.add(user);
+        }
     });
 };
 

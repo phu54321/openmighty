@@ -6,8 +6,10 @@
 
 const _ = require('underscore');
 
-exports.emitRoominfo = function (room) {
-    const users = _.map(room.users, (user) => user.username);
+// Room related
+
+exports.emitRoomUsers = function (room) {
+    const users = _.map(room.users, (user) => user.useridf);
     room.emit('cmd', {
         type: 'roomUsers',
         owner: room.getOwnerIndex(),
@@ -15,12 +17,31 @@ exports.emitRoominfo = function (room) {
     });
 };
 
+exports.emitRoomJoin = function (room, newUser) {
+    _.map(room.users, (user) => {
+        if(user == newUser) return;  // don't send message to same user
+        user.socket.emit('cmd', {
+            type: 'roomJoin',
+            username: newUser.username,
+            useridf: newUser.useridf
+        });
+    });
+};
 
-// Game related thing
+exports.emitRoomLeft = function (room, useridf) {
+    room.emit('cmd', {
+        type: 'roomLeft',
+        useridf: useridf
+    });
+};
+
+
+
+// Game Initialization
 
 exports.emitGamePlayers = function (room) {
     "use strict";
-    const users = _.map(room.gameUsers, (user) => user.username);
+    const users = _.map(room.gameUsers, (user) => user.useridf);
     room.emit('cmd', {
         type: 'gameUsers',
         users: users
@@ -36,6 +57,8 @@ exports.emitGamePlayerDeck = function (room, userIdx) {
         data: user.deck
     });
 };
+
+// Bidding & Friend selection
 
 exports.emitGamePlayerBidding = function (room, bidder, bidShape, bidCount) {
     const obj = {

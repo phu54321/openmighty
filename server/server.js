@@ -75,7 +75,7 @@ function onConnect(socket) {
 
         const users = _.map(room.listUsers(), (user) => user.username);
         socket.emit('info', '현재 입장인원 : ' + users.join(', '));
-        cmdout.emitRoominfo(room);
+        cmdout.emitRoomJoin(room, userEntry);
 
         onRoomJoin(socket);
     }
@@ -101,7 +101,7 @@ function onRoomJoin(socket) {
     socket.on('disconnect', function(){
         console.log('user disconnected : ' + socket.useridf);
         room.removeUser(socket.useridf, (err) => {});
-        cmdout.emitRoominfo(room);
+        cmdout.emitRoomLeft(room, socket.useridf);
         roomsys.gcRoom(socket.roomID);
     });
 
