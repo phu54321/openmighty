@@ -79,8 +79,8 @@ exports.emitGameBidding = function (room) {
     room.emit('cmd', {
         type: 'bidinfo',
         president: room.president,
-        shape: room.gameBidShape,
-        num: room.gameBidCount
+        shape: room.bidShape,
+        num: room.bidCount
     });
 };
 

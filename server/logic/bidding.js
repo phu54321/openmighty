@@ -41,7 +41,7 @@ module.exports = function (MightyRoom) {
             remainingDeck: remainingDeck
         };
         cmdout.emitGameBidRequest(this, 0);
-        return true;
+        return null;
     };
 
     /**
@@ -69,13 +69,12 @@ module.exports = function (MightyRoom) {
      * 유저가 공약 거는걸 처리합니다
      */
     MightyRoom.prototype.onUserBid = function (userEntry, bidType) {
-        if(!this.playing || this.playState != 'bidding') return false;
+        if(!this.playing || this.playState != 'bidding') return "공약을 거는 중이 아닙니다.";
         const bidding = this.bidding;
 
         // 다른 사람이 공약을 걸려고 한다 - 패스
         if(userEntry !== this.gameUsers[bidding.currentBidder]) {
-            console.log('Invalid currentBidder');
-            return false;
+            return "주공이 아닙니다.";
         }
 
         const bidShape = bidType.shape;
@@ -86,17 +85,17 @@ module.exports = function (MightyRoom) {
             bidding.passStatus[bidding.currentBidder] = true;
             cmdout.emitGamePlayerBidding(this, bidding.currentBidder, 'pass');
             passBidding(this);
-            return true;
+            return null;
         }
 
         // 공약 처리
         const lastBidShape = bidding.lastBidShape || 'none';
         const lastBidCount = bidding.lastBidCount || 12;
 
-        if(!isValidBid(bidShape, bidCount)) return false;
+        if(!isValidBid(bidShape, bidCount)) return "잘못된 공약입니다.";
 
         // 기존 공약보다 큰지 확인한다.
-        if(!isHigherBid(lastBidShape, lastBidCount, bidShape, bidCount)) return true;
+        if(!isHigherBid(lastBidShape, lastBidCount, bidShape, bidCount)) return "더 높은 공약을 내야합니다.";
 
         // 공약 업데이트
         bidding.lastBidder = bidding.currentBidder;
@@ -104,7 +103,7 @@ module.exports = function (MightyRoom) {
         bidding.lastBidShape = bidShape;
         cmdout.emitGamePlayerBidding(this, bidding.currentBidder, bidShape, bidCount);
         passBidding(this);
-        return true;
+        return null;
 
         function passBidding(room) {
             if(!room.findNextBidder()) {
@@ -119,10 +118,8 @@ module.exports = function (MightyRoom) {
 
     /**
      * 공약 단계가 끝났을 때를 처리합니다. 공약이 한명만 남았거나 공약이 없습니다.
-     * @returns {boolean}
      */
     MightyRoom.prototype.submitBidder = function() {
-        if(!this.playing || this.playState != 'bidding') return false;
         const bidding = this.bidding;
 
         if(bidding.lastBidder === null) {
@@ -130,39 +127,38 @@ module.exports = function (MightyRoom) {
             this.emit('info', '아무도 공약을 걸지 않았으므로 게임을 종료합니다.');
             delete this.bidding;
             this.endGame();
-            return true;
+            return;
         }
 
         // 상태 변경
         this.president = bidding.lastBidder;
-        this.gameBidCount = bidding.lastBidCount;
-        this.gameBidShape = bidding.lastBidShape;
+        this.bidCount = bidding.lastBidCount;
+        this.bidShape = bidding.lastBidShape;
         this.remainingDeck = bidding.remainingDeck;
         delete this.bidding;
 
         // 카드를 받기 전에 공약을 변경할지 본다
         this.playState = 'bidchange1';
         cmdout.emitGameBidChange1Request(this);
-        return true;
     };
 
     MightyRoom.prototype.onBidChange1 = function(userEntry, newbid) {
-        if(!this.playing || this.playState != 'bidchange1') return false;
+        if(!this.playing || this.playState != 'bidchange1') return "공약변경단계가 아닙니다.";
 
-        if(!newbid) return false;
+        if(!newbid) return "잘못된 공약입니다.";
 
         // Preserve shape
-        if(newbid.shape == 'pass') {
-            cmdout.emitGameBidding(this);
-            this.startCardDiscard(this.remainingDeck);
-            return true;
-        }
-        else {
+        if(newbid.shape != 'pass') {
             const bidShape = newbid.shape;
             const bidCount = newbid.num;
-            if(!isValidBid(bidShape, bidCount)) return false;
-            if(!isHigherBid(this.lastBidShape, this.lastBidCount, bidShape, bidCount)) return false;
+            if(!isValidBid(bidShape, bidCount)) return "잘못된 공약입니다.";
+            if(!isHigherBid(this.bidShape, this.bidCount, bidShape, bidCount)) return "더 높은 공약으로 변경해야합니다.";
+            this.bidShape = bidShape;
+            this.bidCount = bidCount;
         }
+        cmdout.emitGameBidding(this);
+        this.startCardDiscard(this.remainingDeck);
+        return null;
     };
 };
 

@@ -29,24 +29,24 @@ module.exports = function (MightyRoom) {
      */
     MightyRoom.prototype.onCardDiscard = function (userEntry, cards) {
         // Authentication
-        if(!this.playing || this.playState != 'discard3') return false;
-        if(this.gameUsers[this.president] != userEntry) return false;
+        if(!this.playing || this.playState != 'discard3') return "카드를 버릴 단계가 아닙니다.";
+        if(this.gameUsers[this.president] != userEntry) return "주공이 아닙니다.";
 
         // Index check
-        if(cards.length != 3) return false;
-        if(!_.every(cards, (card) => typeof card == 'number')) return false;
+        if(cards.length != 3) return "카드를 3개 선택해야 합니다.";
+        if(!_.every(cards, (card) => typeof card == 'number')) return "잘못된 카드 정보입니다.";
 
         cards = cards.sort((a, b) => a - b);
         // No duplicate index
-        if(cards[0] == cards[1] || cards[1] == cards[2]) return false;
+        if(cards[0] == cards[1] || cards[1] == cards[2]) return "중복된 카드가 있습니다.";
         // Cards OOB
-        if(cards[0] < 0 || cards[2] >= 13) return false;
+        if(cards[0] < 0 || cards[2] >= 13) return "잘못된 카드가 있습니다.";
 
         // Remove card from deck
         const pUser = this.gameUsers[this.president];
-        pUser.deck = pUser.deck.splice(cards[2], 1);
-        pUser.deck = pUser.deck.splice(cards[1], 1);
-        pUser.deck = pUser.deck.splice(cards[0], 1);
+        pUser.deck.splice(cards[2], 1);
+        pUser.deck.splice(cards[1], 1);
+        pUser.deck.splice(cards[0], 1);
 
         // Rewrite deck
         cmdout.emitGameDiscardComplete(this);
@@ -54,26 +54,25 @@ module.exports = function (MightyRoom) {
 
         this.playState = 'fselect';
         cmdout.emitFriendSelectRequest(this);
-        return true;
+        return null;
     };
 
     /**
      * 주공이 친구를 선택합니다. 추가적으로 주공이 공약을 2차로 수정할 수 있습니다.
      * @param userEntry
      * @param msg
-     * @returns {boolean}
      */
     MightyRoom.prototype.onFriendSelectAndBidChange2 = function (userEntry, msg) {
         // Authentication
-        if(!this.playing || this.playState != 'fselect') return false;
-        if(this.gameUsers[this.president] != userEntry) return false;
+        if(!this.playing || this.playState != 'fselect') return "친구 선택 단계가 아닙니다.";
+        if(this.gameUsers[this.president] != userEntry) return "주공이 아닙니다.";
 
         // 만약 공약 수정이 이루어졌다면 해당 공약도 체크합니다.
         if(msg.bidch2) {
             const bidCount = msg.bidch2.bidCount;
             const bidShape = msg.bidch2.bidShape;
-            if(!bidding.isValidBid(bidShape, bidCount)) return false;
-            else if(this.bidCount + 2 > bidCount) return false;  // 공약을 변경하려면 2장 이상 더 걸어야 한다
+            if(!bidding.isValidBid(bidShape, bidCount)) return "잘못된 공약입니다.";
+            else if(this.bidCount + 2 > bidCount) return "2장 이상 더 공약해야 합니다.";  // 공약을 변경하려면 2장 이상 더 걸어야 한다
         }
 
         const applyBidChange2 = () => {
@@ -90,8 +89,8 @@ module.exports = function (MightyRoom) {
         // Friend by card
         if(msg.ftype == 'card') {
             const card = msg.card;
-            if(typeof card != 'number') return false;
-            else if(!this.isValidCard(card)) return false;
+            if(typeof card != 'number') return "잘못된 카드 설정입니다.";
+            else if(!this.isValidCard(card)) return "잘못된 카드를 선택하셨습니다.";
 
             cmdout.emitFriendSelection(this, 'card', card);
 
@@ -112,8 +111,8 @@ module.exports = function (MightyRoom) {
             this.friend = friend;
             applyBidChange2();
             this.startMainGame();
-            return true;
+            return false;
         }
-        else return false;
+        else return "잘못된 프렌드 설정입니다.";
     };
 };

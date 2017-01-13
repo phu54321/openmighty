@@ -65,7 +65,7 @@ const cardShapes = ['spade', 'diamond', 'clover', 'heart', 'joker'];
 // Game start related
 MightyRoom.prototype.startGame = function () {
     "use strict";
-    if(this.playing) return false;
+    if(this.playing) return "이미 플레이중입니다.";
 
     this.playing = true;
 
@@ -85,7 +85,7 @@ MightyRoom.prototype.startGame = function () {
     cmdout.emitGamePlayers(this);
 
     this.initGame();
-    return true;
+    return null;
 };
 
 
