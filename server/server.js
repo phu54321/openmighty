@@ -38,7 +38,7 @@ function validateCookie(socket, next) {
     }
     identity = JSON.parse(identity);
     socket.username = identity.username;
-    socket.useridf = socket.id;
+    socket.useridf = identity.useridf;
     socket.roomID = roomID;
     next();
 }
@@ -74,7 +74,7 @@ function onConnect(socket) {
         socket.room = room;
         socket.userEntry = userEntry;
 
-        const users = _.map(room.listUsers(), (user) => user.username);
+        const users = _.map(room.users, (user) => user.username);
         socket.emit('info', '현재 입장인원 : ' + users.join(', '));
         cmdout.emitRoomJoin(room, userEntry);
 

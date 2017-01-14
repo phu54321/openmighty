@@ -4,6 +4,10 @@
 
 "use strict";
 
+const AISocket = require('../io/aisocket');
+const _ = require('underscore');
+
+
 module.exports = function (MightyRoom) {
     /**
      * Get user index
@@ -59,21 +63,14 @@ module.exports = function (MightyRoom) {
         const userEntry = {
             socket: socket,
             username: username,
-            useridf: useridf
+            useridf: useridf,
+            emit: function (type, obj) {
+                this.socket.emit(type, obj);
+                if(type == 'cmd') this.lastCommand = obj;
+            }
         };
         this.users.push(userEntry);
         cb(null, userEntry);
-    };
-
-
-
-    /**
-     * Get user list
-     * @returns {*}
-     */
-    MightyRoom.prototype.listUsers = function () {
-        "use strict";
-        return this.users;
     };
 
 
@@ -94,12 +91,26 @@ module.exports = function (MightyRoom) {
         "use strict";
         const index = this.getUserIndex(useridf);
         if(index === null) return cb(new Error('방에 존재하지 않는 인원입니다.'));
+        const userEntry = this.users[index];
         this.users.splice(index, 1);
 
+        // 방장 승계
         if(useridf == this.owner && this.users.length > 0) {
             const newOwnerEntry = this.users[Math.floor(Math.random() * this.users.length)];
             this.owner = newOwnerEntry.useridf;
         }
+
+        // 플레이중인 유저라면 AISocket으로 대체
+        if(this.playing) {
+            userEntry.socket = new AISocket(this, userEntry);
+            if(userEntry.lastCommand) {
+                console.log(userEntry.username, userEntry.lastCommand);
+                const lastCommand = _.clone(userEntry.lastCommand);
+                lastCommand.jcall = this.jokerCalled;
+                userEntry.emit('cmd', lastCommand);
+            }
+        }
+
         return cb(null);
     };
 };

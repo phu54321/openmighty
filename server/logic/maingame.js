@@ -196,9 +196,8 @@ module.exports = function (MightyRoom) {
 
         // 지금까지 모아진 카드중에 점수카드를 승자에게 준다.
         this.playedCards.forEach((card) => {
-            if(card % 100 >= 10) winnerObtainedCards.push(card);
+            if(card.num >= 10) winnerObtainedCards.push(card);
         });
-        mutils.sortDeck(winnerObtainedCards);
 
         // 게임 종료시
         if(this.currentTrick == 10) {

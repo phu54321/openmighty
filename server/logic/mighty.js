@@ -34,7 +34,7 @@ MightyRoom.prototype.emit = function (msgType, msg) {
     // 모든 사람 유저에게 emit.
     _.map(this.users, (user) => {
         if(!sentUsers.has(user)) {
-            user.socket.emit(msgType, msg);
+            user.emit(msgType, msg);
             sentUsers.add(user);
         }
     });
@@ -43,7 +43,7 @@ MightyRoom.prototype.emit = function (msgType, msg) {
     // gameUser에게도 emit. ex) AI
     _.map(this.gameUsers, (user) => {
         if(!sentUsers.has(user)) {
-            user.socket.emit(msgType, msg);
+            user.emit(msgType, msg);
             sentUsers.add(user);
         }
     });
@@ -77,7 +77,11 @@ MightyRoom.prototype.onStartGame = function () {
     for(let i = 1 ; playingUsers.length < 5; i++) {
         const aiUserEntry = {
             username: 'Computer ' + i,
-            useridf: this.roomID + '_AI' + i
+            useridf: this.roomID + '_AI' + i,
+            emit: function (type, msg) {
+                this.lastCommand = msg;
+                this.socket.emit(type, msg);
+            }
         };
         aiUserEntry.socket = new AISocket(this, aiUserEntry);
         playingUsers.push(aiUserEntry);

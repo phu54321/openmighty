@@ -20,7 +20,7 @@ exports.emitRoomUsers = function (room) {
 exports.emitRoomJoin = function (room, newUser) {
     _.map(room.users, (user) => {
         if(user == newUser) return;  // don't send message to same user
-        user.socket.emit('cmd', {
+        user.emit('cmd', {
             type: 'roomJoin',
             username: newUser.username,
             useridf: newUser.useridf
@@ -52,7 +52,7 @@ exports.emitGamePlayers = function (room) {
 exports.emitGamePlayerDeck = function (room, userIdx) {
     "use strict";
     const user = room.gameUsers[userIdx];
-    user.socket.emit('cmd', {
+    user.emit('cmd', {
         type: 'deck',
         deck: user.deck
     });
@@ -74,7 +74,7 @@ exports.emitGamePlayerBidding = function (room, bidder, bidShape, bidCount) {
 
 exports.emitGameBidRequest = function (room, userIdx) {
     const user = room.gameUsers[userIdx];
-    user.socket.emit('cmd', {type: 'bidrq'});
+    user.emit('cmd', {type: 'bidrq'});
 };
 
 exports.emitGameBidding = function (room) {
@@ -88,7 +88,7 @@ exports.emitGameBidding = function (room) {
 
 exports.emitGameBidChange1Request = function (room) {
     const president = room.president;
-    room.gameUsers[president].socket.emit('cmd', {type: 'bidch1rq'});
+    room.gameUsers[president].emit('cmd', {type: 'bidch1rq'});
 };
 
 
@@ -99,7 +99,7 @@ exports.emitGameDiscardComplete = function (room) {
 
 exports.emitFriendSelectRequest = function (room) {
     const president = room.president;
-    room.gameUsers[president].socket.emit('cmd', {type: 'fselrq'});
+    room.gameUsers[president].emit('cmd', {type: 'fselrq'});
 };
 
 exports.emitFriendSelection = function (room, friendType, arg) {
@@ -116,7 +116,7 @@ exports.emitFriendSelection = function (room, friendType, arg) {
 
 exports.emitGameCardPlayRequest = function (room) {
     const currentTurn = room.currentTurn;
-    room.gameUsers[currentTurn].socket.emit('cmd', {
+    room.gameUsers[currentTurn].emit('cmd', {
         type: 'playrq',
         shaperq: room.playedCards.length > 0 ? room.playedCards[0].shape : undefined,
         jcall: room.jokerCalled ? true : undefined
