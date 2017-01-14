@@ -2,7 +2,13 @@
  * Created by whyask37 on 2017. 1. 12..
  */
 
+"use strict";
+
+
 const cmdproc = require("./cmdproc");
+const mutils = require('../logic/mutils');
+const _ = require('underscore');
+
 
 function AISocket(room, userEntry) {
     "use strict";
@@ -11,6 +17,7 @@ function AISocket(room, userEntry) {
     this.userEntry = userEntry;
     this.gameUsers = [];
     this.deck = null;
+    this.playedCards = [];
 }
 
 AISocket.prototype.cmd = function (msg) {
@@ -35,8 +42,10 @@ AISocket.prototype.emit = function (type, msg) {
 };
 
 AISocket.prototype.onCommand = function (msg) {
-    setTimeout(() => {
+    process.nextTick(() => {
         "use strict";
+        const deck = this.deck;
+
         if(msg.type == 'bidrq') {
             // Always pass
             this.cmd({
@@ -44,7 +53,42 @@ AISocket.prototype.onCommand = function (msg) {
                 shape: 'pass'
             });
         }
-    }, 1);
+        else if(msg.type == 'bidinfo') {
+            this.playedCards = [];
+        }
+        else if(msg.type == 'deck') {
+            this.deck = msg.deck;
+        }
+        else if(msg.type == 'pcplay') {
+            this.playedCards.push(msg.card);
+        }
+        else if(msg.type == 'playrq') {
+            // 조커 콜 처리
+            if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
+
+            // 문양 요청시
+            if(msg.shaperq) {
+                for(let i = 0 ; i < deck.length ; i++) {
+                    if(deck[i].shape == msg.shaperq) {
+                        this.cmd({
+                            type: 'cplay',
+                            cardIdx: i
+                        });
+                        return;
+                    }
+                }
+            }
+
+            // 그 외 -> 아무거나 낸다
+            this.cmd({
+                type: 'cplay',
+                cardIdx: _.random(0, deck.length - 1)
+            });
+        }
+        else if(msg.type == 'tend') {
+            this.playedCards = [];
+        }
+    });
 };
 
 module.exports = AISocket;

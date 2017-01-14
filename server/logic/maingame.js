@@ -91,6 +91,7 @@ module.exports = function (MightyRoom) {
         // 카드 처리
         userEntry.deck.splice(cardIdx, 1);
         this.playedCards.push(playingCard);
+        cmdout.emitGamePlayerDeck(this, this.currentTurn);
         cmdout.emitGamePlayerCardPlay(this, this.currentTurn, playingCard, isJokerCall);
 
         // maxCard & maxPlayer를 업데이트
@@ -112,13 +113,6 @@ module.exports = function (MightyRoom) {
 
 
     /**
-     * 덱에 카드가 있는지 봅니다
-     */
-    function hasShapeOnDeck(shape, deck) {
-        return !_.every(deck, (card) => card.shape != shape);
-    }
-
-    /**
      * 플레이어가 해당 카드를 낼 수 있는지를 본다.
      */
     MightyRoom.prototype.canPlayCard = function (card) {
@@ -138,20 +132,21 @@ module.exports = function (MightyRoom) {
             return true;
         }
 
-        // 후플레이어.
+        // 그 외
+        else {
+            // 조커콜이면 조커를 내야한다. 조커 처리는 위에서 했으니까 여기까지 넘어왓으면 card는 조커가 아닐것이다
+            if (this.jokerCalled && mutils.hasShapeOnDeck('joker', playerDeck)) return false;
 
-        // 조커콜이면 조커를 내야한다. 조커 처리는 위에서 했으니까 여기까지 넘어왓으면 card는 조커가 아닐것이다
-        if(this.jokerCalled && hasShapeOnDeck('joker', playerDeck)) return false;
+            // 맨 처음 카드 모양이 있으면 그걸 내야한다.
+            const firstCard = this.playedCards[0];
+            if (
+                card.shape != firstCard.shape &&
+                mutils.hasShapeOnDeck(firstCard.shape, playerDeck)
+            ) return false;
 
-        // 맨 처음 카드 모양이 있으면 그걸 내야한다.
-        const firstCard = this.playedCards[0];
-        if(
-            card.shape != firstCard.shape &&
-            hasShapeOnDeck(firstCard.shape, playerDeck)
-        ) return false;
-
-        // 그 외엔 허용
-        return true;
+            // 그 외엔 허용
+            return true;
+        }
     };
 
 
@@ -211,6 +206,7 @@ module.exports = function (MightyRoom) {
             return;
         }
 
+        cmdout.emitGameTrickEnd(this);
         this.startTurn = this.trickWinner;
         this.startNewTrick();
     };
@@ -226,7 +222,7 @@ module.exports = function (MightyRoom) {
             }
         }
 
-        cmdout.emitGameEnd(oppObtainedCardCount, this.bidCount);
+        cmdout.emitGameEnd(this, oppObtainedCardCount);
         this.endGame();
     };
 };

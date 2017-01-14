@@ -53,8 +53,8 @@ exports.emitGamePlayerDeck = function (room, userIdx) {
     "use strict";
     const user = room.gameUsers[userIdx];
     user.socket.emit('cmd', {
-        type: 'myDeck',
-        data: user.deck
+        type: 'deck',
+        deck: user.deck
     });
 };
 
@@ -116,7 +116,11 @@ exports.emitFriendSelection = function (room, friendType, arg) {
 
 exports.emitGameCardPlayRequest = function (room) {
     const currentTurn = room.currentTurn;
-    room.gameUsers[currentTurn].socket.emit('cmd', {type: 'playrq'});
+    room.gameUsers[currentTurn].socket.emit('cmd', {
+        type: 'playrq',
+        shaperq: room.playedCards.length > 0 ? room.playedCards[0].shape : undefined,
+        jcall: room.jokerCalled ? true : undefined
+    });
 };
 
 exports.emitGamePlayerCardPlay = function (room, player, card, jcall) {
@@ -125,5 +129,16 @@ exports.emitGamePlayerCardPlay = function (room, player, card, jcall) {
         player: player,
         card: card,
         jcall: jcall
+    });
+};
+
+exports.emitGameTrickEnd = function (room) {
+    room.emit('cmd', {type: 'tend'});
+};
+
+exports.emitGameEnd = function (room, oppObtainedCardCount) {
+    room.emit('cmd', {
+        type: 'gend',
+        oppcc: oppObtainedCardCount
     });
 };

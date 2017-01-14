@@ -4,6 +4,8 @@
 
 "use strict";
 
+const _ = require('underscore');
+
 const cardShapes = exports.cardShapes = ['spade', 'diamond', 'clover', 'heart', 'joker'];
 const bidShapes = exports.bidShapes = ['spade', 'diamond', 'clover', 'heart', 'none'];
 
@@ -38,11 +40,24 @@ function compareCard(a, b) {
 
 exports.compareCard = compareCard;
 
+
+/**
+ * 덱을 정렬합니다.
+ */
 exports.sortDeck = function (deck) {
     deck.sort(compareCard);
     return deck;
 };
 
+
+/**
+ * 덱에 카드가 있는지 봅니다
+ */
+function hasShapeOnDeck(shape, deck) {
+    return !_.every(deck, (card) => card.shape != shape);
+}
+
+exports.hasShapeOnDeck = hasShapeOnDeck;
 
 //////////
 
