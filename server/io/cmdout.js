@@ -58,7 +58,9 @@ exports.emitGamePlayerDeck = function (room, userIdx) {
     });
 };
 
+////////////////////////////////////////
 // Bidding & Friend selection
+
 
 exports.emitGamePlayerBidding = function (room, bidder, bidShape, bidCount) {
     const obj = {
@@ -105,5 +107,22 @@ exports.emitFriendSelection = function (room, friendType, arg) {
         type: 'fsel',
         friendType: friendType,
         arg: arg
+    });
+};
+
+
+////////////////////////////////////////
+// 메인 게임
+
+exports.emitGameCardPlayRequest = function (room) {
+    const currentTurn = room.currentTurn;
+    room.gameUsers[currentTurn].socket.emit('cmd', {type: 'playrq'});
+};
+
+exports.emitGamePlayerCardPlay = function (room, player, card) {
+    room.emit('cmd', {
+        type: 'pcplay',
+        player: player,
+        card: card
     });
 };

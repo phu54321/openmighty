@@ -62,6 +62,27 @@ MightyRoom.prototype.emit = function (msgType, msg) {
 
 const cardShapes = ['spade', 'diamond', 'clover', 'heart', 'joker'];
 
+MightyRoom.prototype.encodeShape = function (shapeString) {
+    const shape = cardShapes.indexOf(shapeString);
+    if(shape == -1) throw new Error('Invalid shape string');
+    return shape;
+};
+
+MightyRoom.prototype.encodeCard = function (shapeString, subCard) {
+    if(shapeString == 'joker') return 400;
+    else return this.encodeShape(shapeString) * 100 + subCard;
+};
+
+MightyRoom.prototype.decodeCard = function (card) {
+    return {
+        shape: cardShapes[(card / 100) | 0],
+        num: card % 100
+    };
+};
+
+
+
+
 // Game start related
 MightyRoom.prototype.startGame = function () {
     "use strict";
@@ -138,16 +159,35 @@ MightyRoom.prototype.initGame = function () {
     return this.startBidding(deck.slice(50));
 };
 
-/**
- * 카드가 올바른 카드인지 체크합니다
- */
+
+
+//// 유틸리티 함수들
+
+
 MightyRoom.prototype.isValidCard = function (card) {
     if(0 <= card && card < 400) {  // 일반 카드
         const cardNum = card % 100;  // 카드의 숫자
         return 2 <= cardNum && cardNum <= 14;
     }
     else return card == 400;  // 조커
-}
+};
+
+MightyRoom.prototype.isScoreCard = function (card) {
+    const cardNum = card % 100;  // 카드의 숫자
+    return cardNum >= 10;
+};
+
+
+/**
+ * 각 카드의 딜미스 계산시 점수를 구합니다.
+ */
+MightyRoom.prototype.cardDealMissScore = function (card) {
+    if(card === 0) return 0; // 마이티 0점
+    else if(card == 400) return -1;  // 조커 -1점
+    else if(card % 100 == 10) return 0.5;  // 10은 0.5점
+    else if(card % 100 >= 11) return 1;  // JQKA는 1점
+    else return 0;  // 나머지는 0점
+};
 
 
 require('./bidding')(MightyRoom);
