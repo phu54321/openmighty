@@ -19,11 +19,32 @@ module.exports = function (MightyRoom) {
      */
     MightyRoom.prototype.startMainGame = function () {
         this.playState = 'mainGame';
-        this.startTurn = this.president;
+
+        // 프렌드 선정 단계까지는 기루다가 중간에 바뀔 수 있어서
+        // 게임이 시작하기 직전인 여기서 특수카드들을 확정합니다.
+        this.setSpecialCards();
+
+        // 초기화
         this.currentTrick = 0;
         this.obtainedCards = [[], [], [], [], []];
-
+        this.startTurn = this.president;
         this.startNewTrick();
+    };
+
+    /**
+     * 특수카드들을 설정합니다.
+     */
+    MightyRoom.prototype.setSpecialCards = function () {
+        // 특수카드들
+        this.mighty = mutils.createCard(
+            (this.bidShape == 'spade') ? 'diamond' : 'spade',
+            14
+        );
+        this.jokerCall = mutils.createCard(
+            (this.bidShape == 'clover') ? 'spade' : 'clover',
+            3
+        );
+        this.joker = mutils.createCard('joker');
     };
 
 
@@ -48,25 +69,26 @@ module.exports = function (MightyRoom) {
         if(!this.playing || this.playState != 'mainGame') return "본게임중이 아닙니다.";
         if(this.gameUsers[this.currentTurn] != userEntry) return "낼 차례가 아닙니다.";
 
+        // 인덱스 처리
         if(typeof cardIdx != "number") return "잘못된 카드입니다.";
         cardIdx = parseInt(cardIdx);
         if(cardIdx < 0 || cardIdx >= userEntry.deck.length) return "잘못된 카드입니다.";
 
-        // 조커콜 처리
         const playingCard = userEntry.deck[cardIdx];
 
+        // 조커콜이 정당한지 처리
         if(isJokerCall) {
-            if(playingCard.num != 3) return "잚못된 조커콜입니다.";
-            if(this.bidShape == 'clover') {
-                if (playingCard.shape != 'spade') return "잘못된 조커콜입니다.";
-            } else {
-                if (playingCard.shape != 'clover') return "잘못된 조커콜입니다.";
-            }
+            if(!playingCard.equals(this.jokerCall)) return "잚못된 조커콜입니다.";
             isJokerCall = true;
         }
         else isJokerCall = undefined;
 
-        // Pop card!
+
+        // 낼 수 없는 카드 처리
+        if(!this.canPlayCard(playingCard)) return "낼 수 없는 카드입니다.";
+
+
+        // 카드 처리
         userEntry.deck.splice(cardIdx, 1);
         this.playedCards.push(playingCard);
         cmdout.emitGamePlayerCardPlay(this, this.currentTurn, playingCard, isJokerCall);
@@ -90,6 +112,50 @@ module.exports = function (MightyRoom) {
 
 
     /**
+     * 덱에 카드가 있는지 봅니다
+     */
+    function hasShapeOnDeck(shape, deck) {
+        return !_.every(deck, (card) => card.shape != shape);
+    }
+
+    /**
+     * 플레이어가 해당 카드를 낼 수 있는지를 본다.
+     */
+    MightyRoom.prototype.canPlayCard = function (card) {
+        const playerDeck = this.gameUsers[this.currentTurn].deck;
+
+        // 마이티와 조커는 는 언제나 허용
+        if(card.equals(this.mighty)) return true;
+        else if(card.equals(this.joker)) return true;
+
+        // 선플레이어. 웬만하면 다 허용
+        if(this.currentTurn == this.startTurn) {
+            // 주공은 모든 패가 기루다가 아닌 이상 기루다를 첫 턴에 낼 수 없다.
+            if(this.currentTrick === 1 && card.shape == this.bidShape) {
+                return _.every(playerDeck, (card) => card.shape == this.bidShape);
+            }
+            // 그 외엔 허용
+            return true;
+        }
+
+        // 후플레이어.
+
+        // 조커콜이면 조커를 내야한다. 조커 처리는 위에서 했으니까 여기까지 넘어왓으면 card는 조커가 아닐것이다
+        if(this.jokerCalled && hasShapeOnDeck('joker', playerDeck)) return false;
+
+        // 맨 처음 카드 모양이 있으면 그걸 내야한다.
+        const firstCard = this.playedCards[0];
+        if(
+            card.shape != firstCard.shape &&
+            hasShapeOnDeck(firstCard.shape, playerDeck)
+        ) return false;
+
+        // 그 외엔 허용
+        return true;
+    };
+
+
+    /**
      * 지금 게임 상황을 고려해서 해당 카드의 세기를 계산합니다.
      * @returns {number}
      */
@@ -104,8 +170,7 @@ module.exports = function (MightyRoom) {
         const firstCard = this.playedCards[0];
 
         // 마이티 처리
-        const mightyShape = (this.bidShape == 'spade') ? 'diamond' : 'spade';
-        if(card.shape == mightyShape && card.num == 14) return 300;
+        if(card.equals(this.mighty)) return 300;
 
         // 조커 처리
         if(card.shape == 'joker') {

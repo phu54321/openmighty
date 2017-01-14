@@ -59,7 +59,7 @@ function sendCmd(type, object) {
 function translateChatMessage(chatMessage) {
     "use strict";
 
-    var matches, shape, num, cardIdxs, count;
+    var matches, shape, num, cardIdxs, count, cardIdx;
 
     if(chatMessage == 'start') return sendCmd('start');
     if(chatMessage == 'bid pass') return sendCmd('bid', {shape: 'pass'});
@@ -104,13 +104,13 @@ function translateChatMessage(chatMessage) {
     if(chatMessage.startsWith('cplay ')) {
         matches = chatMessage.match(/^cplay (\d+)$/);
         if(matches) {
-            var cardIdx = parseInt(matches[2]);
+            cardIdx = parseInt(matches[1]);
             return sendCmd('cplay', {cardIdx: cardIdx});
         }
 
         matches = chatMessage.match(/^cplay (\d+) jcall$/);
         if(matches) {
-            var cardIdx = parseInt(matches[2]);
+            cardIdx = parseInt(matches[1]);
             return sendCmd('cplay', {cardIdx: cardIdx, jcall: true});
         }
     }
