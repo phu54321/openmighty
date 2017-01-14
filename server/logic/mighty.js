@@ -131,6 +131,16 @@ MightyRoom.prototype.initGame = function () {
     return this.startBidding(deck.slice(50));
 };
 
+MightyRoom.prototype.onAIStopRequest = function (userEntry) {
+    if(!this.playing) return "플레이중이 아닙니다.";  // Cannot stop while playing
+
+    if(userEntry.socket instanceof AISocket) {
+        cmdout.emitGameAbort(this);
+        this.endGame();
+        return null;
+    }
+    else return "잘못된 명령입니다.";
+};
 
 
 //// 유틸리티 함수들

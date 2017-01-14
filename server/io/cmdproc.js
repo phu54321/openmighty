@@ -3,8 +3,11 @@
  */
 "use strict";
 
+const AISocket = require('./aisocket');
+
 let errmsg;
 
+// Start
 exports.start = function (socket, room, userEntry) {
     if(room.playing) return socket.emit('err', '이미 게임이 진행중입니다.');
     else if(userEntry.useridf != room.owner) {
@@ -17,36 +20,45 @@ exports.start = function (socket, room, userEntry) {
     }
 };
 
-
+// Bidding
 exports.bid = function (socket, room, userEntry, msg) {
     if ((errmsg = room.onUserBid(userEntry, msg)) !== null) {
         return socket.emit('err', errmsg);
     }
 };
 
-
-exports.bidch1 = function (socket, room, userEntry, msg) {
+// Bid change 1
+exports.bc1 = function (socket, room, userEntry, msg) {
     if((errmsg = room.onBidChange1(userEntry, msg)) !== null) {
         return socket.emit('err', errmsg);
     }
 };
 
 
-exports.discard3 = function (socket, room, userEntry, msg) {
+// Discard3
+exports.d3 = function (socket, room, userEntry, msg) {
     if((errmsg = room.onCardDiscard(userEntry, msg.cards)) !== null) {
         return socket.emit('err', errmsg);
     }
 };
 
-
-exports.fsel = function (socket, room, userEntry, msg) {
+// Friend selection
+exports.fs = function (socket, room, userEntry, msg) {
     if((errmsg = room.onFriendSelectAndBidChange2(userEntry, msg)) !== null) {
         return socket.emit('err', errmsg);
     }
 };
 
-exports.cplay = function (socket, room, userEntry, msg) {
+// Card play
+exports.cp = function (socket, room, userEntry, msg) {
     if((errmsg = room.onCardPlay(userEntry, msg.cardIdx, msg.jcall || false)) !== null) {
+        return socket.emit('err', errmsg);
+    }
+};
+
+// Abort
+exports.abort = function (socket, room, userEntry) {
+    if((errmsg = room.onAIStopRequest(userEntry)) !== null) {
         return socket.emit('err', errmsg);
     }
 };

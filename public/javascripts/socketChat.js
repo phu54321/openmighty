@@ -60,6 +60,7 @@ function translateChatMessage(chatMessage) {
     "use strict";
 
     var matches, shape, num, cardIdxs, count, cardIdx;
+    var bidShape, bidCount;
 
     if(chatMessage == 'start') return sendCmd('start');
     if(chatMessage == 'bid pass') return sendCmd('bid', {shape: 'pass'});
@@ -71,13 +72,13 @@ function translateChatMessage(chatMessage) {
             return sendCmd('bid', {shape: shape, num: count});
         }
     }
-    if(chatMessage == 'bidch1 pass') return sendCmd('bidch1', {shape: 'pass'});
+    if(chatMessage == 'bidch1 pass') return sendCmd('bc1', {shape: 'pass'});
     if(chatMessage.startsWith('bidch1')) {
         matches = chatMessage.match(/^bidch1 (\w+) (\d+)$/);
         if(matches) {
             shape = matches[1];
             count = parseInt(matches[2]);
-            return sendCmd('bidch1', {shape: shape, num: count});
+            return sendCmd('bc1', {shape: shape, num: count});
         }
     }
     if(chatMessage.startsWith('discard3 ')) {
@@ -88,16 +89,38 @@ function translateChatMessage(chatMessage) {
                 parseInt(matches[2]),
                 parseInt(matches[3]),
             ];
-            return sendCmd('discard3', {cards: cardIdxs});
+            return sendCmd('d3', {cards: cardIdxs});
         }
     }
 
     if(chatMessage.startsWith('fsel card ')) {
-        matches = chatMessage.match(/^fsel card (\w+) (\d+)$/);
+        matches = chatMessage.match(/^fsel card (\w+) (\d+|)$/);
         if(matches) {
             shape = matches[1];
-            num = parseInt(matches[2]);
-            return sendCmd('fsel', {ftype: 'card', shape: shape, num: num});
+            num = parseInt(matches[2]) || 0;
+            return sendCmd('fs', {
+                ftype: 'card',
+                shape: shape,
+                num: num
+            });
+        }
+
+        matches = chatMessage.match(/^fsel card (\w+) (\d+|) bch (\w+) (\d+)$/);
+        if(matches) {
+            shape = matches[1];
+            num = parseInt(matches[2]) || 0;
+            bidShape = matches[3];
+            bidCount = parseInt(matches[4]);
+
+            return sendCmd('fs', {
+                ftype: 'card',
+                shape: shape,
+                num: num,
+                bidch2: {
+                    bidShape: bidShape,
+                    bidCount: bidCount,
+                }
+            });
         }
     }
 
@@ -105,13 +128,13 @@ function translateChatMessage(chatMessage) {
         matches = chatMessage.match(/^cplay (\d+)$/);
         if(matches) {
             cardIdx = parseInt(matches[1]);
-            return sendCmd('cplay', {cardIdx: cardIdx});
+            return sendCmd('cp', {cardIdx: cardIdx});
         }
 
         matches = chatMessage.match(/^cplay (\d+) jcall$/);
         if(matches) {
             cardIdx = parseInt(matches[1]);
-            return sendCmd('cplay', {cardIdx: cardIdx, jcall: true});
+            return sendCmd('cp', {cardIdx: cardIdx, jcall: true});
         }
     }
 }

@@ -20,6 +20,11 @@ function AISocket(room, userEntry) {
     this.playedCards = [];
 }
 
+/**
+ * cmd 액션을 게임에 전달합니다.
+ * @param msg
+ * @returns {boolean}
+ */
 AISocket.prototype.cmd = function (msg) {
     "use strict";
 
@@ -32,6 +37,10 @@ AISocket.prototype.cmd = function (msg) {
     return cmdProcessor(this, this.room, this.userEntry, msg);
 };
 
+
+/**
+ * socket.emit랑 비슷한 역할을 합니다 메세지를 전달받습니다.
+ */
 AISocket.prototype.emit = function (type, msg) {
     "use strict";
 
@@ -39,56 +48,83 @@ AISocket.prototype.emit = function (type, msg) {
     if(type == 'cmd') {
         this.onCommand(msg);
     }
+    else if(type == 'err') {
+        this.cmd({ type: 'stop' });
+    }
 };
 
+/**
+ * 게임에서 받은 cmd를 처리합니다.
+ * @param msg
+ */
 AISocket.prototype.onCommand = function (msg) {
     process.nextTick(() => {
-        "use strict";
-        const deck = this.deck;
-
-        if(msg.type == 'bidrq') {
-            // Always pass
-            this.cmd({
-                type: 'bid',
-                shape: 'pass'
-            });
-        }
-        else if(msg.type == 'bidinfo') {
-            this.playedCards = [];
-        }
-        else if(msg.type == 'deck') {
-            this.deck = msg.deck;
-        }
-        else if(msg.type == 'pcplay') {
-            this.playedCards.push(msg.card);
-        }
-        else if(msg.type == 'playrq') {
-            // 조커 콜 처리
-            if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
-
-            // 문양 요청시
-            if(msg.shaperq) {
-                for(let i = 0 ; i < deck.length ; i++) {
-                    if(deck[i].shape == msg.shaperq) {
-                        this.cmd({
-                            type: 'cplay',
-                            cardIdx: i
-                        });
-                        return;
-                    }
-                }
-            }
-
-            // 그 외 -> 아무거나 낸다
-            this.cmd({
-                type: 'cplay',
-                cardIdx: _.random(0, deck.length - 1)
-            });
-        }
-        else if(msg.type == 'tend') {
-            this.playedCards = [];
+        const badCommand = ['bc1rq', 'fsrq'];
+        const mthName = 'proc_' + msg.type;
+        if (this[mthName]) return this[mthName](msg);
+        else if(badCommand.indexOf(msg.type) != -1) {
+            this.cmd({ type: 'abort' });
         }
     });
 };
 
 module.exports = AISocket;
+
+
+///////////////////////////////////////////////
+//// AI Handler
+
+
+// Ignored actions
+
+AISocket.prototype.proc_deck = function (msg) {
+    this.deck = msg.deck;
+};
+
+
+
+AISocket.prototype.proc_bidrq = function () {
+    this.cmd({
+        type: 'bid',
+        shape: 'pass'
+    });
+};
+
+
+AISocket.prototype.proc_binfo = function () {
+    this.playedCards = [];
+};
+
+AISocket.prototype.proc_cprq = function(msg) {
+    const deck = this.deck;
+
+    // 조커 콜 처리
+    if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
+
+    // 문양 요청시
+    if(msg.shaperq) {
+        for(let i = 0 ; i < deck.length ; i++) {
+            if(deck[i].shape == msg.shaperq) {
+                this.cmd({
+                    type: 'cp',
+                    cardIdx: i
+                });
+                return;
+            }
+        }
+    }
+
+    // 그 외 -> 아무거나 낸다
+    this.cmd({
+        type: 'cp',
+        cardIdx: _.random(0, deck.length - 1)
+    });
+};
+
+AISocket.prototype.proc_pcp = function(msg) {
+    this.playedCards.push(msg.card);
+};
+
+AISocket.prototype.proc_tend = function() {
+    this.playedCards = [];
+};

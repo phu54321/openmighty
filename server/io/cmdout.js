@@ -11,7 +11,7 @@ const _ = require('underscore');
 exports.emitRoomUsers = function (room) {
     const users = _.map(room.users, (user) => user.useridf);
     room.emit('cmd', {
-        type: 'roomUsers',
+        type: 'rusers',
         owner: room.getOwnerIndex(),
         users: users
     });
@@ -21,7 +21,7 @@ exports.emitRoomJoin = function (room, newUser) {
     _.map(room.users, (user) => {
         if(user == newUser) return;  // don't send message to same user
         user.emit('cmd', {
-            type: 'roomJoin',
+            type: 'rjoin',
             username: newUser.username,
             useridf: newUser.useridf
         });
@@ -30,7 +30,7 @@ exports.emitRoomJoin = function (room, newUser) {
 
 exports.emitRoomLeft = function (room, useridf) {
     room.emit('cmd', {
-        type: 'roomLeft',
+        type: 'rleft',
         useridf: useridf
     });
 };
@@ -43,7 +43,7 @@ exports.emitGamePlayers = function (room) {
     "use strict";
     const users = _.map(room.gameUsers, (user) => user.useridf);
     room.emit('cmd', {
-        type: 'gameUsers',
+        type: 'gusers',
         users: users
     });
 };
@@ -64,7 +64,7 @@ exports.emitGamePlayerDeck = function (room, userIdx) {
 
 exports.emitGamePlayerBidding = function (room, bidder, bidShape, bidCount) {
     const obj = {
-        type: 'pbidinfo',
+        type: 'pbinfo',
         bidder: bidder,
         shape: bidShape,
     };
@@ -74,12 +74,14 @@ exports.emitGamePlayerBidding = function (room, bidder, bidShape, bidCount) {
 
 exports.emitGameBidRequest = function (room, userIdx) {
     const user = room.gameUsers[userIdx];
-    user.emit('cmd', {type: 'bidrq'});
+    user.emit('cmd', {
+        type: 'bidrq'
+    });
 };
 
 exports.emitGameBidding = function (room) {
     room.emit('cmd', {
-        type: 'bidinfo',
+        type: 'binfo',
         president: room.president,
         shape: room.bidShape,
         num: room.bidCount
@@ -88,23 +90,29 @@ exports.emitGameBidding = function (room) {
 
 exports.emitGameBidChange1Request = function (room) {
     const president = room.president;
-    room.gameUsers[president].emit('cmd', {type: 'bidch1rq'});
+    room.gameUsers[president].emit('cmd', {
+        type: 'bc1rq'
+    });
 };
 
 
 exports.emitGameDiscardComplete = function (room) {
-    room.emit('cmd', {type: 'discard3end'});
+    room.emit('cmd', {
+        type: 'd3end'
+    });
 };
 
 
 exports.emitFriendSelectRequest = function (room) {
     const president = room.president;
-    room.gameUsers[president].emit('cmd', {type: 'fselrq'});
+    room.gameUsers[president].emit('cmd', {
+        type: 'fsrq'
+    });
 };
 
 exports.emitFriendSelection = function (room, friendType, arg) {
     room.emit('cmd', {
-        type: 'fsel',
+        type: 'fs',
         friendType: friendType,
         arg: arg
     });
@@ -117,7 +125,7 @@ exports.emitFriendSelection = function (room, friendType, arg) {
 exports.emitGameCardPlayRequest = function (room) {
     const currentTurn = room.currentTurn;
     room.gameUsers[currentTurn].emit('cmd', {
-        type: 'playrq',
+        type: 'cprq',
         shaperq: room.playedCards.length > 0 ? room.playedCards[0].shape : undefined,
         jcall: room.jokerCalled ? true : undefined
     });
@@ -125,7 +133,7 @@ exports.emitGameCardPlayRequest = function (room) {
 
 exports.emitGamePlayerCardPlay = function (room, player, card, jcall) {
     room.emit('cmd', {
-        type: 'pcplay',
+        type: 'pcp',
         player: player,
         card: card,
         jcall: jcall
@@ -133,12 +141,22 @@ exports.emitGamePlayerCardPlay = function (room, player, card, jcall) {
 };
 
 exports.emitGameTrickEnd = function (room) {
-    room.emit('cmd', {type: 'tend'});
+    room.emit('cmd', {
+        type: 'tend'
+    });
 };
 
 exports.emitGameEnd = function (room, oppObtainedCardCount) {
     room.emit('cmd', {
         type: 'gend',
         oppcc: oppObtainedCardCount
+    });
+};
+
+////
+
+exports.emitGameAbort = function (room) {
+    room.emit('cmd', {
+        type: 'gabort',
     });
 };
