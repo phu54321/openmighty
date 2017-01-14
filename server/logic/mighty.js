@@ -104,10 +104,10 @@ function createDeck() {
     const deck = [];
     for(let shape = 0 ; shape < 4 ; shape++) {
         for(let n = 2 ; n <= 14 ; n++) {
-            deck.push({shape: mutils.cardShapes[shape], num: n});
+            deck.push(mutils.createCard(mutils.cardShapes[shape], n));
         }
     }
-    deck.push({shape: 'joker', num: '0'});
+    deck.push(mutils.createCard('joker'));
     return _.shuffle(deck);
 }
 

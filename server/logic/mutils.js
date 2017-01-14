@@ -7,6 +7,26 @@
 const cardShapes = exports.cardShapes = ['spade', 'diamond', 'clover', 'heart', 'joker'];
 const bidShapes = exports.bidShapes = ['spade', 'diamond', 'clover', 'heart', 'none'];
 
+
+function Card(shape, num) {
+    this.shape = shape;
+    this.num = num;
+}
+
+Card.prototype.equals = function (rhs) {
+    return rhs.shape == this.shape && rhs.num == this.num;
+};
+
+exports.createCard = function (shape, num) {
+    if(shape == 'joker') num = 0;
+    else if(!isValidCardParam(shape, num)) return null;
+    return new Card(shape, num);
+};
+
+
+////////
+
+
 function compareCard(a, b) {
     const aShapeCode = cardShapes.indexOf(a.shape);
     const bShapeCode = cardShapes.indexOf(b.shape);
@@ -27,10 +47,14 @@ exports.sortDeck = function (deck) {
 //////////
 
 
-exports.isValidCardParam = function (shape, num) {
+function isValidCardParam(shape, num) {
     if (shape == 'joker') return num === 0;
     else return cardShapes.indexOf(shape) != -1 && 2 <= num && num <= 14;
-};
+}
+
+exports.isValidCardParam = isValidCardParam;
+
+
 
 exports.isScoreCard = function (card) {
     return card.num >= 10;

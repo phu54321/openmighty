@@ -90,7 +90,7 @@ module.exports = function (MightyRoom) {
         if(msg.ftype == 'card') {
             if(!mutils.isValidCardParam(msg.shape, msg.num)) return "잘못된 카드 설정입니다.";
 
-            const card = { shape: msg.shape, num: msg.num };
+            const card = mutils.createCard(msg.shape, msg.num);
             cmdout.emitFriendSelection(this, 'card', card);
 
             // Find friend
@@ -98,7 +98,7 @@ module.exports = function (MightyRoom) {
             for(let player = 0 ; player < 5 ; player++) {
                 const pUserEntry = this.gameUsers[player];
                 for(let i = 0 ; i < 10 ; i++) {
-                    if(pUserEntry.deck[i] == card) {
+                    if(pUserEntry.deck[i].equals(card)) {
                         friend = player;
                         break;
                     }
