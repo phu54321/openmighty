@@ -46,7 +46,7 @@ exports.fsel = function (socket, room, userEntry, msg) {
 };
 
 exports.cplay = function (socket, room, userEntry, msg) {
-    if((errmsg = room.onCardPlay(userEntry, msg.cardIdx)) !== null) {
+    if((errmsg = room.onCardPlay(userEntry, msg.cardIdx, msg.jcall || false)) !== null) {
         return socket.emit('err', errmsg);
     }
 };

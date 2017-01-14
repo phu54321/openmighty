@@ -111,6 +111,7 @@ function createDeck() {
     return _.shuffle(deck);
 }
 
+
 /**
  * 게임을 초기화합니다.
  */

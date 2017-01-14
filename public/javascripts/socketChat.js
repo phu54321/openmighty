@@ -107,5 +107,11 @@ function translateChatMessage(chatMessage) {
             var cardIdx = parseInt(matches[2]);
             return sendCmd('cplay', {cardIdx: cardIdx});
         }
+
+        matches = chatMessage.match(/^cplay (\d+) jcall$/);
+        if(matches) {
+            var cardIdx = parseInt(matches[2]);
+            return sendCmd('cplay', {cardIdx: cardIdx, jcall: true});
+        }
     }
 }

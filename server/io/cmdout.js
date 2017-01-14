@@ -119,10 +119,11 @@ exports.emitGameCardPlayRequest = function (room) {
     room.gameUsers[currentTurn].socket.emit('cmd', {type: 'playrq'});
 };
 
-exports.emitGamePlayerCardPlay = function (room, player, card) {
+exports.emitGamePlayerCardPlay = function (room, player, card, jcall) {
     room.emit('cmd', {
         type: 'pcplay',
         player: player,
-        card: card
+        card: card,
+        jcall: jcall
     });
 };
