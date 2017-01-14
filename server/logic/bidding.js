@@ -5,7 +5,9 @@
 "use strict";
 
 const cmdout = require('../io/cmdout');
-const bidShapes = ['spade', 'diamond', 'clover', 'heart', 'none'];
+const mutils = require('./mutils');
+
+const bidShapes = mutils.bidShapes;
 
 function isHigherBid(lastBidShape, lastBidCount, bidShape, bidCount) {
     if(bidShape == 'none') {

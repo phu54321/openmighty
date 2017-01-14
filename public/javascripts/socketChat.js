@@ -59,7 +59,7 @@ function sendCmd(type, object) {
 function translateChatMessage(chatMessage) {
     "use strict";
 
-    var matches, shape, count;
+    var matches, shape, num, cardIdxs, count;
 
     if(chatMessage == 'start') return sendCmd('start');
     if(chatMessage == 'bid pass') return sendCmd('bid', {shape: 'pass'});
@@ -83,25 +83,26 @@ function translateChatMessage(chatMessage) {
     if(chatMessage.startsWith('discard3 ')) {
         matches = chatMessage.match(/^discard3 (\d+) (\d+) (\d+)$/);
         if(matches) {
-            var cards = [
+            cardIdxs = [
                 parseInt(matches[1]),
                 parseInt(matches[2]),
                 parseInt(matches[3]),
             ];
-            return sendCmd('discard3', {cards: cards});
+            return sendCmd('discard3', {cards: cardIdxs});
         }
     }
 
     if(chatMessage.startsWith('fsel card ')) {
-        matches = chatMessage.match(/^fsel card (\d+)$/);
+        matches = chatMessage.match(/^fsel card (\w+) (\d+)$/);
         if(matches) {
-            var card = parseInt(matches[1]);
-            return sendCmd('fsel', {ftype: 'card', card: card});
+            shape = matches[1];
+            num = parseInt(matches[2]);
+            return sendCmd('fsel', {ftype: 'card', shape: shape, num: num});
         }
     }
 
     if(chatMessage.startsWith('cplay ')) {
-        matches = chatMessage.match(/^play (\d+)$/);
+        matches = chatMessage.match(/^cplay (\d+)$/);
         if(matches) {
             var cardIdx = parseInt(matches[2]);
             return sendCmd('cplay', {cardIdx: cardIdx});

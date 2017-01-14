@@ -12,7 +12,7 @@ exports.start = function (socket, room, userEntry) {
     }
 
     userEntry.ready = true;
-    if((errmsg = room.startGame()) !== null) {
+    if((errmsg = room.onStartGame()) !== null) {
         return socket.emit('err', errmsg);
     }
 };

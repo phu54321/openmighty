@@ -10,6 +10,8 @@
 
 const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
+const mutils = require('./mutils');
+
 
 module.exports = function (MightyRoom) {
     /**
@@ -49,8 +51,7 @@ module.exports = function (MightyRoom) {
 
 
         // 조커콜 처리
-        const rawPlayingCard = userEntry.deck[cardIdx];
-        const playingCard = this.decodeCard(rawPlayingCard);
+        const playingCard = userEntry.deck[cardIdx];
 
         if(isJokerCall) {
             if(playingCard.num != 3) return "잚못된 조커콜입니다.";
@@ -64,11 +65,11 @@ module.exports = function (MightyRoom) {
 
         // Pop card!
         userEntry.deck.splice(cardIdx, 1);
-        this.playedCards.push(rawPlayingCard);
-        cmdout.emitGamePlayerCardPlay(this, this.currentTurn, rawPlayingCard);
+        this.playedCards.push(playingCard);
+        cmdout.emitGamePlayerCardPlay(this, this.currentTurn, playingCard);
 
         // maxCard & maxPlayer를 업데이트
-        const cardScore = this.calculateCardScore(rawPlayingCard);
+        const cardScore = this.calculateCardScore(playingCard);
         if(this.trickWinner === null || this.maxCardScore < cardScore) {
             this.maxCardScore = cardScore;
             this.trickWinner = this.currentTurn;
@@ -105,7 +106,7 @@ module.exports = function (MightyRoom) {
         this.playedCards.forEach((card) => {
             if(card % 100 >= 10) winnerObtainedCards.push(card);
         });
-        winnerObtainedCards.sort((a, b) => (a - b));
+        mutils.sortDeck(winnerObtainedCards);
 
         // 게임 종료시
         if(this.currentTrick == 10) {

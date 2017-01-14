@@ -7,7 +7,7 @@
 const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
 const bidding = require('./bidding');
-
+const mutils = require('./mutils');
 
 module.exports = function (MightyRoom) {
     /**
@@ -17,7 +17,7 @@ module.exports = function (MightyRoom) {
     MightyRoom.prototype.startCardDiscard = function (remainingDeck) {
         const pUser = this.gameUsers[this.president];
         pUser.deck = pUser.deck.concat(remainingDeck);
-        pUser.deck.sort((a, b) => (a - b));
+        mutils.sortDeck(pUser.deck);
         delete this.remainingDeck;
 
         cmdout.emitGamePlayerDeck(this, this.president);
@@ -27,26 +27,26 @@ module.exports = function (MightyRoom) {
     /**
      * 주공이 버릴 카드 3장을 선택했을 경우 해당 카드 3장을 버리고 친구 선택 단계로 들어갑니다.
      */
-    MightyRoom.prototype.onCardDiscard = function (userEntry, cards) {
+    MightyRoom.prototype.onCardDiscard = function (userEntry, cardIdxs) {
         // Authentication
         if(!this.playing || this.playState != 'discard3') return "카드를 버릴 단계가 아닙니다.";
         if(this.gameUsers[this.president] != userEntry) return "주공이 아닙니다.";
 
         // Index check
-        if(cards.length != 3) return "카드를 3개 선택해야 합니다.";
-        if(!_.every(cards, (card) => typeof card == 'number')) return "잘못된 카드 정보입니다.";
+        if(cardIdxs.length != 3) return "카드를 3개 선택해야 합니다.";
+        if(!_.every(cardIdxs, (card) => typeof card == 'number')) return "잘못된 카드 정보입니다.";
 
-        cards = cards.sort((a, b) => a - b);
+        cardIdxs = cardIdxs.sort((a, b) => a - b);
         // No duplicate index
-        if(cards[0] == cards[1] || cards[1] == cards[2]) return "중복된 카드가 있습니다.";
+        if(cardIdxs[0] == cardIdxs[1] || cardIdxs[1] == cardIdxs[2]) return "중복된 카드가 있습니다.";
         // Cards OOB
-        if(cards[0] < 0 || cards[2] >= 13) return "잘못된 카드가 있습니다.";
+        if(cardIdxs[0] < 0 || cardIdxs[2] >= 13) return "잘못된 카드가 있습니다.";
 
         // Remove card from deck
         const pUser = this.gameUsers[this.president];
-        pUser.deck.splice(cards[2], 1);
-        pUser.deck.splice(cards[1], 1);
-        pUser.deck.splice(cards[0], 1);
+        pUser.deck.splice(cardIdxs[2], 1);
+        pUser.deck.splice(cardIdxs[1], 1);
+        pUser.deck.splice(cardIdxs[0], 1);
 
         // Rewrite deck
         cmdout.emitGameDiscardComplete(this);
@@ -88,10 +88,9 @@ module.exports = function (MightyRoom) {
 
         // Friend by card
         if(msg.ftype == 'card') {
-            const card = msg.card;
-            if(typeof card != 'number') return "잘못된 카드 설정입니다.";
-            else if(!this.isValidCard(card)) return "잘못된 카드를 선택하셨습니다.";
+            if(!mutils.isValidCardParam(msg.shape, msg.num)) return "잘못된 카드 설정입니다.";
 
+            const card = { shape: msg.shape, num: msg.num };
             cmdout.emitFriendSelection(this, 'card', card);
 
             // Find friend
@@ -107,11 +106,14 @@ module.exports = function (MightyRoom) {
                 if(friend !== null) break;
             }
 
+            // 자기 자신은 프렌드가 될 수 없습니다.
+            if(friend == this.president) friend = null;
+
             this.friendType = 'card';
             this.friend = friend;
             applyBidChange2();
             this.startMainGame();
-            return false;
+            return null;
         }
         else return "잘못된 프렌드 설정입니다.";
     };
