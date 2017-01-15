@@ -5,12 +5,17 @@ block content
     script(src='/javascripts/socketChat.js')
 
     .game
-        .row
-            .col
-                .card.game-card
-                    .card-content
-                        span.card-title Card Title
-                        p Simple card.
-                    .card-action
-                        a(href='#') This is a link
-                        a(href='#') This is a link
+        .deck
+            .deck-card-container
+                .deck-card
+                    .game-card-container
+                        .game-card
+                            .game-card-header
+                                | 5 OF SPADE
+                            .game-card-image.valign-wrapper
+                                .valign
+                                    span ︎♠︎♠
+                                    span ︎♠
+                                    span ︎♠︎♠︎
+                            .game-card-footer
+                                | 5 OF SPADE
