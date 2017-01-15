@@ -7,13 +7,12 @@ block content
     .game
         .player
             - for (var i = 0 ; i < 5 ; i++) {
-            .card.player-card
-                .player-slot
-                    .player-name
-                        | 이름
-                    .player-card
-                        .game-card-container
-                            .game-card.game-card-s3
+            .player-slot
+                .player-name
+                    | 이름
+                .player-card
+                    .game-card-container
+                        .game-card.game-card-s3
             - }
 
         .deck
