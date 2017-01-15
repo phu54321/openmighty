@@ -6,6 +6,7 @@ block content
 
     .game
         .deck
+            - for (var i = 0 ; i < 13 ; i++) {
             .deck-card-container
                 .deck-card
                     .game-card-container
@@ -19,3 +20,5 @@ block content
                                     span ︎♠︎♠︎
                             .game-card-footer
                                 | 5 OF SPADE
+
+            - }
