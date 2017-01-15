@@ -14,9 +14,9 @@ html
 
     body
         .valign-wrapper.center-align
-            .gameMain.valign.left-align
+            .main.valign.left-align
                 .card.topStrip.indigo.white-text
-                    a.left(href='/') openMighty
+                    span.left(onclick='window.location.href="/"') openMighty
                     if request.username
                         .right
                             | #{request.username} &nbsp;

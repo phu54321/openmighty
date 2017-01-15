@@ -1,15 +1,35 @@
 // Include gulp
 const gulp = require('gulp');
+const gulpif = require('gulp-if');
 
 // Include Our Plugins
 const sass = require('gulp-sass');
+const autoprefixer = require('gulp-autoprefixer');
 const nodemon = require('gulp-nodemon');
 const browserSync = require('browser-sync');
+const sprity = require('sprity');
+
+// Sprite sheet
+gulp.task('sprity', function () {
+    return sprity.src({
+        src: './public/images/cards/*.png',
+        style: './public/stylesheets/sprite.scss',
+        orientation: 'binary-tree',
+    })
+        .pipe(gulpif('*.png',
+                gulp.dest('./public/images/'),
+                gulp.dest('./public/stylesheets/')
+        ));
+});
 
 // Compile Our Sass
 gulp.task('sass', function () {
     return gulp.src('public/stylesheets/style.scss')
         .pipe(sass().on('error', sass.logError))
+        .pipe(autoprefixer({
+            browsers: ['last 2 versions'],
+            cascade: false
+        }))
         .pipe(gulp.dest('public/stylesheets/'))
         .pipe(browserSync.stream());
 });

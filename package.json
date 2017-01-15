@@ -32,5 +32,11 @@
     "sprintf-js": "^1.0.3",
     "underscore": "^1.8.3",
     "underscore.string": "^3.3.4"
+  },
+  "devDependencies": {
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-if": "^2.0.2",
+    "sprity": "^1.0.8",
+    "sprity-sass": "^1.0.4"
   }
 }

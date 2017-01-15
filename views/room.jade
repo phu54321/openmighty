@@ -3,7 +3,22 @@ extends layout
 block content
     script(src='/socket.io/socket.io.js')
     script(src='/javascripts/socketChat.js')
-    .chatbox
-        ul.chat-messages#messages
-        form.chat-input.input-field(action='javascript:sendChat();')
-            input(type='text', id='myMessage', autocomplete="off", autofocus)
+
+    .game
+        .player
+            - for (var i = 0 ; i < 5 ; i++) {
+            .card.player-card
+                .player-slot
+                    .player-name
+                        | 이름
+                    .player-card
+                        .game-card-container
+                            .game-card.game-card-s3
+            - }
+
+        .deck
+            - for (var i = 2 ; i <= 14 ; ++i) {
+            .deck-card-container
+                .game-card-container
+                    .deck-card.game-card(class='game-card-s#{i}')
+            - }
