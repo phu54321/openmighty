@@ -5,12 +5,20 @@ block content
     script(src='/javascripts/socketChat.js')
 
     .game
-        .row
-            .col
-                .card.game-card
-                    .card-content
-                        span.card-title Card Title
-                        p Simple card.
-                    .card-action
-                        a(href='#') This is a link
-                        a(href='#') This is a link
+        .player
+            - for (var i = 0 ; i < 5 ; i++) {
+            .card.player-card
+                .player-slot
+                    .player-name
+                        | 이름
+                    .player-card
+                        .game-card-container
+                            .game-card.game-card-s3
+            - }
+
+        .deck
+            - for (var i = 2 ; i <= 14 ; ++i) {
+            .deck-card-container
+                .game-card-container
+                    .deck-card.game-card(class='game-card-s#{i}')
+            - }
