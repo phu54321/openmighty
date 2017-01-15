@@ -12,53 +12,24 @@
 
 .game-card {
   @extend %debug;
-  @extend .card;
 
-  font-size: .5rem;
+  // Fill screen
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
   // Shadow ui
+  box-shadow:
+          0 2px 5px 1px rgba(0, 0, 0, 0.14),
+          0 1px 5px 0 rgba(0, 0, 0, 0.12),
+          0 3px 1px -2px rgba(0, 0, 0, 0.2);
   transition: transform 0.5s;
-  position: absolute;
-  top: 0;  left: 0;
-  bottom: 0; right: 0;
-  display: flex;
-  flex-flow: column;
 
-  .game-card-header {
-    @extend .z-depth-1;
-    background-color: #37474f;
-    width: 100%;
-    height: 1.2rem;
-    color: white;
-    padding: .2rem;
-    box-sizing: border-box;
-  }
-
-  .game-card-image {
-    @extend .center;
-    width: 100%;
-    height: 100%;
-    padding: 5%;
-    font-size: 1.5rem;
-    letter-spacing: 0.5em;
-    word-wrap: break-word;
-    line-height: 1.2rem;
-
-    .valign {
-      margin: auto;
-    }
-
-    span {
-      display: block;
-    }
-  }
-
-  .game-card-footer {
-    @extend .game-card-header;
-    transform: rotate(180deg);
-  }
-
-
+  // Image
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
 
@@ -164,6 +135,14 @@
 
 $shapes: ("s", "c", "d", "h");
 
+
+@for $j from 1 through 4 {
+  @for $i from 2 through 14 {
+    .game-card-#{nth($shapes, $j)}#{$i} {
+      background-image: url("/images/cards/#{nth($shapes, $j)}#{$i}.png");
+    }
+  }
+}
 
 .game-card-j0 {
   background-image: url("/images/cards/j0.png");
