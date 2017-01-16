@@ -24,6 +24,10 @@
     left: 0;
     right: 0;
 
+    .player-empty .player-name {
+      @extend .grey.lighten-2;
+    }
+
     .player-slot {
       @extend .card;
       width: 18%;

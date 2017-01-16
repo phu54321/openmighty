@@ -18,6 +18,11 @@ gulp.task('babel', function () {
         .pipe(babel({
             presets: ['es2015']
         }))
+        .on('error', function(e) {
+            console.log(e.message);
+            console.log(e.codeFrame);
+            this.emit('end');
+        })
         .pipe(concat("app.js"))
         .pipe(sourcemaps.write("."))
         .pipe(gulp.dest("public/"));

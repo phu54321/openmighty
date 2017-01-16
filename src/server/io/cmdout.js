@@ -8,9 +8,13 @@ const _ = require('underscore');
 
 // Room related
 
-exports.emitRoomUsers = function (room) {
-    const users = _.map(room.users, (user) => user.useridf);
-    room.emit('cmd', {
+exports.emitRoomUsers = function (room, user) {
+    const users = _.map(
+        room.users,
+        (user) => {
+            return {useridf: user.useridf, username: user.username};
+        });
+    user.emit('cmd', {
         type: 'rusers',
         owner: room.getOwnerIndex(),
         users: users
@@ -31,7 +35,8 @@ exports.emitRoomJoin = function (room, newUser) {
 exports.emitRoomLeft = function (room, useridf) {
     room.emit('cmd', {
         type: 'rleft',
-        useridf: useridf
+        useridf: useridf,
+        owner: room.owner
     });
 };
 

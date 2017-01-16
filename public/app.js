@@ -139,12 +139,74 @@ function sendCmd(type, object) {
 ////
 
 var cmdTranslatorMap = {};
+var room = {
+    owner: 0,
+    users: []
+};
+
+function viewRoom() {
+    "use strict";
+
+    var owner = room.owner;
+    var users = room.users;
+
+    var $playerSlots = $('.player-slot');
+    for (var i = 0; i < users.length; i++) {
+        var $playerSlot = $($playerSlots[i]);
+        var user = users[i];
+        $playerSlot.attr('useridf', user.useridf);
+        $playerSlot.find('.player-name').text(user.username);
+        $playerSlot.removeClass('player-empty');
+        if (owner == i) $playerSlot.addClass('player-owner');
+    }
+
+    for (var _i = users.length; _i < 5; _i++) {
+        var _$playerSlot = $($playerSlots[_i]);
+        _$playerSlot.removeAttr('useridf');
+        _$playerSlot.find('.player-name').text("Empty");
+        _$playerSlot.addClass('player-empty');
+        _$playerSlot.removeClass('player-owner');
+    }
+}
 
 function translateCmdMessage(msg) {
     "use strict";
 
-    if (cmdTranslatorMap[msg.type]) cmdTranslatorMap[msg.type](msg);else Materialize.toast('Unknown command message type' + msg.type, 5000);
+    if (cmdTranslatorMap[msg.type]) cmdTranslatorMap[msg.type](msg);else Materialize.toast('Unknown command message type : ' + msg.type, 5000);
 }
+
+cmdTranslatorMap.rjoin = function (msg) {
+    "use strict";
+
+    Materialize.toast(msg.username + '님이 입장하셨습니다.');
+    room.users.push({
+        username: msg.username,
+        useridf: msg.useridf
+    });
+    viewRoom();
+};
+
+cmdTranslatorMap.rleft = function (msg) {
+    "use strict";
+
+    for (var i = 0; i < room.users.length; i++) {
+        var user = room.users[i];
+        if (user.useridf == msg.useridf) {
+            Materialize.toast(user.username + '님이 퇴장하셨습니다.');
+            room.users = room.users.splice(i, 1);
+        }
+    }
+    room.owner = msg.owner;
+    viewRoom();
+};
+
+cmdTranslatorMap.rusers = function (msg) {
+    "use strict";
+
+    room.owner = msg.owner;
+    room.users = msg.users;
+    viewRoom();
+};
 /**
  * Created by whyask37 on 2017. 1. 11..
  */

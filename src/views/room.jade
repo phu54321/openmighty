@@ -3,36 +3,12 @@ extends layout
 block content
     .game
         .player
-            .player-slot
-                .player-name
-                    | 이름1
-                .player-card
-                    .game-card-container
-                        .game-card.game-card-s3
-            .player-slot
-                .player-name
-                    | 이름2
-                .player-card
-                    .game-card-container
-                        .game-card.game-card-s3
-            .player-slot
-                .player-name
-                    | 이름3
-                .player-card
-                    .game-card-container
-                        .game-card.game-card-s3
-            .player-slot
-                .player-name
-                    | 이름4
-                .player-card
-                    .game-card-container
-                        .game-card.game-card-s3
-            .player-slot
-                .player-name
-                    | 이름5
-                .player-card
-                    .game-card-container
-                        .game-card.game-card-s3
+            each i in new Array(5)
+                .player-slot.player-empty
+                    .player-name
+                        | Empty
+                    .player-card
+                        .game-card-container
 
         .deck
             - for (var i = 2 ; i <= 14 ; ++i) {

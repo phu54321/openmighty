@@ -1546,7 +1546,7 @@
 .grey-text.text-lighten-3 {
   color: #eeeeee !important; }
 
-.grey.lighten-2 {
+.grey.lighten-2, .game .player .player-empty .player-name {
   background-color: #e0e0e0 !important; }
 
 .grey-text.text-lighten-2 {
