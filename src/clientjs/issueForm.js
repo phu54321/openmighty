@@ -1,17 +1,43 @@
-function formVerifier_AlwaysAllow(value) {
+"use strict";
+
+function issueRegister() {
     'use strict';
+    issueForm(
+        '/users/register',
+        'registerForm',
+        [
+            ['username', 'username', formVerifier_NoBlank, '이름을 입력하세요.'],
+            ['useridf', 'useridf', formVerifier_AlwaysAllow, ''],
+        ],
+        function() {
+            window.location.reload(true);
+        }
+    );
+}
+
+function issueLogout() {
+    $.ajax({
+        type: 'POST',
+        url: '/users/logout',
+        success: function(data) {
+            window.location.reload(true);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.log(textStatus, 'message : ' + jqXHR.responseText + '\nerror : ' + errorThrown);
+        }
+    });
+}
+
+
+//////////
+
+
+function formVerifier_AlwaysAllow(value) {
     return true;
 }
 
 function formVerifier_NoBlank(value) {
-    'use strict';
     return value !== '';
-}
-
-function formVerifier_Email(value) {
-    'use strict';
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(value);
 }
 
 /**
@@ -26,8 +52,8 @@ function formVerifier_Email(value) {
 function issueForm(url, formName, nameTable, callback) {
     'use strict';
 
-    var targetForm = $('#' + formName);
-    var ajaxData = {};
+    const targetForm = $('#' + formName);
+    const ajaxData = {};
 
     if (!targetForm) {
         console.log('Unknown form \'' + formName + '\'');
@@ -35,13 +61,10 @@ function issueForm(url, formName, nameTable, callback) {
     }
 
     // Collect form values
-    for(var i = 0 ; i < nameTable.length ; i++) {
-        var nameTableEntry = nameTable[i];
-
-        var inputName = nameTableEntry[0];
-        var postName = nameTableEntry[1];
-        var formVerifier = nameTableEntry[2] || formVerifier_AlwaysAllow;
-        var errorMsg = nameTableEntry[3] || "허용되지 않은 입력입니다.";
+    for(let i = 0 ; i < nameTable.length ; i++) {
+        let [inputName, postName, formVerifier, errorMsg] = nameTable[i];
+        if(!formVerifier) formVerifier = formVerifier_AlwaysAllow;
+        if(!errorMsg) errorMsg = "허용되지 않은 입력입니다.";
 
         ajaxData[postName] = targetForm.find('#' + inputName).val();
         if(!formVerifier(ajaxData[postName])) {
@@ -74,36 +97,3 @@ function issueForm(url, formName, nameTable, callback) {
     });
     return true;
 }
-
-
-/////////////////////
-
-
-function issueRegister() {
-    'use strict';
-    issueForm(
-        '/users/register',
-        'registerForm',
-        [
-            ['username', 'username', formVerifier_NoBlank, '이름을 입력하세요.'],
-            ['useridf', 'useridf', formVerifier_AlwaysAllow, ''],
-        ],
-        function() {
-            window.location.reload(true);
-        }
-    );
-}
-
-function issueLogout() {
-    $.ajax({
-        type: 'POST',
-        url: '/users/logout',
-        success: function(data) {
-            window.location.reload(true);
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.log(textStatus, 'message : ' + jqXHR.responseText + '\nerror : ' + errorThrown);
-        }
-    });
-}
-

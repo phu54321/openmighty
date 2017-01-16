@@ -1,9 +1,6 @@
 extends layout
 
 block content
-    script(src='/socket.io/socket.io.js')
-    script(src='/clientjs/socketChat.js')
-
     .game
         .player
             .player-slot
@@ -43,3 +40,6 @@ block content
                 .deck-card.game-card-container
                     .game-card(class='game-card-s#{i}')
             - }
+    script(src='/socket.io/socket.io.js')
+    script.
+        initSockets();

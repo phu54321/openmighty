@@ -1,5 +1,7 @@
 {
   "node": true,
+  "browser": true,
+  "jquery": true,
   "esversion": 6,
   "-W034": true
 }
