@@ -3,31 +3,6 @@
   /*! keep */
 }
 
-.game-card-container {
-  position: relative;
-  width: 100%;
-  padding-top: 150%;
-}
-
-.game-card {
-  @extend %debug;
-
-  // Fill screen
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  // Shadow ui
-  transition: transform 0.5s;
-
-  // Image
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-}
-
-
 .game {
   @extend %debug;
   position: relative;
@@ -125,7 +100,7 @@
 $shapes: ("s", "c", "d", "h");
 
 .deck-card {
-  @extend .z-depth-1;
+  @extend .z-depth-3;
   background-size: 100% 100%;
   background-repeat: no-repeat;
 
@@ -139,6 +114,35 @@ $shapes: ("s", "c", "d", "h");
 .deck-card-selected {
   transform: translate(0, -15%);
 }
+
+
+// Game cards
+
+.game-card-container {
+  position: relative;
+  width: 100%;
+  padding-top: 150%;
+  background-color: white;
+}
+
+.game-card {
+  @extend %debug;
+
+  // Fill screen
+  position: absolute;
+  top: 3%;
+  left: 3%;
+  right: 3%;
+  bottom: 3%;
+
+  // Shadow ui
+  transition: transform 0.5s;
+
+  // Image
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
 
 @for $j from 1 through 4 {
   @for $i from 2 through 14 {

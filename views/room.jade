@@ -6,18 +6,40 @@ block content
 
     .game
         .player
-            - for (var i = 0 ; i < 5 ; i++) {
             .player-slot
                 .player-name
-                    | 이름
+                    | 이름1
                 .player-card
                     .game-card-container
                         .game-card.game-card-s3
-            - }
+            .player-slot
+                .player-name
+                    | 이름2
+                .player-card
+                    .game-card-container
+                        .game-card.game-card-s3
+            .player-slot
+                .player-name
+                    | 이름3
+                .player-card
+                    .game-card-container
+                        .game-card.game-card-s3
+            .player-slot
+                .player-name
+                    | 이름4
+                .player-card
+                    .game-card-container
+                        .game-card.game-card-s3
+            .player-slot
+                .player-name
+                    | 이름5
+                .player-card
+                    .game-card-container
+                        .game-card.game-card-s3
 
         .deck
             - for (var i = 2 ; i <= 14 ; ++i) {
             .deck-card-container
-                .game-card-container
-                    .deck-card.game-card(class='game-card-s#{i}')
+                .deck-card.game-card-container
+                    .game-card(class='game-card-s#{i}')
             - }

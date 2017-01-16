@@ -1986,7 +1986,7 @@ a {
 .z-depth-0 {
   box-shadow: none !important; }
 
-.z-depth-1, nav, .card-panel, .card, .game .player .player-slot, .toast, .btn, .btn-large, .btn-floating, .dropdown-content, .collapsible, .side-nav, .topStrip, .game .player .player-slot .player-name, .deck-card {
+.z-depth-1, nav, .card-panel, .card, .game .player .player-slot, .toast, .btn, .btn-large, .btn-floating, .dropdown-content, .collapsible, .side-nav, .topStrip, .game .player .player-slot .player-name {
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); }
 
 .z-depth-1-half, .btn:hover, .btn-large:hover, .btn-floating:hover {
@@ -1995,7 +1995,7 @@ a {
 .z-depth-2, .main {
   box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.3); }
 
-.z-depth-3 {
+.z-depth-3, .deck-card {
   box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.3); }
 
 .z-depth-4, .modal {
@@ -6372,23 +6372,8 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
   .chatbox .chat-input input {
     margin-bottom: 10px; }
 
-.game-card, .game, .game .player, .game .player .player-slot .player-card, .game .deck {
+.game, .game .player, .game .player .player-slot .player-card, .game .deck, .game-card {
   /*! keep */ }
-
-.game-card-container {
-  position: relative;
-  width: 100%;
-  padding-top: 150%; }
-
-.game-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transition: transform 0.5s;
-  background-size: 100% 100%;
-  background-repeat: no-repeat; }
 
 .game {
   position: relative;
@@ -6459,6 +6444,22 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 
 .deck-card-selected {
   transform: translate(0, -15%); }
+
+.game-card-container {
+  position: relative;
+  width: 100%;
+  padding-top: 150%;
+  background-color: white; }
+
+.game-card {
+  position: absolute;
+  top: 3%;
+  left: 3%;
+  right: 3%;
+  bottom: 3%;
+  transition: transform 0.5s;
+  background-size: 100% 100%;
+  background-repeat: no-repeat; }
 
 .game-card-s2 {
   background-image: url(/images/cards/s2.png); }
