@@ -11,7 +11,7 @@ const cookieSecret = 'kefahdskjjhjkhvihkjbhtkgkjgb';
 const app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'src/views'));
 app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
@@ -39,6 +39,7 @@ app.use(session({
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
 app.use('/bower_components', express.static(path.join(__dirname, 'bower_components')));
 
 // Add req to jade local variable
@@ -48,8 +49,8 @@ app.use(function (req, res, next) {
 });
 
 // Routes
-app.use('/', require('./routes/index'));
-app.use('/users', require('./routes/users'));
+app.use('/', require('./src/routes/index'));
+app.use('/users', require('./src/routes/users'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -76,7 +77,7 @@ app.use(function(err, req, res, next) {
 app.initSocketIO = function (io) {
     const socketIOCookieParser = require('socket.io-cookie-parser');
     io.use(socketIOCookieParser(cookieSecret));
-    require('./server/server')(io);
+    require('./src/server/server')(io);
 };
 
 module.exports = app;

@@ -1,36 +1,38 @@
+"use strict";
+
 // Include gulp
 const gulp = require('gulp');
-const gulpif = require('gulp-if');
 
 // Include Our Plugins
-const sass = require('gulp-sass');
-const autoprefixer = require('gulp-autoprefixer');
 const nodemon = require('gulp-nodemon');
 const browserSync = require('browser-sync');
-const sprity = require('sprity');
 
 // Sprite sheet
-gulp.task('sprity', function () {
-    return sprity.src({
-        src: './public/images/cards/*.png',
-        style: './public/stylesheets/sprite.scss',
-        orientation: 'binary-tree',
-    })
-        .pipe(gulpif('*.png',
-                gulp.dest('./public/images/'),
-                gulp.dest('./public/stylesheets/')
-        ));
+gulp.task('babel', function () {
+    const sourcemaps = require("gulp-sourcemaps");
+    const babel = require("gulp-babel");
+    const concat = require("gulp-concat");
+
+    return gulp.src("src/clientjs/*.js")
+        .pipe(sourcemaps.init())
+        .pipe(babel())
+        .pipe(concat("app.js"))
+        .pipe(sourcemaps.write("."))
+        .pipe(gulp.dest("public/"));
 });
 
 // Compile Our Sass
 gulp.task('sass', function () {
-    return gulp.src('public/stylesheets/style.scss')
+    const sass = require('gulp-sass');
+    const autoprefixer = require('gulp-autoprefixer');
+
+    return gulp.src('src/scss/style.scss')
         .pipe(sass().on('error', sass.logError))
         .pipe(autoprefixer({
             browsers: ['last 2 versions'],
             cascade: false
         }))
-        .pipe(gulp.dest('public/stylesheets/'))
+        .pipe(gulp.dest('public/'))
         .pipe(browserSync.stream());
 });
 
@@ -40,16 +42,17 @@ gulp.task('reload', function () {
 
 
 // Watch Files For Changes
-gulp.task('watch', function () {
-    gulp.watch('public/**/*.scss', ['sass']);
-    gulp.watch('views/**/*.jade', ['reload']);
+gulp.task('watch', ['babel', 'sass'], function () {
+    gulp.watch('src/scss/**/*.scss', ['sass']);
+    gulp.watch('src/clientjs/**/*.js', ['babel', 'reload']);
+    gulp.watch('src/views/**/*.jade', ['reload']);
 });
 
 
 const BROWSER_SYNC_RELOAD_DELAY = 2000;
 
 // Nodemon
-gulp.task('nodemon', function (cb) {
+gulp.task('nodemon', ['watch'], function (cb) {
     // Serve files from the root of this project
 
     browserSync.init({
@@ -58,7 +61,7 @@ gulp.task('nodemon', function (cb) {
             ws: true,
         },
         ghostMode: false,
-        files: ["views/**/*.*, public/**/*.*"],
+        files: ["src/**/*.*, dist/**/*.*"],
         port: 7000,
         notify: false
     });
@@ -83,4 +86,4 @@ gulp.task('nodemon', function (cb) {
 });
 
 // Default Task
-gulp.task('default', ['sass', 'watch', 'nodemon']);
+gulp.task('default', ['nodemon']);

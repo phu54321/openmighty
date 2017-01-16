@@ -2,12 +2,13 @@
  * Created by whyask37 on 2017. 1. 11..
  */
 
-var socket = io();
+const socket = io();
+const $messages = $('#messages');
 
 function addMessage(cls, msg) {
-    var li = $('<li></li>').addClass(cls).text(msg);
-    $('#messages').append(li);
-    $('#messages').scrollTop($('#messages')[0].scrollHeight);
+    const li = $('<li></li>').addClass(cls).text(msg);
+    $messages.append(li);
+    $messages.scrollTop($messages[0].scrollHeight);
 }
 
 socket.on('info', function(msg) {
@@ -32,7 +33,6 @@ socket.on('disconnect', function() {
 });
 
 
-
 function sendChat() {
     var chatMessage = $('#myMessage').val();
     $('#myMessage').val('');
@@ -50,7 +50,7 @@ function sendChat() {
 function sendCmd(type, object) {
     "use strict";
 
-    var copy = Object.assign({}, object || {});
+    const copy = Object.assign({}, object || {});
     copy.type = type;
     socket.emit('cmd', copy);
     return true;
