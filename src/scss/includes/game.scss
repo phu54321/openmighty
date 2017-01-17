@@ -24,6 +24,10 @@
     left: 0;
     right: 0;
 
+    .player-owner .player-name {
+      @extend .blue.lighten-3;
+    }
+
     .player-empty .player-name {
       @extend .grey.lighten-2;
     }
@@ -53,6 +57,27 @@
         @extend %debug;
         box-sizing: border-box;
         padding: 3%;
+
+        .player-card-bidding:first-letter {
+          text-transform: capitalize;
+        }
+
+        .player-bid-form {
+          .player-bid-form-title {
+            display: block;
+            font-weight: bold;
+            height: 2rem;
+          }
+          select {
+            height: inherit;
+          }
+
+          button {
+            height: 2rem;
+            line-height: 2rem;
+            width: 100%;
+          }
+        }
       }
     }
   }

@@ -3,7 +3,7 @@ extends layout
 block content
     if errormsg
         script.
-            Materialize.toast('#{escape(errormsg)}', 4000)
+            Materialize.toast(unescape('#{escape(errormsg)}'), 4000)
     .container
         h1 방 입장
 

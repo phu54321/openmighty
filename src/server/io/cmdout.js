@@ -17,6 +17,7 @@ exports.emitRoomUsers = function (room, user) {
     user.emit('cmd', {
         type: 'rusers',
         owner: room.getOwnerIndex(),
+        youridf: user.useridf,
         users: users
     });
 };
@@ -46,7 +47,14 @@ exports.emitRoomLeft = function (room, useridf) {
 
 exports.emitGamePlayers = function (room) {
     "use strict";
-    const users = _.map(room.gameUsers, (user) => user.useridf);
+    const users = _.map(
+        room.gameUsers,
+        (user) => {
+            return {
+                username: user.username,
+                useridf: user.useridf
+            };
+        });
     room.emit('cmd', {
         type: 'gusers',
         users: users
@@ -71,9 +79,9 @@ exports.emitGamePlayerBidding = function (room, bidder, bidShape, bidCount) {
     const obj = {
         type: 'pbinfo',
         bidder: bidder,
-        shape: bidShape,
+        bidShape: bidShape,
     };
-    if(bidShape !== 'pass') obj.num = bidCount;
+    if(bidShape !== 'pass') obj.bidCount = bidCount;
     room.emit('cmd', obj);
 };
 

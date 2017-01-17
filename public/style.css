@@ -496,7 +496,7 @@
 .blue-text.text-lighten-4 {
   color: #BBDEFB !important; }
 
-.blue.lighten-3 {
+.blue.lighten-3, .game .player .player-owner .player-name {
   background-color: #90CAF9 !important; }
 
 .blue-text.text-lighten-3 {
@@ -6412,6 +6412,18 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
       .game .player .player-slot .player-card {
         box-sizing: border-box;
         padding: 3%; }
+        .game .player .player-slot .player-card .player-card-bidding:first-letter {
+          text-transform: capitalize; }
+        .game .player .player-slot .player-card .player-bid-form .player-bid-form-title {
+          display: block;
+          font-weight: bold;
+          height: 2rem; }
+        .game .player .player-slot .player-card .player-bid-form select {
+          height: inherit; }
+        .game .player .player-slot .player-card .player-bid-form button {
+          height: 2rem;
+          line-height: 2rem;
+          width: 100%; }
   .game .deck {
     position: absolute;
     width: 50%;
