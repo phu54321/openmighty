@@ -125,7 +125,7 @@ cmdTranslatorMap.rleft = function (msg) {
         }
     }
     room.owner = msg.owner;
-    viewRoom();
+    if(!room.playing) viewRoom();
 };
 
 cmdTranslatorMap.rusers = function (msg) {
@@ -164,30 +164,51 @@ cmdTranslatorMap.gusers = function (msg) {
     "use strict";
     game.gameUsers = msg.users;
     game.president = -1;
+    game.remainingBidder = 5;
     room.playing = true;
+    game.lastBidder = null;
     viewRoom();
+};
+
+
+cmdTranslatorMap.deck = function (msg) {
+    "use strict";
+    game.deck = msg.deck;
+    viewDeck();
 };
 
 
 cmdTranslatorMap.pbinfo = function (msg) {
     "use strict";
-    const bidder = msg.bidder;
-    const $playerSlot = $($('.player-slot')[bidder]);
+    const $playerSlot = $($('.player-slot')[msg.bidder]);
     const $playerCardContainer = $playerSlot.find('.game-card-container');
 
-    game.bidShape = msg.bidShape;
-    game.bidCount = msg.bidCount;
+    if(msg.bidShape != 'pass') {
+        game.bidShape = msg.bidShape;
+        game.bidCount = msg.bidCount;
+        game.lastBidder = msg.bidder;
+    }
 
     $playerCardContainer.find('.game-card').remove();
     const $biddingInfo = $('<div/>').addClass('game-card player-card-bidding');
     if(msg.bidShape == 'pass') {
         $biddingInfo.text("pass");
+        game.remainingBidder--;
     }
     else {
         $biddingInfo.text(msg.bidShape + ' ' + msg.bidCount);
     }
     $playerCardContainer.append($biddingInfo);
+    checkBidComplete();
 };
+
+function checkBidComplete() {
+    "use strict";
+    if(game.remainingBidder == 1 && game.lastBidder !== null) {
+        Materialize.toast("공약이 끝났습니다. 기다려주세요", 4000);
+    }
+}
+
 
 
 cmdTranslatorMap.bidrq = function () {
@@ -231,9 +252,75 @@ function sendBid() {
     return false;
 }
 
-cmdTranslatorMap.deck = function (msg) {
+
+
+cmdTranslatorMap.bc1rq = function () {
     "use strict";
-    game.deck = msg.deck;
-    viewDeck();
+
+    Materialize.toast('공약을 수정해주세요.');
+
+    const $selfPlayerSlot = getSelfSlot();
+    const $playerCardContainer = $selfPlayerSlot.find('.game-card-container');
+
+    const bidShape = game.bidShape;
+    const bidCount = game.bidCount;
+
+    const abbrTable = {
+        'spade' : '♠',
+        'heart' : '♥,
+        'diamond' : '♦',
+        'clover' : '♣',
+        'none' : 'N',
+    };
+
+
+    $playerCardContainer.html(`
+<form id='bidChangeForm' action="javascript:sendBidChange1();" class="game-card player-bid-form">
+    <div class="player-bid-form-title">현재 : ${abbrTable[bidShape]}${bidCount}</div>
+    <select name="bidShape" class="browser-default">
+        <option value="none" selected>그대로</option>    
+        <option value="spade">삽 (스페이드)</option>
+        <option value="heart">트 (하트)</option>
+        <option value="diamond">다리 (다이아몬드)</option>
+        <option value="clover">끌 (클로버)</option>
+        <option value="none">노 (노기루다)</option>
+    </select>
+    <span class="range-field">
+        <input type="range" name="bidCount" min="${bidCount}" max="20" value="${bidCount}">
+    </span>
+    <button type="submit" class="btn waves-effect waves-light">공약 수정</button>
+</form>`);
+
+    const shapeTable = {
+        'spade' : '스페이드',
+        'heart' : '하트',
+        'diamond' : '다이아몬드',
+        'clover' : '클로버',
+        'none' : '노기루다',
+    };
+
+    $playerCardContainer.find('option[value="' + bidShape + '"]').remove();
+    $playerCardContainer.find('option[value="none"]')
+        .val("bidShape")
+        .text("그대로 (" + shapeTable[bidShape] + ")");
 };
+
+
+function sendBidChange1() {
+    "use strict";
+
+    const $bidChangeForm = $('#bidChangeForm');
+    let bidShape = $bidChangeForm.find('*[name="bidShape"]').val();
+    const bidCount = $bidChangeForm.find('*[name="bidCount"]').val();
+    if(bidShape == game.bidShape && bidCount == game.bidCount) bidShape = 'pass';
+
+    sendCmd('bc1', {
+        shape: bidShape,
+        num: parseInt(bidCount)
+    });
+    return false;
+
+}
+
+////
 

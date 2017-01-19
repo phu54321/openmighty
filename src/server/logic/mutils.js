@@ -6,8 +6,8 @@
 
 const _ = require('underscore');
 
-const cardShapes = exports.cardShapes = ['spade', 'diamond', 'clover', 'heart', 'joker'];
-const bidShapes = exports.bidShapes = ['spade', 'diamond', 'clover', 'heart', 'none'];
+const cardShapes = exports.cardShapes = ['spade', 'heart', 'diamond', 'clover', 'joker'];
+const bidShapes = exports.bidShapes = ['spade', 'heart', 'diamond', 'clover', 'none'];
 
 
 function Card(shape, num) {
@@ -35,7 +35,7 @@ function compareCard(a, b) {
 
     if(aShapeCode < bShapeCode) return -1;
     else if(aShapeCode > bShapeCode) return 1;
-    else return a.num - b.num;
+    else return b.num - a.num;
 }
 
 exports.compareCard = compareCard;
