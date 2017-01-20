@@ -58,7 +58,8 @@
         box-sizing: border-box;
         padding: 3%;
 
-        button {
+        .btn {
+          padding: 0;
           height: 2rem;
           line-height: 2rem;
           width: 100%;

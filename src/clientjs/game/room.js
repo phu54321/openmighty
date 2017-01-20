@@ -68,8 +68,7 @@ exports.viewRoom = function () {
 
 function addStartButton() {
     const $gameCardContainer = $('.player-self').find('.game-card-container');
-    $gameCardContainer.empty();
-    $gameCardContainer.append(template('button'));
+    template($gameCardContainer, 'button');
     $gameCardContainer.find('button').click(function(e) {
         conn.sendCmd('start');
         e.preventDefault();

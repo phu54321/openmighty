@@ -20,7 +20,7 @@ exports.viewDeck = function () {
         const card = game.deck[i];
         const [shape, num] = [card.shape, card.num];
 
-        const $deckCardContainer = template('deck-card');
+        const $deckCardContainer = template(null, 'deck-card');
         $deckCardContainer.find('.game-card').addClass('game-card-' + shape[0] + num);
         $playerDeck.append($deckCardContainer);
     }

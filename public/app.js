@@ -285,6 +285,7 @@
 	    Materialize.toast(msg, 3000);
 	    room.playing = false;
 	    room.viewRoom();
+	    $('#title').text('openMighty');
 	};
 
 /***/ },
@@ -314,7 +315,7 @@
 	            num = _ref[1];
 	
 	
-	        var $deckCardContainer = template('deck-card');
+	        var $deckCardContainer = template(null, 'deck-card');
 	        $deckCardContainer.find('.game-card').addClass('game-card-' + shape[0] + num);
 	        $playerDeck.append($deckCardContainer);
 	    }
@@ -342,16 +343,60 @@
 /* 6 */
 /***/ function(module, exports) {
 
-	'use strict';
-	
 	/**
 	 * Created by whyask37 on 2017. 1. 20..
 	 */
 	
-	module.exports = function (name) {
-	  "use strict";
+	"use strict";
 	
-	  return $('#template-' + name).clone().removeAttr('id');
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+	
+	var Materialize = window.Materialize;
+	
+	module.exports = function ($parent, name, attrs) {
+	    var $template = $('#template-' + name).clone().removeAttr('id');
+	    if ($parent) {
+	        $parent.empty();
+	        $parent.append($template);
+	    }
+	
+	    if (!attrs) return $template;
+	
+	    // Set attributes
+	
+	    var _loop = function _loop(i) {
+	        var _attrs$i = _slicedToArray(attrs[i], 2),
+	            selector = _attrs$i[0],
+	            attributes = _attrs$i[1];
+	
+	        var $elm = selector ? $template.find(selector) : $template;
+	        if ($elm.length != 1) {
+	            Materialize.toast('Invalid selector : ' + selector, 4000);
+	            return 'continue';
+	        }
+	
+	        if (Array.isArray(attributes[0])) {
+	            attributes.forEach(function (attr) {
+	                return applyAttribute($elm, attr);
+	            });
+	        } else applyAttribute($elm, attributes);
+	    };
+	
+	    for (var i = 0; i < attrs.length; i++) {
+	        var _ret = _loop(i);
+	
+	        if (_ret === 'continue') continue;
+	    }
+	
+	    function applyAttribute($elm, attribute) {
+	        var _attribute = _slicedToArray(attribute, 2),
+	            attr = _attribute[0],
+	            value = _attribute[1];
+	
+	        if (attr == 'text') $elm.text(value);else if (attr == 'val') $elm.val(value);else $elm.attr(attr, value);
+	    }
+	
+	    return $template;
 	};
 
 /***/ },
@@ -426,8 +471,7 @@
 	
 	function addStartButton() {
 	    var $gameCardContainer = $('.player-self').find('.game-card-container');
-	    $gameCardContainer.empty();
-	    $gameCardContainer.append(template('button'));
+	    template($gameCardContainer, 'button');
 	    $gameCardContainer.find('button').click(function (e) {
 	        conn.sendCmd('start');
 	        e.preventDefault();
@@ -571,9 +615,8 @@
 	        if (game.bidShape == 'none') bidCount++;
 	
 	        var $playerCardContainer = $('.player-self .game-card-container');
-	        $playerCardContainer.empty();
 	
-	        var $bidForm = template('bidding');
+	        var $bidForm = template($playerCardContainer, 'bidding');
 	        $bidForm.attr('id', 'bidForm');
 	        $bidForm.find('input[name="bidCount"]').attr('min', bidCount).val(bidCount);
 	        $bidForm.submit(function () {
@@ -588,7 +631,6 @@
 	            });
 	            return false;
 	        });
-	        $playerCardContainer.append($bidForm);
 	    };
 	
 	    /**
@@ -603,18 +645,7 @@
 	        var $playerCardContainer = $('.player-self .game-card-container');
 	        $playerCardContainer.empty();
 	
-	        var $bidForm = template('bidding');
-	        $bidForm.attr('id', 'bidChangeForm');
-	
-	        // 현재 공약을 보여준다
-	        $bidForm.find('.player-bid-form-title').text("현재 : " + game.shapeAbbrTable[bidShape] + bidCount);
-	
-	        // 현재 공약만큼 공약 슬라이더 변경
-	        $bidForm.find('input[name="bidCount"]').attr('min', bidCount).val(bidCount);
-	
-	        // 문양 선택에서 pass->기존문양, 원래 기존문양 삭제
-	        $bidForm.find('option[value="' + bidShape + '"]').remove();
-	        $bidForm.find('option[value="pass"]').val(bidShape).text("그대로 (" + game.shapeStringTable[bidShape] + ")");
+	        var $bidForm = template($playerCardContainer, 'bidding', [[null, ['id', 'bidChangeForm']], ['.player-bid-form-title', ['text', "현재 : " + game.shapeAbbrTable[bidShape] + bidCount]], ['input[name="bidCount"]', [['min', bidCount], ['val', bidCount]]], ['option[value="' + bidShape + '"]', 'remove'], ['option[value="pass"]', [['val', bidShape], ['text', "그대로 (" + game.shapeStringTable[bidShape] + ")"]]]]);
 	
 	        // submit시 할 일
 	        $bidForm.submit(function () {
@@ -631,7 +662,6 @@
 	            });
 	            return false;
 	        });
-	        $playerCardContainer.append($bidForm);
 	    };
 	
 	    /**
@@ -639,6 +669,8 @@
 	     * @param msg
 	     */
 	    cmdTranslatorMap.binfo = function (msg) {
+	        $('.player-slot .game-card-container').empty();
+	
 	        var bidString = game.shapeStringTable[msg.shape] + ' ' + msg.num;
 	        Materialize.toast('공약 : ' + bidString, 1500);
 	        $('#title').text('openMighty - ' + bidString);
@@ -681,8 +713,7 @@
 	        });
 	
 	        var $playerCardContainer = $('.player-self .game-card-container');
-	        $playerCardContainer.empty();
-	        var $button = template('button');
+	        var $button = template($playerCardContainer, 'button');
 	        $button.find('button').text("버리기");
 	        $button.find('button').click(function (e) {
 	            // 고른 카드 선택
@@ -702,8 +733,6 @@
 	            conn.sendCmd('d3', { cards: selected });
 	            e.preventDefault();
 	        });
-	
-	        $playerCardContainer.append($button);
 	    };
 	};
 

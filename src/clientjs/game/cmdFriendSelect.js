@@ -27,8 +27,7 @@ module.exports = function (cmdTranslatorMap) {
         });
 
         const $playerCardContainer = $('.player-self .game-card-container');
-        $playerCardContainer.empty();
-        const $button = template('button');
+        const $button = template($playerCardContainer, 'button');
         $button.find('button').text("버리기");
         $button.find('button').click(function(e) {
             // 고른 카드 선택
@@ -48,7 +47,5 @@ module.exports = function (cmdTranslatorMap) {
             conn.sendCmd('d3', {cards: selected});
             e.preventDefault();
         });
-
-        $playerCardContainer.append($button);
     };
 };

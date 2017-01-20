@@ -81,9 +81,8 @@ module.exports = function (cmdTranslatorMap) {
         if (game.bidShape == 'none') bidCount++;
 
         const $playerCardContainer = $('.player-self .game-card-container');
-        $playerCardContainer.empty();
 
-        const $bidForm = template('bidding');
+        const $bidForm = template($playerCardContainer, 'bidding');
         $bidForm.attr('id', 'bidForm');
         $bidForm.find('input[name="bidCount"]')
             .attr('min', bidCount)
@@ -100,7 +99,6 @@ module.exports = function (cmdTranslatorMap) {
             });
             return false;
         });
-        $playerCardContainer.append($bidForm);
     };
 
 
@@ -116,23 +114,19 @@ module.exports = function (cmdTranslatorMap) {
         const $playerCardContainer = $('.player-self .game-card-container');
         $playerCardContainer.empty();
 
-        const $bidForm = template('bidding');
-        $bidForm.attr('id', 'bidChangeForm');
-
-        // 현재 공약을 보여준다
-        $bidForm.find('.player-bid-form-title')
-            .text("현재 : " + game.shapeAbbrTable[bidShape] + bidCount);
-
-        // 현재 공약만큼 공약 슬라이더 변경
-        $bidForm.find('input[name="bidCount"]')
-            .attr('min', bidCount)
-            .val(bidCount);
-
-        // 문양 선택에서 pass->기존문양, 원래 기존문양 삭제
-        $bidForm.find('option[value="' + bidShape + '"]').remove();
-        $bidForm.find('option[value="pass"]')
-            .val(bidShape)
-            .text("그대로 (" + game.shapeStringTable[bidShape] + ")");
+        const $bidForm = template($playerCardContainer, 'bidding', [
+            [null, ['id', 'bidChangeForm']],
+            ['.player-bid-form-title', ['text', "현재 : " + game.shapeAbbrTable[bidShape] + bidCount]],
+            ['input[name="bidCount"]', [
+                ['min', bidCount],
+                ['val', bidCount]
+            ]],
+            ['option[value="' + bidShape + '"]', 'remove'],
+            ['option[value="pass"]', [
+                ['val', bidShape],
+                ['text', "그대로 (" + game.shapeStringTable[bidShape] + ")"]
+            ]]
+        ]);
 
         // submit시 할 일
         $bidForm.submit(function() {
@@ -149,7 +143,6 @@ module.exports = function (cmdTranslatorMap) {
             });
             return false;
         });
-        $playerCardContainer.append($bidForm);
     };
 
     /**
@@ -157,6 +150,8 @@ module.exports = function (cmdTranslatorMap) {
      * @param msg
      */
     cmdTranslatorMap.binfo = function (msg) {
+        $('.player-slot .game-card-container').empty();
+
         const bidString = game.shapeStringTable[msg.shape] + ' ' + msg.num;
         Materialize.toast('공약 : ' + bidString, 1500);
         $('#title').text('openMighty - ' + bidString);

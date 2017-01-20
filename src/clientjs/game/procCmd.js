@@ -28,4 +28,5 @@ cmdTranslatorMap.gabort = function (obj) {
     Materialize.toast(msg, 3000);
     room.playing = false;
     room.viewRoom();
+    $('#title').text('openMighty');
 };
