@@ -16,9 +16,9 @@ module.exports = function (cmdTranslatorMap) {
      * 버려달라는 부탁을 받았을 때.
      * @param msg
      */
-    cmdTranslatorMap.d3rq = function () {
+    cmdTranslatorMap.fsrq = function () {
         "use strict";
-        Materialize.toast('카드 3장을 버려주세요', 1500);
+        Materialize.toast('카드 3장을 버리고 프렌드를 선정하세요', 1500);
 
 
         // 덱을 선택할 수 있도록 한다.
@@ -26,16 +26,29 @@ module.exports = function (cmdTranslatorMap) {
             $(this).toggleClass('deck-card-selected');
         });
 
+        const bidCount = game.bidCount;
+        const bidShape = game.bidShape;
+
         const $playerCardContainer = $('.player-self .game-card-container');
-        const $button = template($playerCardContainer, 'button');
-        $button.find('button').text("버리기");
-        $button.find('button').click(function(e) {
+        const $friendSelector = template($playerCardContainer, 'fselect', [
+            [null, ['id', 'friendSelectForm']],
+            ['option[value=' + bidShape + ']', 'remove'],
+            ['input[name="bidCount"]', [
+                ['min', bidCount],
+                ['val', bidCount]
+            ]],
+            ['option[value="pass"]', ['val', bidShape]],
+        ]);
+
+        $friendSelector.submit(function() {
+            const msg = {};
+            const $fSelectForm = $('#friendSelectForm');
+
             // 고른 카드 선택
             const cards = $('.deck .deck-card').toArray();
             const selected = [];
             for(let i = 0 ; i < cards.length ; i++) {
-                const $card = $(cards[i]);
-                if($card.hasClass('deck-card-selected')) {
+                if($(cards[i]).hasClass('deck-card-selected')) {
                     selected.push(i);
                 }
             }
@@ -43,9 +56,39 @@ module.exports = function (cmdTranslatorMap) {
                 Materialize.toast('3장을 골라주세요.', 1500);
                 return false;
             }
+            msg.discards = selected;
 
-            conn.sendCmd('d3', {cards: selected});
-            e.preventDefault();
+            // 새로운 공약
+            const bidShape = $fSelectForm.find('*[name="bidShape"]').val();
+            const bidCount = $fSelectForm.find('*[name="bidCount"]').val();
+            if (!(bidShape == game.bidShape && bidCount == game.bidCount)) {
+                msg.bidch2 = {
+                    bidShape: bidShape,
+                    bidCount: bidCount
+                };
+            }
+
+            // 프렌드 선택
+            const friendType = $fSelectForm.find('select[name=friendType]').val();
+            const cardMap = {
+                'mighty': { shape: bidShape == 'spade' ? 'diamond' : 'spade', num: 14 },
+                'joker': { shape: 'joker', num: 0 },
+                'girudaA': { shape: bidShape, num: 14 },
+                'girudaK': { shape: bidShape, num: 13 }
+            };
+            if(cardMap[friendType]) {
+                const friendCard = cardMap[friendType];
+                msg.ftype = 'card';
+                msg.shape = friendCard.shape;
+                msg.num = friendCard.num;
+            }
+            else {
+                Materialize.toast('프렌드를 선정해주세요.', 1500);
+                return false;
+            }
+
+            conn.sendCmd('fs', msg);
+            return false;
         });
     };
 };

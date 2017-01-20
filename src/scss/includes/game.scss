@@ -69,8 +69,8 @@
           text-transform: capitalize;
         }
 
-        .player-bid-form {
-          .player-bid-form-title {
+        .player-form {
+          .player-form-title {
             display: block;
             font-weight: bold;
             height: 2rem;
@@ -139,10 +139,6 @@ $shapes: ("s", "c", "d", "h");
   background-repeat: no-repeat;
 
   transition: transform 0.5s;
-}
-
-.deck-card:hover {
-  transform: translate(0, -15%);
 }
 
 .deck-card-selected {

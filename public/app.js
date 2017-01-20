@@ -353,6 +353,8 @@
 	
 	var Materialize = window.Materialize;
 	
+	var jqueryMethods = ['text', 'val', 'submit', 'click', 'remove', 'empty'];
+	
 	module.exports = function ($parent, name, attrs) {
 	    var $template = $('#template-' + name).clone().removeAttr('id');
 	    if ($parent) {
@@ -363,37 +365,30 @@
 	    if (!attrs) return $template;
 	
 	    // Set attributes
-	
-	    var _loop = function _loop(i) {
+	    var $elm = void 0;
+	    for (var i = 0; i < attrs.length; i++) {
 	        var _attrs$i = _slicedToArray(attrs[i], 2),
 	            selector = _attrs$i[0],
 	            attributes = _attrs$i[1];
 	
-	        var $elm = selector ? $template.find(selector) : $template;
+	        $elm = selector ? $template.find(selector) : $template;
 	        if ($elm.length != 1) {
 	            Materialize.toast('Invalid selector : ' + selector, 4000);
-	            return 'continue';
+	            console.log('Invalid selector', attrs[i]);
+	            continue;
 	        }
 	
 	        if (Array.isArray(attributes[0])) {
-	            attributes.forEach(function (attr) {
-	                return applyAttribute($elm, attr);
-	            });
-	        } else applyAttribute($elm, attributes);
-	    };
-	
-	    for (var i = 0; i < attrs.length; i++) {
-	        var _ret = _loop(i);
-	
-	        if (_ret === 'continue') continue;
+	            attributes.forEach(applyAttribute);
+	        } else applyAttribute(attributes);
 	    }
 	
-	    function applyAttribute($elm, attribute) {
+	    function applyAttribute(attribute) {
 	        var _attribute = _slicedToArray(attribute, 2),
 	            attr = _attribute[0],
 	            value = _attribute[1];
 	
-	        if (attr == 'text') $elm.text(value);else if (attr == 'val') $elm.val(value);else $elm.attr(attr, value);
+	        if (jqueryMethods.indexOf(attr) != -1) $elm[attr](value);else $elm.attr(attr, value);
 	    }
 	
 	    return $template;
@@ -643,14 +638,7 @@
 	        var bidCount = game.bidCount;
 	
 	        var $playerCardContainer = $('.player-self .game-card-container');
-	        $playerCardContainer.empty();
-	
-	        var $bidForm = template($playerCardContainer, 'bidding', [[null, ['id', 'bidChangeForm']], ['.player-bid-form-title', ['text', "현재 : " + game.shapeAbbrTable[bidShape] + bidCount]], ['input[name="bidCount"]', [['min', bidCount], ['val', bidCount]]], ['option[value="' + bidShape + '"]', 'remove'], ['option[value="pass"]', [['val', bidShape], ['text', "그대로 (" + game.shapeStringTable[bidShape] + ")"]]]]);
-	
-	        // submit시 할 일
-	        $bidForm.submit(function () {
-	            "use strict";
-	
+	        template($playerCardContainer, 'bidding', [[null, ['id', 'bidChangeForm']], ['.player-form-title', ['text', "현재 : " + game.shapeAbbrTable[bidShape] + bidCount]], ['input[name="bidCount"]', [['min', bidCount], ['val', bidCount]]], ['option[value="' + bidShape + '"]', ['remove']], ['option[value="pass"]', [['val', bidShape], ['text', "그대로 (" + game.shapeStringTable[bidShape] + ")"]]], [null, ['submit', function () {
 	            var $bidChangeForm = $('#bidChangeForm');
 	            var bidShape = $bidChangeForm.find('*[name="bidShape"]').val();
 	            var bidCount = $bidChangeForm.find('*[name="bidCount"]').val();
@@ -661,7 +649,7 @@
 	                num: parseInt(bidCount)
 	            });
 	            return false;
-	        });
+	        }]]]);
 	    };
 	
 	    /**
@@ -674,8 +662,8 @@
 	        var bidString = game.shapeStringTable[msg.shape] + ' ' + msg.num;
 	        Materialize.toast('공약 : ' + bidString, 1500);
 	        $('#title').text('openMighty - ' + bidString);
-	        game.bidShape = msg.bidShape;
-	        game.bidCount = msg.bidCount;
+	        game.bidShape = msg.shape;
+	        game.bidCount = msg.num;
 	        game.president = msg.president;
 	    };
 	};
@@ -702,26 +690,31 @@
 	     * 버려달라는 부탁을 받았을 때.
 	     * @param msg
 	     */
-	    cmdTranslatorMap.d3rq = function () {
+	    cmdTranslatorMap.fsrq = function () {
 	        "use strict";
 	
-	        Materialize.toast('카드 3장을 버려주세요', 1500);
+	        Materialize.toast('카드 3장을 버리고 프렌드를 선정하세요', 1500);
 	
 	        // 덱을 선택할 수 있도록 한다.
 	        $('.deck-card').click(function () {
 	            $(this).toggleClass('deck-card-selected');
 	        });
 	
+	        var bidCount = game.bidCount;
+	        var bidShape = game.bidShape;
+	
 	        var $playerCardContainer = $('.player-self .game-card-container');
-	        var $button = template($playerCardContainer, 'button');
-	        $button.find('button').text("버리기");
-	        $button.find('button').click(function (e) {
+	        var $friendSelector = template($playerCardContainer, 'fselect', [[null, ['id', 'friendSelectForm']], ['option[value=' + bidShape + ']', 'remove'], ['input[name="bidCount"]', [['min', bidCount], ['val', bidCount]]], ['option[value="pass"]', ['val', bidShape]]]);
+	
+	        $friendSelector.submit(function () {
+	            var msg = {};
+	            var $fSelectForm = $('#friendSelectForm');
+	
 	            // 고른 카드 선택
 	            var cards = $('.deck .deck-card').toArray();
 	            var selected = [];
 	            for (var i = 0; i < cards.length; i++) {
-	                var $card = $(cards[i]);
-	                if ($card.hasClass('deck-card-selected')) {
+	                if ($(cards[i]).hasClass('deck-card-selected')) {
 	                    selected.push(i);
 	                }
 	            }
@@ -729,9 +722,38 @@
 	                Materialize.toast('3장을 골라주세요.', 1500);
 	                return false;
 	            }
+	            msg.discards = selected;
 	
-	            conn.sendCmd('d3', { cards: selected });
-	            e.preventDefault();
+	            // 새로운 공약
+	            var bidShape = $fSelectForm.find('*[name="bidShape"]').val();
+	            var bidCount = $fSelectForm.find('*[name="bidCount"]').val();
+	            if (!(bidShape == game.bidShape && bidCount == game.bidCount)) {
+	                msg.bidch2 = {
+	                    bidShape: bidShape,
+	                    bidCount: bidCount
+	                };
+	            }
+	
+	            // 프렌드 선택
+	            var friendType = $fSelectForm.find('select[name=friendType]').val();
+	            var cardMap = {
+	                'mighty': { shape: bidShape == 'spade' ? 'diamond' : 'spade', num: 14 },
+	                'joker': { shape: 'joker', num: 0 },
+	                'girudaA': { shape: bidShape, num: 14 },
+	                'girudaK': { shape: bidShape, num: 13 }
+	            };
+	            if (cardMap[friendType]) {
+	                var friendCard = cardMap[friendType];
+	                msg.ftype = 'card';
+	                msg.shape = friendCard.shape;
+	                msg.num = friendCard.num;
+	            } else {
+	                Materialize.toast('프렌드를 선정해주세요.', 1500);
+	                return false;
+	            }
+	
+	            conn.sendCmd('fs', msg);
+	            return false;
 	        });
 	    };
 	};

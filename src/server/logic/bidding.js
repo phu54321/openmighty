@@ -159,7 +159,7 @@ module.exports = function (MightyRoom) {
             this.bidCount = bidCount;
         }
         cmdout.emitGameBidding(this);
-        this.startCardDiscard(this.remainingDeck);
+        this.startFriendSelect(this.remainingDeck);
         return null;
     };
 };

@@ -1,3 +1,5 @@
+"use strict";
+
 const express = require('express');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
@@ -58,7 +60,6 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-
 
 // error handler
 app.use(function(err, req, res, next) {

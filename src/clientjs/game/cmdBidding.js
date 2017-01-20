@@ -112,37 +112,35 @@ module.exports = function (cmdTranslatorMap) {
         const bidCount = game.bidCount;
 
         const $playerCardContainer = $('.player-self .game-card-container');
-        $playerCardContainer.empty();
-
-        const $bidForm = template($playerCardContainer, 'bidding', [
+        template($playerCardContainer, 'bidding', [
             [null, ['id', 'bidChangeForm']],
-            ['.player-bid-form-title', ['text', "현재 : " + game.shapeAbbrTable[bidShape] + bidCount]],
+
+            ['.player-form-title', ['text', "현재 : " + game.shapeAbbrTable[bidShape] + bidCount]],
+
             ['input[name="bidCount"]', [
                 ['min', bidCount],
                 ['val', bidCount]
             ]],
-            ['option[value="' + bidShape + '"]', 'remove'],
+
+            ['option[value="' + bidShape + '"]', ['remove']],
+
             ['option[value="pass"]', [
                 ['val', bidShape],
                 ['text', "그대로 (" + game.shapeStringTable[bidShape] + ")"]
-            ]]
+            ]],
+            [null, ['submit', function() {
+                const $bidChangeForm = $('#bidChangeForm');
+                let bidShape = $bidChangeForm.find('*[name="bidShape"]').val();
+                const bidCount = $bidChangeForm.find('*[name="bidCount"]').val();
+                if (bidShape == game.bidShape && bidCount == game.bidCount) bidShape = 'pass';
+
+                conn.sendCmd('bc1', {
+                    shape: bidShape,
+                    num: parseInt(bidCount)
+                });
+                return false;
+            }]]
         ]);
-
-        // submit시 할 일
-        $bidForm.submit(function() {
-            "use strict";
-
-            const $bidChangeForm = $('#bidChangeForm');
-            let bidShape = $bidChangeForm.find('*[name="bidShape"]').val();
-            const bidCount = $bidChangeForm.find('*[name="bidCount"]').val();
-            if (bidShape == game.bidShape && bidCount == game.bidCount) bidShape = 'pass';
-
-            conn.sendCmd('bc1', {
-                shape: bidShape,
-                num: parseInt(bidCount)
-            });
-            return false;
-        });
     };
 
     /**
@@ -155,8 +153,8 @@ module.exports = function (cmdTranslatorMap) {
         const bidString = game.shapeStringTable[msg.shape] + ' ' + msg.num;
         Materialize.toast('공약 : ' + bidString, 1500);
         $('#title').text('openMighty - ' + bidString);
-        game.bidShape = msg.bidShape;
-        game.bidCount = msg.bidCount;
+        game.bidShape = msg.shape;
+        game.bidCount = msg.num;
         game.president = msg.president;
     };
 };
