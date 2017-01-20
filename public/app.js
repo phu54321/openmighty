@@ -218,7 +218,6 @@
 	
 	$('#gameDiv').ready(function () {
 	    socket = io();
-	    alert('Game connected');
 	
 	    socket.on('err', function (msg) {
 	        Materialize.toast(msg, 4000);
@@ -267,33 +266,45 @@
 	var cmdTranslatorMap = {};
 	var Materialize = window.Materialize;
 	
+	var game = __webpack_require__(5);
+	var room = __webpack_require__(7);
+	
 	exports.translateCmdMessage = function (msg) {
 	    if (cmdTranslatorMap[msg.type]) cmdTranslatorMap[msg.type](msg);else Materialize.toast('Unknown command message type : ' + msg.type, 5000);
 	};
 	
-	var gameMod = __webpack_require__(5);
-	var game = gameMod.game;
-	var room = gameMod.room;
-	
-	function getSelfSlot() {
-	    "use strict";
-	
-	    return $('.player-slot.player-self');
-	}
-	
 	///////////////////////////////////
 	
 	// Room users
-	__webpack_require__(6)(cmdTranslatorMap);
+	__webpack_require__(8)(cmdTranslatorMap);
+	__webpack_require__(9)(cmdTranslatorMap);
 	
-	///////////////////////////////////
+	cmdTranslatorMap.gabort = function (obj) {
+	    var msg = obj.msg || '게임이 중간에 종료되었습니다.';
+	    Materialize.toast(msg, 4000);
+	    room.playing = false;
+	    room.viewRoom();
+	};
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by whyask37 on 2017. 1. 20..
+	 */
 	
-	// Game init
+	"use strict";
 	
+	var game = {};
+	var template = __webpack_require__(6);
 	
-	function viewDeck() {
+	exports = module.exports = game;
+	exports.game = game;
+	
+	exports.viewDeck = function () {
 	    var $playerDeck = $('.deck');
-	    $playerDeck.find('.deck-card-container').remove();
+	    $playerDeck.empty();
 	
 	    for (var i = 0; i < game.deck.length; i++) {
 	        var card = game.deck[i];
@@ -302,143 +313,49 @@
 	            num = _ref[1];
 	
 	
-	        var $deckCardContainer = $('<div/>').addClass('deck-card-container');
-	        var $deckCard = $('<div/>').addClass('deck-card game-card-container');
-	        var $gameCard = $('<div/>').addClass('game-card game-card-' + shape[0] + num);
-	        $deckCard.append($gameCard);
-	        $deckCardContainer.append($deckCard);
+	        var $deckCardContainer = template('deck-card');
+	        $deckCardContainer.find('.game-card').addClass('game-card-' + shape[0] + num);
 	        $playerDeck.append($deckCardContainer);
 	    }
-	}
-	
-	cmdTranslatorMap.gusers = function (msg) {
-	    "use strict";
-	
-	    game.gameUsers = msg.users;
-	    game.president = -1;
-	    game.remainingBidder = 5;
-	    room.playing = true;
-	    game.lastBidder = null;
-	    gameMod.viewRoom();
 	};
 	
-	cmdTranslatorMap.deck = function (msg) {
-	    "use strict";
+	// Various utilities
 	
-	    game.deck = msg.deck;
-	    viewDeck();
+	exports.shapeAbbrTable = {
+	    'spade': '♠',
+	    'heart': '♥',
+	    'diamond': '♦',
+	    'clover': '♣',
+	    'none': 'N'
 	};
 	
-	cmdTranslatorMap.pbinfo = function (msg) {
-	    "use strict";
-	
-	    var $playerSlot = $($('.player-slot')[msg.bidder]);
-	    var $playerCardContainer = $playerSlot.find('.game-card-container');
-	
-	    if (msg.bidShape != 'pass') {
-	        game.bidShape = msg.bidShape;
-	        game.bidCount = msg.bidCount;
-	        game.lastBidder = msg.bidder;
-	    }
-	
-	    $playerCardContainer.find('.game-card').remove();
-	    var $biddingInfo = $('<div/>').addClass('game-card player-card-bidding');
-	    if (msg.bidShape == 'pass') {
-	        $biddingInfo.text("pass");
-	        game.remainingBidder--;
-	    } else {
-	        $biddingInfo.text(msg.bidShape + ' ' + msg.bidCount);
-	    }
-	    $playerCardContainer.append($biddingInfo);
-	    checkBidComplete();
+	exports.shapeStringTable = {
+	    'spade': '스페이드',
+	    'heart': '하트',
+	    'diamond': '다이아몬드',
+	    'clover': '클로버',
+	    'none': '노기루다'
 	};
-	
-	function checkBidComplete() {
-	    "use strict";
-	
-	    if (game.remainingBidder == 1 && game.lastBidder !== null) {
-	        Materialize.toast("공약이 끝났습니다. 기다려주세요", 4000);
-	    }
-	}
-	
-	cmdTranslatorMap.bidrq = function () {
-	    "use strict";
-	
-	    var $selfPlayerSlot = getSelfSlot();
-	    var $playerCardContainer = $selfPlayerSlot.find('.game-card-container');
-	
-	    var bidCount = game.bidCount || 13;
-	    if (game.bidShape == 'none') bidCount++;
-	
-	    $playerCardContainer.html('\n<form id=\'bidForm\' action="javascript:sendBid();" class="game-card player-bid-form">\n    <div class="player-bid-form-title">\uACF5\uC57D</div>\n    <select name="bidShape" class="browser-default">\n        <option value="pass" selected="">\uD328\uC2A4</option>\n        <option value="spade">\uC0BD (\uC2A4\uD398\uC774\uB4DC)</option>\n        <option value="heart">\uD2B8 (\uD558\uD2B8)</option>\n        <option value="diamond">\uB2E4\uB9AC (\uB2E4\uC774\uC544\uBAAC\uB4DC)</option>\n        <option value="clover">\uB04C (\uD074\uB85C\uBC84)</option>\n        <option value="none">\uB178 (\uB178\uAE30\uB8E8\uB2E4)</option>\n    </select>\n    <span class="range-field">\n        <input type="range" name="bidCount" min="' + bidCount + '" max="20" value="' + bidCount + '">\n    </span>\n    <button type="submit" class="btn waves-effect waves-light">\uACF5\uC57D</button>\n</form>\n');
-	};
-	
-	function sendBid() {
-	    "use strict";
-	
-	    var $bidForm = $('#bidForm');
-	    var bidShape = $bidForm.find('*[name="bidShape"]').val();
-	    var bidCount = $bidForm.find('*[name="bidCount"]').val();
-	    sendCmd('bid', {
-	        shape: bidShape,
-	        num: parseInt(bidCount)
-	    });
-	    return false;
-	}
-	
-	cmdTranslatorMap.bc1rq = function () {
-	    "use strict";
-	
-	    Materialize.toast('공약을 수정해주세요.');
-	
-	    var $selfPlayerSlot = getSelfSlot();
-	    var $playerCardContainer = $selfPlayerSlot.find('.game-card-container');
-	
-	    var bidShape = game.bidShape;
-	    var bidCount = game.bidCount;
-	
-	    var abbrTable = {
-	        'spade': '♠',
-	        'heart': '♥',
-	        'diamond': '♦',
-	        'clover': '♣',
-	        'none': 'N'
-	    };
-	
-	    $playerCardContainer.html('\n<form id=\'bidChangeForm\' action="javascript:sendBidChange1();" class="game-card player-bid-form">\n    <div class="player-bid-form-title">\uD604\uC7AC : ' + abbrTable[bidShape] + bidCount + '</div>\n    <select name="bidShape" class="browser-default">\n        <option value="none" selected>\uADF8\uB300\uB85C</option>    \n        <option value="spade">\uC0BD (\uC2A4\uD398\uC774\uB4DC)</option>\n        <option value="heart">\uD2B8 (\uD558\uD2B8)</option>\n        <option value="diamond">\uB2E4\uB9AC (\uB2E4\uC774\uC544\uBAAC\uB4DC)</option>\n        <option value="clover">\uB04C (\uD074\uB85C\uBC84)</option>\n        <option value="none">\uB178 (\uB178\uAE30\uB8E8\uB2E4)</option>\n    </select>\n    <span class="range-field">\n        <input type="range" name="bidCount" min="' + bidCount + '" max="20" value="' + bidCount + '">\n    </span>\n    <button type="submit" class="btn waves-effect waves-light">\uACF5\uC57D \uC218\uC815</button>\n</form>');
-	
-	    var shapeTable = {
-	        'spade': '스페이드',
-	        'heart': '하트',
-	        'diamond': '다이아몬드',
-	        'clover': '클로버',
-	        'none': '노기루다'
-	    };
-	
-	    $playerCardContainer.find('option[value="' + bidShape + '"]').remove();
-	    $playerCardContainer.find('option[value="none"]').val("bidShape").text("그대로 (" + shapeTable[bidShape] + ")");
-	};
-	
-	function sendBidChange1() {
-	    "use strict";
-	
-	    var $bidChangeForm = $('#bidChangeForm');
-	    var bidShape = $bidChangeForm.find('*[name="bidShape"]').val();
-	    var bidCount = $bidChangeForm.find('*[name="bidCount"]').val();
-	    if (bidShape == game.bidShape && bidCount == game.bidCount) bidShape = 'pass';
-	
-	    sendCmd('bc1', {
-	        shape: bidShape,
-	        num: parseInt(bidCount)
-	    });
-	    return false;
-	}
-	
-	////
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * Created by whyask37 on 2017. 1. 20..
+	 */
+	
+	module.exports = function (name) {
+	  "use strict";
+	
+	  return $('#template-' + name).clone().removeAttr('id');
+	};
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Created by whyask37 on 2017. 1. 20..
@@ -446,17 +363,17 @@
 	
 	"use strict";
 	
+	var game = __webpack_require__(5);
 	var room = {
 	    playing: false,
 	    myidf: null,
 	    owner: 0,
 	    users: []
 	};
+	var conn = __webpack_require__(3);
+	var template = __webpack_require__(6);
 	
-	var game = {};
-	
-	exports.room = room;
-	exports.game = game;
+	exports = module.exports = room;
 	
 	exports.viewRoom = function () {
 	    var users = void 0,
@@ -475,24 +392,48 @@
 	    var $playerSlots = $('.player-slot');
 	    $playerSlots.removeClass('player-owner player-president player-self');
 	
+	    var self = null;
+	
 	    for (var i = 0; i < users.length; i++) {
 	        var $playerSlot = $($playerSlots[i]);
 	        var user = users[i];
 	        $playerSlot.find('.player-name').text(user.username);
+	        $playerSlot.find('.game-card-container').empty();
 	
 	        if (owner === i) $playerSlot.addClass('player-owner');
 	        if (president === i) $playerSlot.addClass('player-president');
-	        if (user.useridf == room.myidf) $playerSlot.addClass('player-self');
+	        if (user.useridf == room.myidf) {
+	            $playerSlot.addClass('player-self');
+	            self = i;
+	        }
 	    }
 	
 	    for (var _i = users.length; _i < 5; _i++) {
 	        var _$playerSlot = $($playerSlots[_i]);
 	        _$playerSlot.find('.player-name').text("Empty");
+	        _$playerSlot.find('.game-card-container').empty();
+	    }
+	
+	    if (!room.playing) {
+	        if (owner === self) {
+	            addStartButton();
+	        }
+	    } else {
+	        game.selfIndex = self;
 	    }
 	};
+	
+	function addStartButton() {
+	    var $gameCardContainer = $('.player-self').find('.game-card-container');
+	    $gameCardContainer.empty();
+	    $gameCardContainer.append(template('start'));
+	    $gameCardContainer.find('button').click(function () {
+	        conn.sendCmd('start');
+	    });
+	}
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -501,7 +442,8 @@
 	
 	"use strict";
 	
-	var game = __webpack_require__(5);
+	var room = __webpack_require__(7);
+	
 	var Materialize = window.Materialize;
 	
 	module.exports = function (cmdTranslatorMap) {
@@ -509,17 +451,17 @@
 	        "use strict";
 	
 	        Materialize.toast(msg.username + '님이 입장하셨습니다.', 4000);
-	        game.room.users.push({
+	        room.users.push({
 	            username: msg.username,
 	            useridf: msg.useridf
 	        });
-	        game.viewRoom();
+	        room.viewRoom();
 	    };
 	
 	    cmdTranslatorMap.rleft = function (msg) {
 	        "use strict";
 	
-	        var users = game.room.users;
+	        var users = room.users;
 	        for (var i = 0; i < users.length; i++) {
 	            var user = users[i];
 	            if (user.useridf == msg.useridf) {
@@ -528,18 +470,177 @@
 	                break;
 	            }
 	        }
-	        game.room.owner = msg.owner;
-	        if (!game.room.playing) game.viewRoom();
+	        room.owner = msg.owner;
+	        if (!room.playing) room.viewRoom();
 	    };
 	
 	    cmdTranslatorMap.rusers = function (msg) {
 	        "use strict";
 	
-	        var room = game.room;
 	        room.owner = msg.owner;
 	        room.users = msg.users;
 	        room.myidf = msg.youridf;
-	        game.viewRoom();
+	        room.viewRoom();
+	    };
+	};
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by whyask37 on 2017. 1. 20..
+	 */
+	
+	"use strict";
+	
+	var Materialize = window.Materialize;
+	
+	var template = __webpack_require__(6);
+	var game = __webpack_require__(5);
+	var room = __webpack_require__(7);
+	var conn = __webpack_require__(3);
+	
+	module.exports = function (cmdTranslatorMap) {
+	    /**
+	     * 게임 유저에 대한 프로세서
+	     * @param msg
+	     */
+	    cmdTranslatorMap.gusers = function (msg) {
+	        game.gameUsers = msg.users;
+	
+	        game.president = -1;
+	        game.remainingBidder = 5;
+	        game.lastBidder = null;
+	
+	        room.playing = true;
+	        room.viewRoom();
+	    };
+	
+	    /**
+	     * 덱이 왔을 때 처리
+	     * @param msg
+	     */
+	    cmdTranslatorMap.deck = function (msg) {
+	        game.deck = msg.deck;
+	        game.viewDeck();
+	    };
+	
+	    /**
+	     * 플레이어가 비딩했다는 정보가 들어왔을 때 (본인 포함)
+	     * @param msg
+	     */
+	    cmdTranslatorMap.pbinfo = function (msg) {
+	        var $bidderCardContainer = $($('.player-slot .game-card-container')[msg.bidder]);
+	
+	        // 패스가 아니라면 마지막 공약 업데이트
+	        if (msg.bidShape != 'pass') {
+	            game.bidShape = msg.bidShape;
+	            game.bidCount = msg.bidCount;
+	            game.lastBidder = msg.bidder;
+	        }
+	
+	        // 공약 표시
+	        $bidderCardContainer.find('.game-card').remove();
+	        var $biddingInfo = $('<div/>').addClass('game-card player-card-bidding');
+	        if (msg.bidShape == 'pass') {
+	            $biddingInfo.text("pass");
+	            game.remainingBidder--;
+	        } else {
+	            $biddingInfo.text(msg.bidShape + ' ' + msg.bidCount);
+	        }
+	        $bidderCardContainer.append($biddingInfo);
+	
+	        // 공약 완료 체크
+	        if (game.remainingBidder == 1 && game.lastBidder !== null) {
+	            if (game.lastBidder != game.selfIndex) {
+	                Materialize.toast("공약이 끝났습니다. 기다려주세요", 4000);
+	            }
+	            game.president = game.lastBidder;
+	        }
+	    };
+	
+	    /**
+	     * 공약 요청이 들어왔을 때
+	     */
+	    cmdTranslatorMap.bidrq = function () {
+	        // 최소 공약
+	        var bidCount = game.bidCount || 13;
+	        if (game.bidShape == 'none') bidCount++;
+	
+	        var $playerCardContainer = $('.player-self .game-card-container');
+	        $playerCardContainer.empty();
+	
+	        var $bidForm = template('bidding');
+	        $bidForm.attr('id', 'bidForm');
+	        $bidForm.find('input[name="bidCount"]').attr('min', bidCount).val(bidCount);
+	        $bidForm.submit(function () {
+	            "use strict";
+	
+	            var $bidForm = $('#bidForm');
+	            var bidShape = $bidForm.find('*[name="bidShape"]').val();
+	            var bidCount = $bidForm.find('*[name="bidCount"]').val();
+	            conn.sendCmd('bid', {
+	                shape: bidShape,
+	                num: parseInt(bidCount)
+	            });
+	            return false;
+	        });
+	        $playerCardContainer.append($bidForm);
+	    };
+	
+	    /**
+	     * 1차 공약 수정 요청이 들어왔을 때
+	     */
+	    cmdTranslatorMap.bc1rq = function () {
+	        Materialize.toast('공약을 수정해주세요.', 4000);
+	
+	        var bidShape = game.bidShape;
+	        var bidCount = game.bidCount;
+	
+	        var $playerCardContainer = $('.player-self .game-card-container');
+	        $playerCardContainer.empty();
+	
+	        var $bidForm = template('bidding');
+	        $bidForm.attr('id', 'bidChangeForm');
+	
+	        // 현재 공약을 보여준다
+	        $bidForm.find('.player-bid-form-title').text("현재 : " + game.shapeAbbrTable[bidShape] + bidCount);
+	
+	        // 현재 공약만큼 공약 슬라이더 변경
+	        $bidForm.find('input[name="bidCount"]').attr('min', bidCount).val(bidCount);
+	
+	        // 문양 선택에서 pass->기존문양, 원래 기존문양 삭제
+	        $bidForm.find('option[value="' + bidShape + '"]').remove();
+	        $bidForm.find('option[value="pass"]').val(bidShape).text("그대로 (" + game.shapeStringTable[bidShape] + ")");
+	
+	        // submit시 할 일
+	        $bidForm.submit(function () {
+	            "use strict";
+	
+	            var $bidChangeForm = $('#bidChangeForm');
+	            var bidShape = $bidChangeForm.find('*[name="bidShape"]').val();
+	            var bidCount = $bidChangeForm.find('*[name="bidCount"]').val();
+	            if (bidShape == game.bidShape && bidCount == game.bidCount) bidShape = 'pass';
+	
+	            conn.sendCmd('bc1', {
+	                shape: bidShape,
+	                num: parseInt(bidCount)
+	            });
+	            return false;
+	        });
+	        $playerCardContainer.append($bidForm);
+	    };
+	
+	    /**
+	     * 1차 공약수정 후 공약을 알린다.
+	     * @param msg
+	     */
+	    cmdTranslatorMap.binfo = function (msg) {
+	        Materialize.toast('공약 : ' + game.shapeStringTable[msg.shape] + ' ' + msg.num, 4000);
+	        game.bidShape = msg.bidShape;
+	        game.bidCount = msg.bidCount;
+	        game.president = msg.president;
 	    };
 	};
 

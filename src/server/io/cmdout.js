@@ -92,6 +92,13 @@ exports.emitGameBidRequest = function (room, userIdx) {
     });
 };
 
+exports.emitGameBidChange1Request = function (room) {
+    const president = room.president;
+    room.gameUsers[president].emit('cmd', {
+        type: 'bc1rq'
+    });
+};
+
 exports.emitGameBidding = function (room) {
     room.emit('cmd', {
         type: 'binfo',
@@ -101,13 +108,12 @@ exports.emitGameBidding = function (room) {
     });
 };
 
-exports.emitGameBidChange1Request = function (room) {
+exports.emitGameDiscardRequest = function (room) {
     const president = room.president;
     room.gameUsers[president].emit('cmd', {
-        type: 'bc1rq'
+        type: 'd3rq'
     });
 };
-
 
 exports.emitGameDiscardComplete = function (room) {
     room.emit('cmd', {
@@ -168,8 +174,8 @@ exports.emitGameEnd = function (room, oppObtainedCardCount) {
 
 ////
 
-exports.emitGameAbort = function (room) {
-    room.emit('cmd', {
-        type: 'gabort',
-    });
+exports.emitGameAbort = function (room, msg) {
+    const obj = {type: 'gabort'};
+    if(msg) obj.msg = msg;
+    room.emit('cmd', obj);
 };

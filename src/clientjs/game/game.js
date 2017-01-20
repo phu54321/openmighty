@@ -4,46 +4,43 @@
 
 "use strict";
 
-const room = {
-    playing: false,
-    myidf: null,
-    owner: 0,
-    users: []
-};
 
 const game = {};
+const template = require('./template');
 
-exports.room = room;
+exports = module.exports = game;
 exports.game = game;
 
-exports.viewRoom = function () {
-    let users, owner, president;
-    if(!room.playing) {
-        owner = room.owner;
-        users = room.users;
-        president = -1;
-    }
-    else {
-        owner = -1;
-        users = game.gameUsers;
-        president = game.president;
-    }
 
-    const $playerSlots = $('.player-slot');
-    $playerSlots.removeClass('player-owner player-president player-self');
+exports.viewDeck = function () {
+    const $playerDeck = $('.deck');
+    $playerDeck.empty();
 
-    for(let i = 0 ; i < users.length ; i++) {
-        const $playerSlot = $($playerSlots[i]);
-        const user = users[i];
-        $playerSlot.find('.player-name').text(user.username);
+    for (let i = 0; i < game.deck.length; i++) {
+        const card = game.deck[i];
+        const [shape, num] = [card.shape, card.num];
 
-        if(owner === i) $playerSlot.addClass('player-owner');
-        if(president === i) $playerSlot.addClass('player-president');
-        if(user.useridf == room.myidf) $playerSlot.addClass('player-self');
+        const $deckCardContainer = template('deck-card');
+        $deckCardContainer.find('.game-card').addClass('game-card-' + shape[0] + num);
+        $playerDeck.append($deckCardContainer);
     }
+};
 
-    for(let i = users.length ; i < 5 ; i++) {
-        const $playerSlot = $($playerSlots[i]);
-        $playerSlot.find('.player-name').text("Empty");
-    }
+
+// Various utilities
+
+exports.shapeAbbrTable = {
+    'spade': '♠',
+    'heart': '♥',
+    'diamond': '♦',
+    'clover': '♣',
+    'none': 'N',
+};
+
+exports.shapeStringTable = {
+    'spade': '스페이드',
+    'heart': '하트',
+    'diamond': '다이아몬드',
+    'clover': '클로버',
+    'none': '노기루다',
 };

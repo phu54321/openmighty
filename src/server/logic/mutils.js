@@ -6,8 +6,8 @@
 
 const _ = require('underscore');
 
-const cardShapes = exports.cardShapes = ['spade', 'heart', 'diamond', 'clover', 'joker'];
-const bidShapes = exports.bidShapes = ['spade', 'heart', 'diamond', 'clover', 'none'];
+const cardShapes = exports.cardShapes = ['spade', 'heart', 'clover', 'diamond', 'joker'];
+const bidShapes = exports.bidShapes = ['spade', 'heart', 'clover', 'diamond', 'none'];
 
 
 function Card(shape, num) {

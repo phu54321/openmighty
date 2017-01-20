@@ -59,7 +59,7 @@ AISocket.prototype.emit = function (type, msg) {
  */
 AISocket.prototype.onCommand = function (msg) {
     process.nextTick(() => {
-        const badCommand = ['bc1rq', 'fsrq'];
+        const badCommand = ['d3rq', 'bc1rq', 'fsrq'];
         const mthName = 'proc_' + msg.type;
         if (this[mthName]) return this[mthName](msg);
         else if(badCommand.indexOf(msg.type) != -1) {

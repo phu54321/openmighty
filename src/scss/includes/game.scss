@@ -58,6 +58,12 @@
         box-sizing: border-box;
         padding: 3%;
 
+        button {
+          height: 2rem;
+          line-height: 2rem;
+          width: 100%;
+        }
+
         .player-card-bidding:first-letter {
           text-transform: capitalize;
         }
@@ -72,11 +78,6 @@
             height: inherit;
           }
 
-          button {
-            height: 2rem;
-            line-height: 2rem;
-            width: 100%;
-          }
         }
       }
     }
@@ -86,11 +87,14 @@
   // Deck related
   .deck {
     @extend %debug;
+    @extend .z-depth-1;
+    @extend .yellow.lighten-2;
     position: absolute;
     width: 50%;
     left: 0;
     right: 0;
     bottom: -10%;
+    padding: 2% 2% 0 2%;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
@@ -112,7 +116,7 @@
 
   @media all and (max-width: 700px) {
     .deck {
-      width: 80%;
+      width: 84%;
     }
   }
 
@@ -172,6 +176,9 @@ $shapes: ("s", "c", "d", "h");
   background-repeat: no-repeat;
 }
 
+.game-template {
+  display: none;
+}
 
 @for $j from 1 through 4 {
   @for $i from 2 through 14 {

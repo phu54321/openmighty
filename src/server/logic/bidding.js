@@ -127,7 +127,7 @@ module.exports = function (MightyRoom) {
         if(bidding.lastBidder === null) {
             // 아무도 공약을 걸지 않았으므로 폐지
             this.emit('info', '아무도 공약을 걸지 않았으므로 게임을 종료합니다.');
-            delete this.bidding;
+            cmdout.emitGameAbort(this);
             this.endGame();
             return;
         }

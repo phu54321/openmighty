@@ -7,14 +7,13 @@
 const Materialize = window.Materialize;
 const io = window.io;
 
-const cmdproc = require('./cmdproc');
+const cmdproc = require('./procCmd');
 
 let socket;
 
 
 $('#gameDiv').ready(function () {
     socket = io();
-    alert('Game connected');
 
     socket.on('err', function (msg) {
         Materialize.toast(msg, 4000);

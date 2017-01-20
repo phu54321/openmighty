@@ -4,23 +4,24 @@
 
 "use strict";
 
-const game = require('./game');
+const room = require('./room');
+
 const Materialize = window.Materialize;
 
 module.exports = function (cmdTranslatorMap) {
     cmdTranslatorMap.rjoin = function (msg) {
         "use strict";
         Materialize.toast(msg.username + '님이 입장하셨습니다.', 4000);
-        game.room.users.push({
+        room.users.push({
             username: msg.username,
             useridf: msg.useridf
         });
-        game.viewRoom();
+        room.viewRoom();
     };
 
     cmdTranslatorMap.rleft = function (msg) {
         "use strict";
-        const users = game.room.users;
+        const users = room.users;
         for (let i = 0; i < users.length; i++) {
             const user = users[i];
             if (user.useridf == msg.useridf) {
@@ -29,16 +30,15 @@ module.exports = function (cmdTranslatorMap) {
                 break;
             }
         }
-        game.room.owner = msg.owner;
-        if (!game.room.playing) game.viewRoom();
+        room.owner = msg.owner;
+        if (!room.playing) room.viewRoom();
     };
 
     cmdTranslatorMap.rusers = function (msg) {
         "use strict";
-        const room = game.room;
         room.owner = msg.owner;
         room.users = msg.users;
         room.myidf = msg.youridf;
-        game.viewRoom();
+        room.viewRoom();
     };
 };

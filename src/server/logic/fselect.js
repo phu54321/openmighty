@@ -22,6 +22,7 @@ module.exports = function (MightyRoom) {
 
         cmdout.emitGamePlayerDeck(this, this.president);
         this.playState = 'discard3';
+        cmdout.emitGameDiscardRequest(this);
     };
 
     /**
