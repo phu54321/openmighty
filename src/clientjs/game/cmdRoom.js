@@ -11,7 +11,7 @@ const Materialize = window.Materialize;
 module.exports = function (cmdTranslatorMap) {
     cmdTranslatorMap.rjoin = function (msg) {
         "use strict";
-        Materialize.toast(msg.username + '님이 입장하셨습니다.', 4000);
+        Materialize.toast(msg.username + '님이 입장하셨습니다.', 2000);
         room.users.push({
             username: msg.username,
             useridf: msg.useridf
@@ -25,7 +25,7 @@ module.exports = function (cmdTranslatorMap) {
         for (let i = 0; i < users.length; i++) {
             const user = users[i];
             if (user.useridf == msg.useridf) {
-                Materialize.toast(user.username + '님이 퇴장하셨습니다.', 4000);
+                Materialize.toast(user.username + '님이 퇴장하셨습니다.', 2000);
                 users.splice(i, 1);
                 break;
             }

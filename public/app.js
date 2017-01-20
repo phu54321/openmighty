@@ -220,7 +220,7 @@
 	    socket = io();
 	
 	    socket.on('err', function (msg) {
-	        Materialize.toast(msg, 4000);
+	        Materialize.toast(msg, 3000);
 	    });
 	
 	    socket.on('info', function (msg) {
@@ -270,7 +270,7 @@
 	var room = __webpack_require__(7);
 	
 	exports.translateCmdMessage = function (msg) {
-	    if (cmdTranslatorMap[msg.type]) cmdTranslatorMap[msg.type](msg);else Materialize.toast('Unknown command message type : ' + msg.type, 5000);
+	    if (cmdTranslatorMap[msg.type]) cmdTranslatorMap[msg.type](msg);else Materialize.toast('Unknown command message type : ' + msg.type, 4000);
 	};
 	
 	///////////////////////////////////
@@ -278,10 +278,11 @@
 	// Room users
 	__webpack_require__(8)(cmdTranslatorMap);
 	__webpack_require__(9)(cmdTranslatorMap);
+	__webpack_require__(10)(cmdTranslatorMap);
 	
 	cmdTranslatorMap.gabort = function (obj) {
 	    var msg = obj.msg || '게임이 중간에 종료되었습니다.';
-	    Materialize.toast(msg, 4000);
+	    Materialize.toast(msg, 3000);
 	    room.playing = false;
 	    room.viewRoom();
 	};
@@ -426,9 +427,10 @@
 	function addStartButton() {
 	    var $gameCardContainer = $('.player-self').find('.game-card-container');
 	    $gameCardContainer.empty();
-	    $gameCardContainer.append(template('start'));
-	    $gameCardContainer.find('button').click(function () {
+	    $gameCardContainer.append(template('button'));
+	    $gameCardContainer.find('button').click(function (e) {
 	        conn.sendCmd('start');
+	        e.preventDefault();
 	    });
 	}
 
@@ -450,7 +452,7 @@
 	    cmdTranslatorMap.rjoin = function (msg) {
 	        "use strict";
 	
-	        Materialize.toast(msg.username + '님이 입장하셨습니다.', 4000);
+	        Materialize.toast(msg.username + '님이 입장하셨습니다.', 2000);
 	        room.users.push({
 	            username: msg.username,
 	            useridf: msg.useridf
@@ -465,7 +467,7 @@
 	        for (var i = 0; i < users.length; i++) {
 	            var user = users[i];
 	            if (user.useridf == msg.useridf) {
-	                Materialize.toast(user.username + '님이 퇴장하셨습니다.', 4000);
+	                Materialize.toast(user.username + '님이 퇴장하셨습니다.', 2000);
 	                users.splice(i, 1);
 	                break;
 	            }
@@ -554,7 +556,7 @@
 	        // 공약 완료 체크
 	        if (game.remainingBidder == 1 && game.lastBidder !== null) {
 	            if (game.lastBidder != game.selfIndex) {
-	                Materialize.toast("공약이 끝났습니다. 기다려주세요", 4000);
+	                Materialize.toast("공약이 끝났습니다. 기다려주세요", 1500);
 	            }
 	            game.president = game.lastBidder;
 	        }
@@ -593,7 +595,7 @@
 	     * 1차 공약 수정 요청이 들어왔을 때
 	     */
 	    cmdTranslatorMap.bc1rq = function () {
-	        Materialize.toast('공약을 수정해주세요.', 4000);
+	        Materialize.toast('공약을 수정해주세요.', 1500);
 	
 	        var bidShape = game.bidShape;
 	        var bidCount = game.bidCount;
@@ -637,10 +639,71 @@
 	     * @param msg
 	     */
 	    cmdTranslatorMap.binfo = function (msg) {
-	        Materialize.toast('공약 : ' + game.shapeStringTable[msg.shape] + ' ' + msg.num, 4000);
+	        var bidString = game.shapeStringTable[msg.shape] + ' ' + msg.num;
+	        Materialize.toast('공약 : ' + bidString, 1500);
+	        $('#title').text('openMighty - ' + bidString);
 	        game.bidShape = msg.bidShape;
 	        game.bidCount = msg.bidCount;
 	        game.president = msg.president;
+	    };
+	};
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by whyask37 on 2017. 1. 20..
+	 */
+	
+	"use strict";
+	
+	var Materialize = window.Materialize;
+	
+	var template = __webpack_require__(6);
+	var room = __webpack_require__(7);
+	var game = __webpack_require__(5);
+	var conn = __webpack_require__(3);
+	
+	module.exports = function (cmdTranslatorMap) {
+	    /**
+	     * 버려달라는 부탁을 받았을 때.
+	     * @param msg
+	     */
+	    cmdTranslatorMap.d3rq = function () {
+	        "use strict";
+	
+	        Materialize.toast('카드 3장을 버려주세요', 1500);
+	
+	        // 덱을 선택할 수 있도록 한다.
+	        $('.deck-card').click(function () {
+	            $(this).toggleClass('deck-card-selected');
+	        });
+	
+	        var $playerCardContainer = $('.player-self .game-card-container');
+	        $playerCardContainer.empty();
+	        var $button = template('button');
+	        $button.find('button').text("버리기");
+	        $button.find('button').click(function (e) {
+	            // 고른 카드 선택
+	            var cards = $('.deck .deck-card').toArray();
+	            var selected = [];
+	            for (var i = 0; i < cards.length; i++) {
+	                var $card = $(cards[i]);
+	                if ($card.hasClass('deck-card-selected')) {
+	                    selected.push(i);
+	                }
+	            }
+	            if (selected.length != 3) {
+	                Materialize.toast('3장을 골라주세요.', 1500);
+	                return false;
+	            }
+	
+	            conn.sendCmd('d3', { cards: selected });
+	            e.preventDefault();
+	        });
+	
+	        $playerCardContainer.append($button);
 	    };
 	};
 

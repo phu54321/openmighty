@@ -16,7 +16,7 @@ $('#gameDiv').ready(function () {
     socket = io();
 
     socket.on('err', function (msg) {
-        Materialize.toast(msg, 4000);
+        Materialize.toast(msg, 3000);
     });
 
     socket.on('info', function (msg) {

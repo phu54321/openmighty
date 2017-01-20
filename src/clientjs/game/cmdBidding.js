@@ -66,7 +66,7 @@ module.exports = function (cmdTranslatorMap) {
         // 공약 완료 체크
         if (game.remainingBidder == 1 && game.lastBidder !== null) {
             if(game.lastBidder != game.selfIndex) {
-                Materialize.toast("공약이 끝났습니다. 기다려주세요", 4000);
+                Materialize.toast("공약이 끝났습니다. 기다려주세요", 1500);
             }
             game.president = game.lastBidder;
         }
@@ -108,7 +108,7 @@ module.exports = function (cmdTranslatorMap) {
      * 1차 공약 수정 요청이 들어왔을 때
      */
     cmdTranslatorMap.bc1rq = function () {
-        Materialize.toast('공약을 수정해주세요.', 4000);
+        Materialize.toast('공약을 수정해주세요.', 1500);
 
         const bidShape = game.bidShape;
         const bidCount = game.bidCount;
@@ -157,7 +157,9 @@ module.exports = function (cmdTranslatorMap) {
      * @param msg
      */
     cmdTranslatorMap.binfo = function (msg) {
-        Materialize.toast('공약 : ' + game.shapeStringTable[msg.shape] + ' ' + msg.num, 4000);
+        const bidString = game.shapeStringTable[msg.shape] + ' ' + msg.num;
+        Materialize.toast('공약 : ' + bidString, 1500);
+        $('#title').text('openMighty - ' + bidString);
         game.bidShape = msg.bidShape;
         game.bidCount = msg.bidCount;
         game.president = msg.president;

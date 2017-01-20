@@ -1,7 +1,7 @@
 doctype html
 html
     head
-        title= title
+        title openMighty
         meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"')
 
         link(rel='stylesheet', href='/style.css')
@@ -16,7 +16,7 @@ html
         .valign-wrapper.center-align
             .main.valign.left-align
                 .topStrip
-                    span.left(onclick='window.location.href="/"') openMighty
+                    span#title.left(onclick='window.location.href="/"') openMighty
                     if request.username
                         .right
                             | #{request.username} &nbsp;
