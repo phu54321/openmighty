@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    .game
+    .game#gameDiv
         .player
             each i in new Array(5)
                 .player-slot.player-empty
@@ -15,27 +15,19 @@ block content
                 .deck-card.game-card-container
                     .game-card(class='game-card-s#{i}')
             - }
-    script(src='/socket.io/socket.io.js')
-    script.
-        initSockets();
-        $(document).ready(function () {
-            $('select').material_select();
-        });
 
-        /*
-         form.game-card.player-bid-form(action='sendBid();')
-             span.player-bid-form-title 공약
-             select.browser-default(name='bidShape')
-                 option(value='pass' selected) 패스
-                 option(value='spade') 삽 (스페이드)
-                 option(value='heart') 트 (하트)
-                 option(value='diamond') 다리 (다이아몬드)
-                 option(value='clover') 끌 (클로버)
-                 option(value='none') 노 (노기루다)
-             span.range-field
-                 input(type='range', name='bidCount', min='13', max='20')
-             button.btn.waves-effect.waves-light(type='submit') 공약
-
-
-
-         */
+script.
+    /*
+    form.game-card.player-bid-form(action='sendBid();')
+        span.player-bid-form-title 공약
+        select.browser-default(name='bidShape')
+            option(value='pass' selected) 패스
+            option(value='spade') 삽 (스페이드)
+            option(value='heart') 트 (하트)
+            option(value='diamond') 다리 (다이아몬드)
+            option(value='clover') 끌 (클로버)
+            option(value='none') 노 (노기루다)
+        span.range-field
+            input(type='range', name='bidCount', min='13', max='20')
+        button.btn.waves-effect.waves-light(type='submit') 공약
+    */

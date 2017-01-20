@@ -35,6 +35,8 @@
   },
   "devDependencies": {
     "babel": "^6.5.2",
+    "babel-core": "^6.21.0",
+    "babel-loader": "^6.2.10",
     "babel-preset-es2015": "^6.18.0",
     "gulp-autoprefixer": "^3.1.1",
     "gulp-babel": "^6.1.2",
@@ -42,6 +44,8 @@
     "gulp-if": "^2.0.2",
     "gulp-sourcemaps": "^2.4.0",
     "sprity": "^1.0.8",
-    "sprity-sass": "^1.0.4"
+    "sprity-sass": "^1.0.4",
+    "webpack": "^1.14.0",
+    "webpack-stream": "^3.2.0"
   }
 }

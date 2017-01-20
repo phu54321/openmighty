@@ -6,25 +6,15 @@ const gulp = require('gulp');
 // Include Our Plugins
 const nodemon = require('gulp-nodemon');
 const browserSync = require('browser-sync');
+const webpack = require('webpack-stream');
 
 // Sprite sheet
 gulp.task('babel', function () {
-    const sourcemaps = require("gulp-sourcemaps");
     const babel = require("gulp-babel");
     const concat = require("gulp-concat");
 
-    return gulp.src("src/clientjs/*.js")
-        .pipe(sourcemaps.init())
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .on('error', function(e) {
-            console.log(e.message);
-            console.log(e.codeFrame);
-            this.emit('end');
-        })
-        .pipe(concat("app.js"))
-        .pipe(sourcemaps.write("."))
+    return gulp.src("src/clientjs/main.js")
+        .pipe(webpack(require("./webpack.config")))
         .pipe(gulp.dest("public/"));
 });
 

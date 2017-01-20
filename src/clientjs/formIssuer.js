@@ -1,6 +1,6 @@
 "use strict";
 
-function issueRegister() {
+window.issueRegister = function () {
     'use strict';
     issueForm(
         '/users/register',
@@ -13,9 +13,9 @@ function issueRegister() {
             window.location.reload(true);
         }
     );
-}
+};
 
-function issueLogout() {
+window.issueLogout = function () {
     $.ajax({
         type: 'POST',
         url: '/users/logout',
