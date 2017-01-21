@@ -127,7 +127,6 @@ module.exports = function (cmdTranslatorMap) {
             const bidShape = $fSelectForm.find('*[name="bidShape"]').val();
             const bidCount = $fSelectForm.find('*[name="bidCount"]').val();
             if (!(bidShape == game.bidShape && bidCount == game.bidCount)) {
-                console.log(bidShape, bidCount);
                 msg.bidch2 = {
                     shape: bidShape,
                     num: parseInt(bidCount)

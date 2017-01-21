@@ -21,13 +21,13 @@ $('#gameDiv').ready(function () {
 
     socket.on('info', function (msg) {
         "use strict";
-        console.log('info', msg);
+        // console.log('info', msg);
     });
 
 
     socket.on('cmd', function (msg) {
         "use strict";
-        console.log('cmd', msg);
+        // console.log('cmd', msg);
         cmdproc.translateCmdMessage(msg);
     });
 

@@ -51,7 +51,7 @@ function validateCookie(socket, next) {
 function onConnect(socket) {
     "use strict";
 
-    console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
+    // console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
     socket.emit('info', 'Welcome to openMighty server');
 
     const roomID = socket.roomID;
@@ -95,13 +95,13 @@ function onRoomJoin(socket) {
 
     // Process chatting
     socket.on('chat', function(msg) {
-        console.log('chat from ' + socket.useridf + ' : ' + msg);
+        // console.log('chat from ' + socket.useridf + ' : ' + msg);
         room.emit('chat', '[' + socket.username + '] ' + msg);
     });
 
     // Process disconnection
     socket.on('disconnect', function(){
-        console.log('user disconnected : ' + socket.useridf);
+        // console.log('user disconnected : ' + socket.useridf);
         room.removeUser(socket.useridf, (err) => {});
         cmdout.emitRoomLeft(room, socket.useridf);
         roomsys.gcRoom(socket.roomID);
@@ -113,7 +113,7 @@ function onRoomJoin(socket) {
             return socket.emit('err', '잘못된 명령입니다.');
         }
 
-        console.log('[cmd ' + socket.useridf + ']', msg);
+        // console.log('[cmd ' + socket.useridf + ']', msg);
 
         const cmdProcessor = cmdproc[msg.type];
         if(!cmdProcessor) {

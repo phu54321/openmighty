@@ -1,0 +1,23 @@
+{
+  "name": "openmighty",
+  "description": "",
+  "main": "",
+  "authors": [
+    "phu54321 <phu54321@naver.com>"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "materialize": "^0.97.8",
+    "socket.io": "^1.7.2",
+    "underscore": "^1.8.3"
+  }
+}

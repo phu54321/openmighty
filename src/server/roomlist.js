@@ -29,7 +29,7 @@ function gcRoom(roomID) {
     "use strict";
     const room = getRoom(roomID);
     if(room && room.hasNoUser()) {
-        console.log('Room ' + roomID + ' empty : removing');
+        // console.log('Room ' + roomID + ' empty : removing');
         delete roomMap[roomID];
     }
 }

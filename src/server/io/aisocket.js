@@ -30,10 +30,10 @@ AISocket.prototype.cmd = function (msg) {
 
     const cmdProcessor = cmdproc[msg.type];
     if(!cmdProcessor) {
-        console.log('[' + this.userEntry.useridf + '] 알 수 없는 명령입니다 : ' + msg.type);
+        // console.log('[' + this.userEntry.useridf + '] Unknown command : ' + msg.type);
         return false;
     }
-    console.log('[' + this.userEntry.useridf + ' Out]', msg);
+    // console.log('[' + this.userEntry.useridf + ' Out]', msg);
     return cmdProcessor(this, this.room, this.userEntry, msg);
 };
 
@@ -44,7 +44,7 @@ AISocket.prototype.cmd = function (msg) {
 AISocket.prototype.emit = function (type, msg) {
     "use strict";
 
-    console.log('[' + this.userEntry.useridf + ' In]', msg);
+    // console.log('[' + this.userEntry.useridf + ' In]', msg);
     if(type == 'cmd') {
         this.onCommand(msg);
     }
