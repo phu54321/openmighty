@@ -34,17 +34,17 @@ exports = module.exports = function (cmdTranslatorMap) {
             const jokerCard = $('.game-card-shape-j');
             if(jokerCard.length !== 0) {
                 jokerCard
-                    .parents('deck-card')
+                    .parents('.deck-card')
                     .addClass('deck-card-selectbale');
                 return;
             }
         }
         // 기존 문양이 있을 경우
         else if(msg.shaperq) {
-            const rqShapeCards = $('.game-card-shape-' + msg.shaperq[0]);
-            if(rqShapeCards) {
-                rqShapeCards
-                    .parents('deck-card')
+            const $rqShapeCards = $('.game-card-shape-' + msg.shaperq[0]);
+            if($rqShapeCards.length !== 0) {
+                $rqShapeCards
+                    .parents('.deck-card')
                     .addClass('deck-card-selectable');
                 return;
             }
@@ -146,6 +146,31 @@ exports = module.exports = function (cmdTranslatorMap) {
         $cards.fadeOut(1000);
         issueTrickStart();
     };
+
+    /**
+     * 게임 종료시
+     * @param msg
+     */
+    cmdTranslatorMap.gend = function (msg) {
+        const bid = game.bidCount;
+        const got = 20 - msg.oppcc;
+        const $modal = $('#gameEndModal');
+        const $modalText = $modal.find('.modal-content p');
+        if(got >= bid) $modalText.text('[' + got + '/' + bid + '] 여당 승리입니다.');
+        else $modalText.text('[' + got + '/' + bid + '] 야당 승리입니다.');
+        room.playing = false;
+        $modal.modal({
+            dismissible: true,
+            complete: function() {
+                if(!room.playing) {
+                    room.viewRoom();
+                    $('#title').text('openMighty');
+                }
+            }
+        });
+        $modal.modal('open');
+    };
+
 };
 
 exports.issueTrickStart = issueTrickStart;

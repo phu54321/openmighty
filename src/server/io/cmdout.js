@@ -37,7 +37,7 @@ exports.emitRoomLeft = function (room, useridf) {
     room.emit('cmd', {
         type: 'rleft',
         useridf: useridf,
-        owner: room.owner
+        owner: room.getOwnerIndex()
     });
 };
 
