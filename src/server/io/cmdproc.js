@@ -49,7 +49,7 @@ exports.fs = function (socket, room, userEntry, msg) {
 
 // Card play
 exports.cp = function (socket, room, userEntry, msg) {
-    if((errmsg = room.onCardPlay(userEntry, msg.cardIdx, msg.jcall || false)) !== null) {
+    if((errmsg = room.onCardPlay(userEntry, msg)) !== null) {
         return socket.emit('err', errmsg);
     }
 };

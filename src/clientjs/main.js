@@ -7,3 +7,7 @@
 require('./formIssuer');
 require('./roomjoin');
 require('./game/conn');
+
+$(function() {
+    $('#jokerCall').modal('open');
+});

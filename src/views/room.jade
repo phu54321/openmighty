@@ -12,12 +12,39 @@ block content
                     .player-has
         .deck
 
+
+    // 모달 리스트
+
+    #jokerCallModal.modal
+        .modal-content
+            h4 조커 콜
+            p 조커 콜을 하시겠습니까?
+        .modal-footer
+            button.modal-action.modal-close.waves-effect.waves-red.btn-flat(name='no') 아니오
+            button.modal-action.modal-close.waves-effect.waves-green.btn-flat(name='yes') 예
+
+    #jokerModal.modal
+        .modal-content
+            h4 조커
+            p 나오게 할 문양을 선택해주세요.
+            select.browser-default(name='srq')
+                option(value='none' selected) 없음
+                option(value='spade') 삽 (스페이드)
+                option(value='heart') 트 (하트)
+                option(value='diamond') 다리 (다이아몬드)
+                option(value='clover') 끌 (클로버)
+        .modal-footer
+            button.modal-action.modal-close.waves-effect.waves-green.btn-flat OK
+
     #gameEndModal.modal
         .modal-content
             h4 게임 결과
             p [13장/13장] 여당 승리입니다.
         .modal-footer
             button.modal-action.modal-close.waves-effect.waves-green.btn-flat OK
+
+
+    // 템플릿
 
     .game-template
         #template-deck-card.deck-card-container

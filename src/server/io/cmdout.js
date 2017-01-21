@@ -145,10 +145,19 @@ exports.emitGameCardPlayRequest = function (room) {
     const currentTurn = room.currentTurn;
     room.gameUsers[currentTurn].emit('cmd', {
         type: 'cprq',
-        shaperq: room.playedCards.length > 0 ? room.playedCards[0].shape : undefined,
+        shaperq: room.shapeRequest || undefined,
         jcall: room.jokerCalled ? true : undefined
     });
 };
+
+
+exports.emitJokerRequest = function (room) {
+    room.emit('cmd', {
+        type: 'jrq',
+        shaperq: room.shapeRequest || undefined,
+    });
+};
+
 
 exports.emitGamePlayerCardPlay = function (room, player, card, jcall) {
     room.emit('cmd', {

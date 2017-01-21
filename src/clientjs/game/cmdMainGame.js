@@ -13,6 +13,7 @@ const conn = require('./conn');
 
 function issueTrickStart() {
     unbindClick();
+    game.trick++;
 }
 
 function unbindClick() {
@@ -23,9 +24,22 @@ function unbindClick() {
 
 function initGame() {
     game.trick = 0;
-    game.obtained = [[], [], [], [], []];
+    game.starter = game.president;
     issueTrickStart();
 }
+
+function decodeCard($card) {
+    const cardIdf = $card.attr('card');
+    const shape = {
+        's': 'spade', 'h': 'heart',
+        'c': 'clover', 'd': 'diamond',
+        'j': 'joker'
+    }[cardIdf[0]];
+    const num = parseInt(cardIdf.substr(1));
+    return {shape: shape, num: num};
+}
+
+
 
 exports = module.exports = function (cmdTranslatorMap) {
     function filterSelectableCards(msg) {
@@ -52,11 +66,13 @@ exports = module.exports = function (cmdTranslatorMap) {
         $('.deck-card').addClass('deck-card-selectable');
     }
 
+    /**
+     * 카드를 내라는 요청
+     * @param msg
+     */
     cmdTranslatorMap.cprq = function (msg) {
         "use strict";
         Materialize.toast('카드를 내주세요.', 1500);
-
-        filterSelectableCards(msg);
 
         const $gameCardContainer = $('.player-self .game-card-container');
         template($gameCardContainer, 'button', [
@@ -66,24 +82,82 @@ exports = module.exports = function (cmdTranslatorMap) {
             ]]
         ]);
 
+        // 카드 선택 활성화.
+        filterSelectableCards(msg);
         $('.deck-card-selectable').click(function () {
             $('.deck-card').removeClass('deck-card-selected');
             $(this).addClass('deck-card-selected');
             $gameCardContainer.find('button').prop('disabled', false);
         });
 
+        // 카드 내기를 할 때
         $gameCardContainer.find('button').click(function() {
             const $selected = $('.deck-card-selected');
             if($selected.length != 1) {
                 Materialize.toast("카드를 선택해주세요.", 1500);
             }
 
-            // TODO : 조커콜 여부 처리
-            conn.sendCmd('cp', {
-                cardIdx: $selected.index('.deck-card')
-            });
+            const card = decodeCard($selected.find('.game-card'));
+
+            // 조커콜 처리
+            if(game.trick != 1 && card.num == 3 && (
+                game.bidShape == 'clover' && card.shape == 'spade' ||
+                game.bidShape != 'clover' && card.shape == 'clover'
+            )) {
+                const $jokerCallModal = $('#jokerCallModal');
+                $jokerCallModal.find('button[name=no]').click(() => {
+                    conn.sendCmd('cp', {
+                        cardIdx: $selected.index('.deck-card')
+                    });
+                });
+                $jokerCallModal.find('button[name=yes]').click(() => {
+                    conn.sendCmd('cp', {
+                        cardIdx: $selected.index('.deck-card'),
+                        jcall: true
+                    });
+                });
+                $jokerCallModal.modal({
+                    dismissible: false
+                });
+                $jokerCallModal.modal('open');
+            }
+
+            else if(card.shape == 'joker' && game.starter == game.selfIndex) {
+                const $jokerModal = $('#jokerModal');
+                const $callShape = $jokerModal.find('select[name=srq]');
+                $callShape.val('none');
+                $jokerModal.modal({
+                    dismissible: false
+                });
+
+                $jokerModal.find('button').click(() => {
+                    let callShape = $callShape.val();
+                    if(callShape == 'none') callShape = undefined;
+                    conn.sendCmd('cp', {
+                        cardIdx: $selected.index('.deck-card'),
+                        srq: callShape
+                    });
+                });
+                $jokerModal.modal('open');
+            }
+
+            else {
+                // 일반 카드
+                conn.sendCmd('cp', {
+                    cardIdx: $selected.index('.deck-card')
+                });
+            }
         });
     };
+
+    /**
+     * 조커로 문양을 부를 때
+     */
+    cmdTranslatorMap.jrq = function (msg) {
+        const shapeRequest = msg.shaperq;
+        Materialize.toast('조커로 ' + game.shapeStringTable[shapeRequest] + '를 불렀습니다.', 2000);
+    };
+
 
     /**
      * 다른 플레이어가 카드를 냈을 때
@@ -125,25 +199,20 @@ exports = module.exports = function (cmdTranslatorMap) {
 
         // 카드를 모은다
         $cards.each(function () {
-            const cardIdf = $(this).attr('card');
-            const shape = {
-                's': 'spade', 'h': 'heart',
-                'c': 'clover', 'd': 'diamond',
-                'j': 'joker'
-            }[cardIdf[0]];
-            const num = parseInt(cardIdf.substr(1));
-            if(num >= 10) {
-                let numStr = ['10', 'J', 'Q', 'K', 'A'][num - 10];
+            const card = decodeCard($(this));
+            if(card.num >= 10) {
+                let numStr = ['10', 'J', 'Q', 'K', 'A'][card.num - 10];
                 $winnerHas.append(
                     $('<div/>')
                         .addClass('has-slot')
-                        .addClass('has-' + shape)
+                        .addClass('has-' + card.shape)
                         .text(numStr)
                 );
             }
         });
 
         $cards.fadeOut(1000);
+        game.starter = msg.winner;
         issueTrickStart();
     };
 

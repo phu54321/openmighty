@@ -58,6 +58,7 @@ module.exports = function (MightyRoom) {
         this.maxCardStrength = -1;
         this.jokerCalled = false;
         this.trickWinner = null;
+        this.shapeRequest = null;
         cmdout.emitGameCardPlayRequest(this);
     };
 
@@ -65,29 +66,36 @@ module.exports = function (MightyRoom) {
     /**
      * 유저가 카드를 냈을 때를 처리합니다.
      */
-    MightyRoom.prototype.onCardPlay = function (userEntry, cardIdx, isJokerCall) {
+    MightyRoom.prototype.onCardPlay = function (userEntry, msg) {
         if(!this.playing || this.playState != 'mainGame') return "본게임중이 아닙니다.";
         if(this.gameUsers[this.currentTurn] != userEntry) return "낼 차례가 아닙니다.";
 
         // 인덱스 처리
-        if(typeof cardIdx != "number") return "잘못된 카드입니다.";
-        cardIdx = parseInt(cardIdx);
+        if(typeof msg.cardIdx != "number") return "잘못된 카드입니다.";
+        const cardIdx = parseInt(msg.cardIdx);
         if(cardIdx < 0 || cardIdx >= userEntry.deck.length) return "잘못된 카드입니다.";
 
         const playingCard = userEntry.deck[cardIdx];
 
         // 조커콜이 정당한지 처리
+        const isJokerCall = Boolean(msg.jcall);
         if(isJokerCall) {
             if(!playingCard.equals(this.jokerCall)) return "잚못된 조커콜입니다.";
-            isJokerCall = true;
         }
-        else isJokerCall = undefined;
 
-        console.log(userEntry.deck, cardIdx, playingCard);
-
-
+        // 조커로 문양을 부를 수 있는지 처리
+        const jokerShapeRequest = msg.srq;
+        if(jokerShapeRequest) {
+            if(!playingCard.equals(this.joker)) return "잘못된 조커입니다.";
+            else if(this.currentTurn != this.startTurn) return "첫 턴에만 문양을 부를 수 있습니다.";
+            else if(msg.srq == 'joker') return "조커로 조커를 콜 할 수 없습니다.";
+            else if(mutils.cardShapes.indexOf(msg.srq) == -1) return "잘못된 문양입니다.";
+        }
         // 낼 수 없는 카드 처리
         if(!this.canPlayCard(playingCard)) return "낼 수 없는 카드입니다.";
+
+
+        //////////////////////////////////////////////////////////////////////////////////////
 
 
         // 카드 처리
@@ -105,6 +113,15 @@ module.exports = function (MightyRoom) {
 
         // 조커콜 처리
         if(isJokerCall) this.jokerCalled = true;
+
+        // 문양 처리
+        if(jokerShapeRequest) {
+            this.shapeRequest = jokerShapeRequest;
+            cmdout.emitJokerRequest(this);
+        }
+        else if(this.startTurn == this.currentTurn) {
+            this.shapeRequest = playingCard.shape;
+        }
 
         // 턴 업데이트
         this.currentTurn = (this.currentTurn + 1) % 5;
