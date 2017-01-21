@@ -194,6 +194,17 @@ exports = module.exports = function (cmdTranslatorMap) {
         unbindClick();
     };
 
+    function createCardIcon(card) {
+        if(card.shape == 'joker') {
+            return $('<div/>').addClass('has-slot has-joker').text('Joker');
+        }
+        let numStr = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'][card.num - 2];
+        return $('<div/>')
+                .addClass('has-slot')
+                .addClass('has-' + card.shape)
+                .text(numStr);
+    }
+
     /**
      * 트릭이 끝났을 경우
      */
@@ -201,17 +212,15 @@ exports = module.exports = function (cmdTranslatorMap) {
         const $winnerHas = $($('.player-has')[msg.winner]);
         const $cards = $('.player-slot .game-card');
 
+        const $lastTricks = $('.last-trick');
+        $lastTricks.empty();
+
         // 카드를 모은다
         $cards.each(function () {
             const card = decodeCard($(this));
+            $lastTricks.append(createCardIcon(card));
             if(card.num >= 10) {
-                let numStr = ['10', 'J', 'Q', 'K', 'A'][card.num - 10];
-                $winnerHas.append(
-                    $('<div/>')
-                        .addClass('has-slot')
-                        .addClass('has-' + card.shape)
-                        .text(numStr)
-                );
+                $winnerHas.append(createCardIcon(card));
             }
         });
 

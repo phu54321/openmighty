@@ -1,240 +1,265 @@
 %debug {
-  // outline: 1px solid #00bfa5;
-  /*! keep */
+    // outline: 1px solid #00bfa5;
+    /*! keep */
 }
 
 .game {
-  @extend %debug;
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-
-  align-items: center;
-  justify-content: space-between;
-  flex-flow: column;
-
-
-  .player {
     @extend %debug;
+    position: absolute;
     display: flex;
-    width: 90%;
-    margin-left: auto;
-    margin-right: auto;
+    top: 3em;
     left: 0;
     right: 0;
+    bottom: 0;
 
-    .player-name {
-      background-color: #f48fb1;
-    }
+    justify-content: space-between;
+    flex-flow: column;
 
-    .player-owner .player-name {
-      @extend .blue.lighten-3;
-    }
-
-    .player-empty .player-name {
-      @extend .grey.lighten-2;
-    }
-
-    .player-self .player-name {
-      background-color: #9ccc65;
-    }
-
-    .player-leading .player-name {
-      background-color: #81d4fa;
-    }
-
-    .player-leading.player-president .player-name {
-      @extend .light-blue.lighten-1;
-    }
-
-
-    .player-leading .player-has .has-slot {
-      opacity: 0;
-      transition: opacity 0.5s;
-    }
-
-    .player-slot {
-      @extend .card;
-      width: 18%;
-      margin-left: 1%;
-      margin-right: 1%;
-      padding-top: 4%;
-      z-index: 1;
-
-      .player-name {
-        @extend .z-depth-1;
-        position: absolute;
-        top: 0;
+    .player {
+        @extend %debug;
+        display: flex;
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
         left: 0;
         right: 0;
-        padding: 2%;
-        box-sizing: border-box;
-        text-align: center;
-        text-overflow: ellipsis;
-        font-weight: bold;
-      }
 
-      .player-card {
-        @extend %debug;
-        box-sizing: border-box;
-        padding: 3%;
+        // Player colors
+        .player-name { background-color: #f48fb1; }
+        .player-owner .player-name { background-color: #90caf9; }
+        .player-empty .player-name { background-color: #90a4ae; }
+        .player-self .player-name { background-color: #9ccc65; }
+        .player-leading .player-name { background-color: #81d4fa; }
+        .player-president .player-name { background-color: #0091ea; }
 
-        .btn {
-          padding: 0;
-          height: 2rem;
-          line-height: 2rem;
-          width: 100%;
+        // Hide leading team's score
+        .player-leading .player-has .has-slot {
+            opacity: 0;
+            transition: opacity 0.5s;
         }
 
-        .player-card-bidding:first-letter {
-          text-transform: capitalize;
+        .player-slot {
+            @extend .card;
+            width: 20%;
+            margin-left: 1%;
+            margin-right: 1%;
+            margin-top: 0;
+            z-index: 1;
+
+            .player-name {
+                @extend .z-depth-1;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 2%;
+                box-sizing: border-box;
+                text-align: center;
+                text-overflow: ellipsis;
+                font-weight: bold;
+            }
+
+            .player-card {
+                @extend %debug;
+                box-sizing: border-box;
+                padding: 3%;
+
+                .btn {
+                    padding: 0;
+                    height: 2rem;
+                    line-height: 2rem;
+                    width: 100%;
+                }
+
+                .player-card-bidding:first-letter {
+                    text-transform: capitalize;
+                }
+
+                .player-form {
+                    .player-form-title {
+                        display: block;
+                        font-weight: bold;
+                        height: 2rem;
+                    }
+                    select {
+                        height: inherit;
+                        padding: 0.1rem;
+                        font-size: 0.9rem;
+                    }
+
+                }
+            }
+
+            .player-has {
+                @extend .grey.lighten-3;
+                height: 2.8rem;
+                padding: 0.2rem;
+                z-index: 2;
+            }
         }
-
-        .player-form {
-          .player-form-title {
-            display: block;
-            font-weight: bold;
-            height: 2rem;
-          }
-          select {
-            height: inherit;
-            padding: 0.1rem;
-            font-size: 0.9rem;
-          }
-
-        }
-      }
-
-      .player-has {
-        @extend .grey.lighten-3;
-        height: 2.8em;
-        padding: 0.2em;
-        z-index: 2;
-        word-wrap: normal;
-
-        .has-slot + .has-slot {
-          margin-left: .1em;
-        }
-
-        .has-slot {
-          display: inline-block;
-          line-height: .7em;
-          font-size: .7em;
-          padding: -2em;
-        }
-
-        .has-spade {
-          &:before { content: '♠'; }
-          color: black;
-        }
-
-        .has-clover {
-          &:before { content: '♣'; }
-          color: black;
-        }
-
-        .has-heart {
-          &:before { content: '♥'; }
-          color: red;
-        }
-
-        .has-diamond {
-          &:before { content: '♦'; }
-          color: red;
-        }
-      }
     }
-  }
 
+    // Fantastic media query for pentagon shape
+    @media all and (orientation: portrait) {
+        .player {
+            display: flex;
+            position: relative;
+            width: 95%;
 
-  // Deck related
-  .deck {
-    @extend %debug;
-    @extend .z-depth-1;
-    @extend .yellow.lighten-2;
-    position: absolute;
-    width: 50%;
-    left: 0; right: 0;
-    bottom: -10%;
-    padding: 2% 2% 0 2%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
+            flex-flow: wrap;
+            justify-content: center;
 
-    .deck-card-container {
-      display: inline-block;
-      width: 16%;
-      margin-right: -9.1%;
+            .player-slot {
+                width: 29%;
+                margin-left: 2%;
+                margin-right: 2%;
+            }
+
+            .player-slot:nth-child(1) { order: 1; }
+            .player-slot:nth-child(2) { order: 2; }
+            .player-slot:nth-child(3) { order: 3; }
+            .player-slot:nth-child(4) { order: 5; }
+            .player-slot:nth-child(5) { order: 4; }
+        }
     }
-    // 13 * a - 12 * b = 99
-    // 13 * (a - b) + b = 99
-    // b = 3, a - b =
 
+    .last-trick {
+        &:before {
+            content: '직전 트릭 : ';
+        }
+        align-self: center;
+        border: 1px solid lightgreen;
+        line-height: 2rem;
+        padding: .2rem 2rem;
+        height: 2.4rem;
+        width: 18rem;
 
-    .deck-card-container:last-child {
-      margin-right: 0;
+        .has-slot + .has-slot { margin-left: .3rem; }
     }
-  }
 
-  @media all and (max-width: 700px) {
-    .deck {
-      width: 84%;
+
+    .deck-container {
+        display: flex;
+        flex-flow: column;
+        flex: 1;
+
+        .deck-downer { flex: 1; }
+
+        // Deck related
+        .deck {
+            @extend %debug;
+            @extend .z-depth-1;
+            @extend .yellow.lighten-2;
+            align-self: flex-end;
+            width: 50%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 2% 2% 0 2%;
+            transform: translateY(5%);
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+
+            .deck-card-container {
+                display: inline-block;
+                width: 16%;
+                margin-right: -9.1%;
+
+                .deck-card {
+                    @extend .z-depth-3;
+                    background-size: 100% 100%;
+                    background-repeat: no-repeat;
+
+                    transition: transform 0.5s;
+                }
+
+                .deck-card-selected {
+                    transform: translate(0, -15%);
+                }
+            }
+
+            .deck-card-container:last-child {
+                margin-right: 0;
+            }
+        }
+
+        @media all and (max-width: 800px) {
+            .deck {
+                width: 84%;
+            }
+        }
+
+        @media all and (max-width: 400px) {
+            .deck {
+                width: 96%;
+            }
+        }
     }
-  }
-
-  @media all and (max-width: 400px) {
-    .deck {
-      width: 96%;
-    }
-  }
-
-
-
 }
 
-$shapes: ("s", "c", "d", "h");
-
-.deck-card {
-  @extend .z-depth-3;
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-
-  transition: transform 0.5s;
-}
-
-.deck-card-selected {
-  transform: translate(0, -15%);
-}
 
 
 // Game cards
-
 .game-card-container {
-  position: relative;
-  width: 100%;
-  padding-top: 150%;
-  background-color: white;
+    position: relative;
+    width: 100%;
+    padding-top: 150%;
+    background-color: white;
+
+    .game-card {
+        @extend %debug;
+
+        // Fill screen
+        position: absolute;
+        top: 3%;
+        left: 3%;
+        right: 3%;
+        bottom: 3%;
+
+        // Shadow ui
+        transition: transform 0.5s;
+
+        // Image
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+    }
 }
 
-.game-card {
-  @extend %debug;
 
-  // Fill screen
-  position: absolute;
-  top: 3%;
-  left: 3%;
-  right: 3%;
-  bottom: 3%;
-
-  // Shadow ui
-  transition: transform 0.5s;
-
-  // Image
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
+// Has slots
+.has-slot {
+    display: inline-block;
+    line-height: .7rem;
+    font-size: .7rem;
+    padding: -2rem;
 }
+
+// Spacing btw slots
+.has-slot + .has-slot { margin-left: .1rem; }
+
+// Shapes
+.has-joker   {
+    &:before { content: '★'; }
+    background: -webkit-linear-gradient(top, #878787, #000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.has-spade   { &:before { content: '♠'; } color: black; }
+.has-clover  { &:before { content: '♣'; } color: black; }
+.has-heart   { &:before { content: '♥'; } color: red; }
+.has-diamond { &:before { content: '♦'; } color: red; }
+
+
+
+
+// Templates should be hidden by default
 
 .game-template {
-  display: none;
+    display: none;
+}
+
+
+// Bugfix
+.modal-overlay {
+    height: auto !important;
 }
