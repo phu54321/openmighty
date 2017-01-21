@@ -143,7 +143,7 @@ exports.emitFriendSelection = function (room, friendType, args) {
 
 exports.emitGameCardPlayRequest = function (room) {
     const currentTurn = room.currentTurn;
-    room.gameUsherokers[currentTurn].emit('cmd', {
+    room.gameUsers[currentTurn].emit('cmd', {
         type: 'cprq',
         shaperq: room.shapeRequest || undefined,
         jcall: room.jokerCalled ? true : undefined

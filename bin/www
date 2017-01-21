@@ -95,6 +95,7 @@ function onListening() {
 
 // Some exception
 process.on('uncaughtException', function (err) {
-    console.log('Caught exception: ' + err);
+    console.log('Caught exception: ' + err)
+    console.log(err.stack);
     // Server has to go on!
 });

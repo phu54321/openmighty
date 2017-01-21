@@ -73,7 +73,7 @@ module.exports = function (cmdTranslatorMap) {
             return ftype;
         }
         else if(msg.ftype == 'first') return 'first';
-        else if(msg.ftype == 'none') return 'none;'
+        else if(msg.ftype == 'none') return 'none;';
         else return null;
     }
 
