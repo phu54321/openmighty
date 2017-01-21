@@ -71,6 +71,7 @@ exports.emitGamePlayerDeck = function (room, userIdx) {
     });
 };
 
+
 ////////////////////////////////////////
 // Bidding & Friend selection
 

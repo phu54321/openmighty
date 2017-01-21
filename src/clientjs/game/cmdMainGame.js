@@ -194,6 +194,12 @@ exports = module.exports = function (cmdTranslatorMap) {
         unbindClick();
     };
 
+
+    /**
+     * 카드 아이콘
+     * @param card
+     * @returns {*|jQuery}
+     */
     function createCardIcon(card) {
         if(card.shape == 'joker') {
             return $('<div/>').addClass('has-slot has-joker').text('Joker');
@@ -204,6 +210,7 @@ exports = module.exports = function (cmdTranslatorMap) {
                 .addClass('has-' + card.shape)
                 .text(numStr);
     }
+
 
     /**
      * 트릭이 끝났을 경우
@@ -239,6 +246,7 @@ exports = module.exports = function (cmdTranslatorMap) {
         game.starter = msg.winner;
         issueTrickStart();
     };
+
 
     /**
      * 게임 종료시
