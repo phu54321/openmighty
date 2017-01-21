@@ -129,11 +129,11 @@ exports.emitFriendSelectRequest = function (room) {
     });
 };
 
-exports.emitFriendSelection = function (room, friendType, arg) {
+exports.emitFriendSelection = function (room, friendType, args) {
     room.emit('cmd', {
         type: 'fs',
         friendType: friendType,
-        arg: arg
+        args: args
     });
 };
 

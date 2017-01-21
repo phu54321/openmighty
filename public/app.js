@@ -680,12 +680,63 @@
 	
 	var Materialize = window.Materialize;
 	
+	var _ = window._;
 	var template = __webpack_require__(6);
 	var room = __webpack_require__(7);
 	var game = __webpack_require__(5);
 	var conn = __webpack_require__(3);
 	
 	module.exports = function (cmdTranslatorMap) {
+	    function genCardMap(bidShape) {
+	        return {
+	            'mighty': { shape: bidShape == 'spade' ? 'diamond' : 'spade', num: 14 },
+	            'joker': { shape: 'joker', num: 0 },
+	            'girudaA': { shape: bidShape, num: 14 },
+	            'girudaK': { shape: bidShape, num: 13 }
+	        };
+	    }
+	
+	    /**
+	     * 프렌드 타입 -> 메세지
+	     * @param bidShape
+	     * @param friendType
+	     * @param msg
+	     * @returns {boolean}
+	     */
+	    function encodeFriend(bidShape, friendType, msg) {
+	        var cardMap = genCardMap(bidShape);
+	        if (cardMap[friendType]) {
+	            var friendCard = cardMap[friendType];
+	            msg.ftype = 'card';
+	            msg.shape = friendCard.shape;
+	            msg.num = friendCard.num;
+	            return true;
+	        }
+	        return false;
+	    }
+	
+	    /**
+	     * 메세지 -> 프렌드 타입
+	     * @param bidShape
+	     * @param msg
+	     * @returns {*}
+	     */
+	    function decodeFriend(bidShape, msg) {
+	        var cardMap = genCardMap(bidShape);
+	
+	        if (msg.ftype == 'card') {
+	            var ftype = null;
+	            _.keys(cardMap).some(function (key) {
+	                var card = cardMap[key];
+	                if (card.shape == msg.args.shape && card.num == msg.args.num) {
+	                    ftype = key;
+	                    return true;
+	                }
+	            });
+	            return ftype;
+	        } else return null;
+	    }
+	
 	    /**
 	     * 버려달라는 부탁을 받았을 때.
 	     * @param msg
@@ -736,18 +787,7 @@
 	
 	            // 프렌드 선택
 	            var friendType = $fSelectForm.find('select[name=friendType]').val();
-	            var cardMap = {
-	                'mighty': { shape: bidShape == 'spade' ? 'diamond' : 'spade', num: 14 },
-	                'joker': { shape: 'joker', num: 0 },
-	                'girudaA': { shape: bidShape, num: 14 },
-	                'girudaK': { shape: bidShape, num: 13 }
-	            };
-	            if (cardMap[friendType]) {
-	                var friendCard = cardMap[friendType];
-	                msg.ftype = 'card';
-	                msg.shape = friendCard.shape;
-	                msg.num = friendCard.num;
-	            } else {
+	            if (!encodeFriend(bidShape, friendType, msg)) {
 	                Materialize.toast('프렌드를 선정해주세요.', 1500);
 	                return false;
 	            }
@@ -755,6 +795,19 @@
 	            conn.sendCmd('fs', msg);
 	            return false;
 	        });
+	    };
+	
+	    /**
+	     * 프렌드 선정 완료
+	     * @param msg
+	     */
+	    cmdTranslatorMap.fs = function (msg) {
+	        var friendType = decodeFriend(game.bidShape, msg);
+	        var friendString = $('#template-fselect').find('select[name="friendType"]').text() + " 프렌드";
+	        Materialize.toast(friendString, 2000);
+	
+	        var $title = $('#title');
+	        $title.text($title.text() + ' - ' + friendString);
 	    };
 	};
 
