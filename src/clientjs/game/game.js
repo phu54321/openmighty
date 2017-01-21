@@ -9,7 +9,6 @@ const game = {};
 const template = require('./template');
 
 exports = module.exports = game;
-exports.game = game;
 
 
 exports.viewDeck = function () {

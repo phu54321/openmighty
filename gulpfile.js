@@ -12,14 +12,19 @@ const webpack = require('webpack-stream');
 gulp.task('babel', function () {
     const babel = require("gulp-babel");
     const concat = require("gulp-concat");
+    const sourcemaps = require('gulp-sourcemaps');
+    const uglify = require('gulp-uglify');
 
     return gulp.src("src/clientjs/main.js")
+        .pipe(sourcemaps.init())
         .pipe(webpack(require("./webpack.config")))
         .on('error', function(e) {
             console.log(e.message);
             console.log(e.codeFrame);
             this.emit('end');
         })
+        .pipe(uglify())
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest("public/"));
 });
 

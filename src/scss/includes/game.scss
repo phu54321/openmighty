@@ -238,15 +238,3 @@ $shapes: ("s", "c", "d", "h");
 .game-template {
   display: none;
 }
-
-@for $j from 1 through 4 {
-  @for $i from 2 through 14 {
-    .game-card-#{nth($shapes, $j)}#{$i} {
-      background-image: url(/images/cards/#{nth($shapes, $j)}#{$i}.png);
-    }
-  }
-}
-
-.game-card-j0 {
-  background-image: url(/images/cards/j0.png);
-}
