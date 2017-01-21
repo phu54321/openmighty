@@ -119,6 +119,7 @@ module.exports = function (MightyRoom) {
             this.shapeRequest = jokerShapeRequest;
             cmdout.emitJokerRequest(this);
         }
+
         else if(this.startTurn == this.currentTurn) {
             this.shapeRequest = playingCard.shape;
         }
@@ -217,6 +218,16 @@ module.exports = function (MightyRoom) {
         this.playedCards.forEach((card) => {
             if(card.num >= 10) winnerObtainedCards.push(card);
         });
+
+        // 초구 프렌드 처리
+        if(
+            this.friendType == 'first' &&
+            this.friend === null &&
+            this.trickWinner != this.president &&
+            this.currentTrick <= 4
+        ) {
+            this.friend = this.trickWinner;
+        }
 
         // 게임 종료시
         if(this.currentTrick == 10) {

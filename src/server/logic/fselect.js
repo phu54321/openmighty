@@ -57,6 +57,8 @@ module.exports = function (MightyRoom) {
         if(msg.ftype == 'card') {
             if(!mutils.isValidCardParam(msg.shape, msg.num)) return "잘못된 카드 설정입니다.";
         }
+        else if(msg.ftype == 'first');
+        else if(msg.ftype == 'none');
         else return "잘못된 프렌드 설정입니다.";
 
 
@@ -100,6 +102,18 @@ module.exports = function (MightyRoom) {
 
             this.friendType = 'card';
             this.friend = friend;
+        }
+
+        else if(msg.ftype == 'first') {
+            this.friendType = 'first';
+            this.friend = null;
+            cmdout.emitFriendSelection(this, 'first');
+        }
+
+        else if(msg.ftype == 'none') {
+            this.friendType = 'none';
+            this.friend = null;
+            cmdout.emitFriendSelection(this, 'none');
         }
 
         this.startMainGame();

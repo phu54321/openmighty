@@ -468,6 +468,7 @@
 	        _$playerSlot.addClass('player-empty');
 	        _$playerSlot.find('.player-name').text("Empty");
 	        _$playerSlot.find('.game-card-container').empty();
+	        _$playerSlot.find('.player-has').empty();
 	    }
 	
 	    if (!room.playing) {
@@ -729,6 +730,12 @@
 	            msg.shape = friendCard.shape;
 	            msg.num = friendCard.num;
 	            return true;
+	        } else if (friendType == 'first') {
+	            msg.ftype = 'first';
+	            return true;
+	        } else if (friendType == 'none') {
+	            msg.ftype = 'none';
+	            return true;
 	        }
 	        return false;
 	    }
@@ -752,7 +759,7 @@
 	                }
 	            });
 	            return ftype;
-	        } else return null;
+	        } else if (msg.ftype == 'first') return 'first';else if (msg.ftype == 'none') return 'none;';else return null;
 	    }
 	
 	    /**
@@ -1018,6 +1025,12 @@
 	                $winnerHas.append($('<div/>').addClass('has-slot').addClass('has-' + card.shape).text(numStr));
 	            }
 	        });
+	
+	        // 초구 프렌드
+	        if (game.ftype == 'first' && game.president != msg.winner && $('.player-leading').length != 2 && game.trick <= 4) {
+	            // 프렌드 발견
+	            $($('.player-slot')[msg.winner]).addClass('player-leading');
+	        }
 	
 	        $cards.fadeOut(1000);
 	        game.starter = msg.winner;

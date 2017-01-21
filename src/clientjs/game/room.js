@@ -54,6 +54,7 @@ exports.viewRoom = function () {
         $playerSlot.addClass('player-empty');
         $playerSlot.find('.player-name').text("Empty");
         $playerSlot.find('.game-card-container').empty();
+        $playerSlot.find('.player-has').empty();
     }
 
     if(!room.playing) {

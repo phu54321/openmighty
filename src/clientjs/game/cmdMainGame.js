@@ -211,6 +211,17 @@ exports = module.exports = function (cmdTranslatorMap) {
             }
         });
 
+        // 초구 프렌드
+        if(
+            game.ftype == 'first' &&
+            game.president != msg.winner &&
+            $('.player-leading').length != 2 &&
+            game.trick <= 4
+        ) {
+            // 프렌드 발견
+            $($('.player-slot')[msg.winner]).addClass('player-leading');
+        }
+
         $cards.fadeOut(1000);
         game.starter = msg.winner;
         issueTrickStart();

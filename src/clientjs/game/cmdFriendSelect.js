@@ -40,6 +40,14 @@ module.exports = function (cmdTranslatorMap) {
             msg.num = friendCard.num;
             return true;
         }
+        else if(friendType == 'first') {
+            msg.ftype = 'first';
+            return true;
+        }
+        else if(friendType == 'none') {
+            msg.ftype = 'none';
+            return true;
+        }
         return false;
     }
 
@@ -64,6 +72,8 @@ module.exports = function (cmdTranslatorMap) {
             });
             return ftype;
         }
+        else if(msg.ftype == 'first') return 'first';
+        else if(msg.ftype == 'none') return 'none;'
         else return null;
     }
 
