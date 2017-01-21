@@ -132,7 +132,7 @@ exports.emitFriendSelectRequest = function (room) {
 exports.emitFriendSelection = function (room, friendType, args) {
     room.emit('cmd', {
         type: 'fs',
-        friendType: friendType,
+        ftype: friendType,
         args: args
     });
 };
@@ -159,9 +159,10 @@ exports.emitGamePlayerCardPlay = function (room, player, card, jcall) {
     });
 };
 
-exports.emitGameTrickEnd = function (room) {
+exports.emitGameTrickEnd = function (room, winner) {
     room.emit('cmd', {
-        type: 'tend'
+        type: 'tend',
+        winner: winner
     });
 };
 

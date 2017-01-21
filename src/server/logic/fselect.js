@@ -47,8 +47,8 @@ module.exports = function (MightyRoom) {
 
         // 만약 공약 수정이 이루어졌다면 해당 공약도 체크
         if(msg.bidch2) {
-            const bidCount = msg.bidch2.bidCount;
-            const bidShape = msg.bidch2.bidShape;
+            const bidCount = msg.bidch2.num;
+            const bidShape = msg.bidch2.shape;
             if(!bidding.isValidBid(bidShape, bidCount)) return "잘못된 공약입니다.";
             else if(this.bidCount + 2 > bidCount) return "2장 이상 더 공약해야 합니다.";  // 공약을 변경하려면 2장 이상 더 걸어야 한다
         }

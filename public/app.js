@@ -279,6 +279,7 @@
 	__webpack_require__(8)(cmdTranslatorMap);
 	__webpack_require__(9)(cmdTranslatorMap);
 	__webpack_require__(10)(cmdTranslatorMap);
+	__webpack_require__(11)(cmdTranslatorMap);
 	
 	cmdTranslatorMap.gabort = function (obj) {
 	    var msg = obj.msg || '게임이 중간에 종료되었습니다.';
@@ -316,7 +317,7 @@
 	
 	
 	        var $deckCardContainer = template(null, 'deck-card');
-	        $deckCardContainer.find('.game-card').addClass('game-card-' + shape[0] + num);
+	        $deckCardContainer.find('.game-card').addClass('game-card-' + shape[0] + num).addClass('game-card-shape-' + shape[0]);
 	        $playerDeck.append($deckCardContainer);
 	    }
 	};
@@ -353,34 +354,37 @@
 	
 	var Materialize = window.Materialize;
 	
-	var jqueryMethods = ['text', 'val', 'submit', 'click', 'remove', 'empty'];
+	var jqueryMethods = ['text', 'val', 'submit', 'click', 'remove', 'empty', 'addClass', 'removeClass', ' toggleClass'];
+	
+	var properties = ['disabled'];
 	
 	module.exports = function ($parent, name, attrs) {
 	    var $template = $('#template-' + name).clone().removeAttr('id');
-	    if ($parent) {
-	        $parent.empty();
-	        $parent.append($template);
-	    }
-	
-	    if (!attrs) return $template;
-	
-	    // Set attributes
 	    var $elm = void 0;
-	    for (var i = 0; i < attrs.length; i++) {
-	        var _attrs$i = _slicedToArray(attrs[i], 2),
-	            selector = _attrs$i[0],
-	            attributes = _attrs$i[1];
 	
-	        $elm = selector ? $template.find(selector) : $template;
-	        if ($elm.length != 1) {
-	            Materialize.toast('Invalid selector : ' + selector, 4000);
-	            console.log('Invalid selector', attrs[i]);
-	            continue;
+	    if (attrs) {
+	        // Set attributes
+	        for (var i = 0; i < attrs.length; i++) {
+	            var _attrs$i = _slicedToArray(attrs[i], 2),
+	                selector = _attrs$i[0],
+	                attributes = _attrs$i[1];
+	
+	            $elm = selector ? $template.find(selector) : $template;
+	            if ($elm.length != 1) {
+	                Materialize.toast('Invalid selector : ' + selector, 4000);
+	                console.log('Invalid selector', attrs[i]);
+	                continue;
+	            }
+	
+	            if (Array.isArray(attributes[0])) {
+	                attributes.forEach(applyAttribute);
+	            } else {
+	                if (attributes === null || typeof attributes == "string") {
+	                    attributes = [attrs[i][1], attrs[i][2]];
+	                }
+	                applyAttribute(attributes);
+	            }
 	        }
-	
-	        if (Array.isArray(attributes[0])) {
-	            attributes.forEach(applyAttribute);
-	        } else applyAttribute(attributes);
 	    }
 	
 	    function applyAttribute(attribute) {
@@ -388,7 +392,12 @@
 	            attr = _attribute[0],
 	            value = _attribute[1];
 	
-	        if (jqueryMethods.indexOf(attr) != -1) $elm[attr](value);else $elm.attr(attr, value);
+	        if (jqueryMethods.indexOf(attr) != -1) $elm[attr](value);else if (properties.indexOf(attr) != -1) $elm.prop(attr, value);else $elm.attr(attr, value);
+	    }
+	
+	    if ($parent) {
+	        $parent.empty();
+	        $parent.append($template);
 	    }
 	
 	    return $template;
@@ -685,6 +694,7 @@
 	var room = __webpack_require__(7);
 	var game = __webpack_require__(5);
 	var conn = __webpack_require__(3);
+	var mainGame = __webpack_require__(11);
 	
 	module.exports = function (cmdTranslatorMap) {
 	    function genCardMap(bidShape) {
@@ -755,7 +765,7 @@
 	        var bidShape = game.bidShape;
 	
 	        var $playerCardContainer = $('.player-self .game-card-container');
-	        var $friendSelector = template($playerCardContainer, 'fselect', [[null, ['id', 'friendSelectForm']], ['option[value=' + bidShape + ']', 'remove'], ['input[name="bidCount"]', [['min', bidCount], ['val', bidCount]]], ['option[value="pass"]', ['val', bidShape]]]);
+	        var $friendSelector = template($playerCardContainer, 'fselect', [[null, ['id', 'friendSelectForm']], ['option[value=' + bidShape + ']', ['remove']], ['input[name="bidCount"]', [['min', bidCount], ['val', bidCount]]], ['option[value="pass"]', ['val', bidShape]]]);
 	
 	        $friendSelector.submit(function () {
 	            var msg = {};
@@ -779,9 +789,10 @@
 	            var bidShape = $fSelectForm.find('*[name="bidShape"]').val();
 	            var bidCount = $fSelectForm.find('*[name="bidCount"]').val();
 	            if (!(bidShape == game.bidShape && bidCount == game.bidCount)) {
+	                console.log(bidShape, bidCount);
 	                msg.bidch2 = {
-	                    bidShape: bidShape,
-	                    bidCount: bidCount
+	                    shape: bidShape,
+	                    num: parseInt(bidCount)
 	                };
 	            }
 	
@@ -803,13 +814,124 @@
 	     */
 	    cmdTranslatorMap.fs = function (msg) {
 	        var friendType = decodeFriend(game.bidShape, msg);
-	        var friendString = $('#template-fselect').find('select[name="friendType"]').text() + " 프렌드";
+	        var friendString = $('#template-fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
 	        Materialize.toast(friendString, 2000);
 	
 	        var $title = $('#title');
 	        $title.text($title.text() + ' - ' + friendString);
+	
+	        mainGame.initGame();
 	    };
 	};
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by whyask37 on 2017. 1. 21..
+	 */
+	
+	"use strict";
+	
+	var Materialize = window.Materialize;
+	
+	var template = __webpack_require__(6);
+	var game = __webpack_require__(5);
+	var room = __webpack_require__(7);
+	var conn = __webpack_require__(3);
+	
+	function issueTrickStart() {
+	    unbindClick();
+	}
+	
+	function unbindClick() {
+	    $('.deck-card').removeClass('deck-card-selected').unbind('click');
+	}
+	
+	function initGame() {
+	    game.trick = 0;
+	    game.obtained = [[], [], [], [], []];
+	    issueTrickStart();
+	}
+	
+	exports = module.exports = function (cmdTranslatorMap) {
+	    function filterSelectableCards(msg) {
+	        // 조커콜
+	        if (msg.jcall) {
+	            var jokerCard = $('.game-card-shape-j');
+	            if (jokerCard.length !== 0) {
+	                jokerCard.parents('deck-card').addClass('deck-card-selectbale');
+	                return;
+	            }
+	        }
+	        // 기존 문양이 있을 경우
+	        else if (msg.shaperq) {
+	                var rqShapeCards = $('.game-card-shape-' + msg.shaperq[0]);
+	                if (rqShapeCards) {
+	                    rqShapeCards.parents('deck-card').addClass('deck-card-selectable');
+	                    return;
+	                }
+	            }
+	        $('.deck-card').addClass('deck-card-selectable');
+	    }
+	
+	    cmdTranslatorMap.cprq = function (msg) {
+	        "use strict";
+	
+	        Materialize.toast('카드를 내주세요.', 1500);
+	
+	        filterSelectableCards(msg);
+	
+	        var $gameCardContainer = $('.player-self .game-card-container');
+	        template($gameCardContainer, 'button', [['button', [['text', '카드 내기'], ['disabled', true]]]]);
+	
+	        $('.deck-card-selectable').click(function () {
+	            $('.deck-card').removeClass('deck-card-selected');
+	            $(this).addClass('deck-card-selected');
+	            $gameCardContainer.find('button').prop('disabled', false);
+	        });
+	
+	        $gameCardContainer.find('button').click(function () {
+	            var $selected = $('.deck-card-selected');
+	            if ($selected.length != 1) {
+	                Materialize.toast("카드를 선택해주세요.", 1500);
+	            }
+	
+	            // TODO : 조커콜 여부 처리
+	            conn.sendCmd('cp', {
+	                cardIdx: $selected.index('.deck-card')
+	            });
+	        });
+	    };
+	
+	    /**
+	     * 다른 플레이어가 카드를 냈을 때
+	     */
+	    cmdTranslatorMap.pcp = function (msg) {
+	        "use strict";
+	
+	        var card = msg.card;
+	
+	        var $playerSlot = $($('.player-slot')[msg.player]);
+	        var $gameCardContainer = $playerSlot.find('.game-card-container');
+	        template($gameCardContainer, 'game-card', [[null, ['addClass', 'game-card-' + card.shape[0] + card.num]]]);
+	        unbindClick();
+	    };
+	
+	    /**
+	     * 트릭이 끝났을 경우
+	     */
+	    cmdTranslatorMap.tend = function (msg) {
+	        var winner = msg.winner;
+	        // TODO: 이긴 카드를 모으는 로직 추가
+	        $('.player-slot .game-card').fadeOut(1000);
+	        issueTrickStart();
+	    };
+	};
+	
+	exports.issueTrickStart = issueTrickStart;
+	exports.initGame = initGame;
 
 /***/ }
 /******/ ]);

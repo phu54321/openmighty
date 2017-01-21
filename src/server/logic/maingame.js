@@ -83,6 +83,8 @@ module.exports = function (MightyRoom) {
         }
         else isJokerCall = undefined;
 
+        console.log(userEntry.deck, cardIdx, playingCard);
+
 
         // 낼 수 없는 카드 처리
         if(!this.canPlayCard(playingCard)) return "낼 수 없는 카드입니다.";
@@ -205,7 +207,7 @@ module.exports = function (MightyRoom) {
             return;
         }
 
-        cmdout.emitGameTrickEnd(this);
+        cmdout.emitGameTrickEnd(this, this.trickWinner);
         this.startTurn = this.trickWinner;
         this.startNewTrick();
     };

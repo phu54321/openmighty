@@ -83,6 +83,41 @@
 
         }
       }
+
+      .player-has {
+        @extend .grey.lighten-3;
+        height: 2.6em;
+        padding: 0.2em;
+        z-index: 2;
+
+        %has-slot {
+          line-height: 1em;
+        }
+
+        .has-spade {
+          @extend %has-slot;
+          &:before { content: '♠'; }
+          color: black;
+        }
+
+        .has-clover {
+          @extend %has-slot;
+          &:before { content: '♣'; }
+          color: black;
+        }
+
+        .has-heart {
+          @extend %has-slot;
+          &:before { content: '♥'; }
+          color: red;
+        }
+
+        .has-diamond {
+          @extend %has-slot;
+          &:before { content: '♦'; }
+          color: red;
+        }
+      }
     }
   }
 

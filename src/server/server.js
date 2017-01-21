@@ -113,6 +113,8 @@ function onRoomJoin(socket) {
             return socket.emit('err', '잘못된 명령입니다.');
         }
 
+        console.log('[cmd ' + socket.useridf + ']', msg);
+
         const cmdProcessor = cmdproc[msg.type];
         if(!cmdProcessor) {
             return socket.emit('err', '알 수 없는 명령입니다.');

@@ -21,6 +21,7 @@ exports.translateCmdMessage = function (msg) {
 require('./cmdRoom')(cmdTranslatorMap);
 require('./cmdBidding')(cmdTranslatorMap);
 require('./cmdFriendSelect')(cmdTranslatorMap);
+require('./cmdMainGame')(cmdTranslatorMap);
 
 
 cmdTranslatorMap.gabort = function (obj) {

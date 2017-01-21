@@ -11,6 +11,7 @@ const template = require('./template');
 const room = require('./room');
 const game = require('./game');
 const conn = require('./conn');
+const mainGame = require('./cmdMainGame');
 
 module.exports = function (cmdTranslatorMap) {
     function genCardMap(bidShape) {
@@ -86,7 +87,7 @@ module.exports = function (cmdTranslatorMap) {
         const $playerCardContainer = $('.player-self .game-card-container');
         const $friendSelector = template($playerCardContainer, 'fselect', [
             [null, ['id', 'friendSelectForm']],
-            ['option[value=' + bidShape + ']', 'remove'],
+            ['option[value=' + bidShape + ']', ['remove']],
             ['input[name="bidCount"]', [
                 ['min', bidCount],
                 ['val', bidCount]
@@ -116,9 +117,10 @@ module.exports = function (cmdTranslatorMap) {
             const bidShape = $fSelectForm.find('*[name="bidShape"]').val();
             const bidCount = $fSelectForm.find('*[name="bidCount"]').val();
             if (!(bidShape == game.bidShape && bidCount == game.bidCount)) {
+                console.log(bidShape, bidCount);
                 msg.bidch2 = {
-                    bidShape: bidShape,
-                    bidCount: bidCount
+                    shape: bidShape,
+                    num: parseInt(bidCount)
                 };
             }
 
@@ -141,10 +143,12 @@ module.exports = function (cmdTranslatorMap) {
      */
     cmdTranslatorMap.fs = function (msg) {
         const friendType = decodeFriend(game.bidShape, msg);
-        const friendString = $('#template-fselect').find('select[name="friendType"]').text() + " 프렌드";
+        const friendString = $('#template-fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
         Materialize.toast(friendString, 2000);
 
         const $title = $('#title');
         $title.text($title.text() + ' - ' + friendString);
+
+        mainGame.initGame();
     };
 };

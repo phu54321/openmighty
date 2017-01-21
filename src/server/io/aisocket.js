@@ -58,14 +58,14 @@ AISocket.prototype.emit = function (type, msg) {
  * @param msg
  */
 AISocket.prototype.onCommand = function (msg) {
-    process.nextTick(() => {
+    setTimeout(() => {
         const badCommand = ['d3rq', 'bc1rq', 'fsrq'];
         const mthName = 'proc_' + msg.type;
         if (this[mthName]) return this[mthName](msg);
         else if(badCommand.indexOf(msg.type) != -1) {
             this.cmd({ type: 'abort' });
         }
-    });
+    }, 400);
 };
 
 module.exports = AISocket;

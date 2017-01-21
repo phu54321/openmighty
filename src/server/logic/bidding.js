@@ -26,7 +26,7 @@ function isValidBid(bidShape, bidCount) {
     return true;
 }
 
-module.exports = function (MightyRoom) {
+exports = module.exports = function (MightyRoom) {
     /**
      * Start bidding
      * @param remainingDeck

@@ -3,8 +3,6 @@
  */
 "use strict";
 
-const AISocket = require('./aisocket');
-
 let errmsg;
 
 // Start
