@@ -38,7 +38,7 @@ function validateCookie(socket, next) {
     }
     identity = JSON.parse(identity);
     socket.username = identity.username;
-    socket.useridf = socket.id;
+    socket.useridf = identity.useridf;
     socket.roomID = roomID;
     next();
 }
