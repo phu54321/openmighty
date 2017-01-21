@@ -1,21 +1,19 @@
 {
   "name": "openmighty",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
-
   "scripts": {
     "start": "node ./bin/www",
     "postinstall": "bower install"
   },
-
   "engines": {
     "node": "6.3.1"
   },
-
   "dependencies": {
     "async": "^2.1.4",
     "body-parser": "~1.16.0",
     "bower": "^1.8.0",
+    "compression": "^1.6.2",
     "connect-redis": "^3.2.0",
     "cookie-parser": "~1.4.3",
     "express": "~4.14.0",

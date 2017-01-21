@@ -1,54 +1,51 @@
 "use strict";
 
 const express = require('express');
-const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
 const path = require('path');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const compression = require('compression');
+
 const cookieSecret = 'kefahdskjjhjkhvihkjbhtkgkjgb';
 
 const app = express();
 
-// view engine setup
+app.use(logger('dev'));
+
 app.set('views', path.join(__dirname, 'src/views'));
 app.set('view engine', 'jade');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser(cookieSecret));
-
-app.use(require('node-sass-middleware')({
-    src: path.join(__dirname, 'public'),
-    dest: path.join(__dirname, 'public'),
-    indentedSyntax: true,
-    sourceMap: true
-}));
-
-app.use(session({
-    store: new RedisStore({
-        host: '127.0.0.1',
-        port: 6379
-    }),
-    secret: 'openMightySession',
-    resave: false,
-    saveUninitialized: false
-}));
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'dist')));
-app.use('/bower_components', express.static(path.join(__dirname, 'bower_components')));
 
 // Add req to jade local variable
 app.use(function (req, res, next) {
     res.locals.request = req;
     next();
 });
+
+////////////////////
+
+app.use(compression());
+app.use(
+    '/images/cards',
+    express.static(
+        path.join(__dirname, 'public/images/cards'),
+        { maxAge: 86400000 }  // 1 day cache
+    )
+);
+app.use(express.static(
+    path.join(__dirname, 'public')
+));
+
+app.use(
+    '/bower_components',
+    express.static(
+        path.join(__dirname, 'bower_components'))
+);
+
 
 // Routes
 app.use('/', require('./src/routes/index'));
