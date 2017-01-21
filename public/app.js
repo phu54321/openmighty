@@ -440,7 +440,7 @@
 	    }
 	
 	    var $playerSlots = $('.player-slot');
-	    $playerSlots.removeClass('player-owner player-president player-self');
+	    $playerSlots.removeClass('player-empty player-owner player-president player-self player-leading');
 	
 	    var self = null;
 	
@@ -460,6 +460,7 @@
 	
 	    for (var _i = users.length; _i < 5; _i++) {
 	        var _$playerSlot = $($playerSlots[_i]);
+	        _$playerSlot.addClass('player-empty');
 	        _$playerSlot.find('.player-name').text("Empty");
 	        _$playerSlot.find('.game-card-container').empty();
 	    }
@@ -478,6 +479,7 @@
 	    template($gameCardContainer, 'button');
 	    $gameCardContainer.find('button').click(function (e) {
 	        conn.sendCmd('start');
+	        $('.player-has').empty();
 	        e.preventDefault();
 	    });
 	}
@@ -674,6 +676,7 @@
 	        game.bidShape = msg.shape;
 	        game.bidCount = msg.num;
 	        game.president = msg.president;
+	        $($('.player-slot')[game.president]).addClass('player-leading player-president');
 	    };
 	};
 
@@ -816,6 +819,8 @@
 	        var friendType = decodeFriend(game.bidShape, msg);
 	        var friendString = $('#template-fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
 	        Materialize.toast(friendString, 2000);
+	        game.ftype = msg.ftype;
+	        game.fargs = msg.args;
 	
 	        var $title = $('#title');
 	        $title.text($title.text() + ' - ' + friendString);
@@ -914,8 +919,16 @@
 	        var card = msg.card;
 	
 	        var $playerSlot = $($('.player-slot')[msg.player]);
+	
+	        if (game.ftype == 'card' && game.fargs.shape == card.shape && game.fargs.num == card.num) {
+	            // 프렌드 발견
+	            $playerSlot.addClass('player-leading');
+	        }
+	
 	        var $gameCardContainer = $playerSlot.find('.game-card-container');
-	        template($gameCardContainer, 'game-card', [[null, ['addClass', 'game-card-' + card.shape[0] + card.num]]]);
+	
+	        var cardIdf = card.shape[0] + card.num;
+	        template($gameCardContainer, 'game-card', [[null, [['addClass', 'game-card-' + cardIdf], ['card', cardIdf]]]]);
 	        unbindClick();
 	    };
 	
@@ -923,9 +936,25 @@
 	     * 트릭이 끝났을 경우
 	     */
 	    cmdTranslatorMap.tend = function (msg) {
-	        var winner = msg.winner;
-	        // TODO: 이긴 카드를 모으는 로직 추가
-	        $('.player-slot .game-card').fadeOut(1000);
+	        var $winnerHas = $($('.player-has')[msg.winner]);
+	        var $cards = $('.player-slot .game-card');
+	
+	        // 카드를 모은다
+	        $cards.each(function () {
+	            var cardIdf = $(this).attr('card');
+	            var shape = {
+	                's': 'spade', 'h': 'heart',
+	                'c': 'clover', 'd': 'diamond',
+	                'j': 'joker'
+	            }[cardIdf[0]];
+	            var num = parseInt(cardIdf.substr(1));
+	            if (num >= 10) {
+	                var numStr = ['10', 'J', 'Q', 'K', 'A'][num - 10];
+	                $winnerHas.append($('<div/>').addClass('has-slot').addClass('has-' + shape).text(numStr));
+	            }
+	        });
+	
+	        $cards.fadeOut(1000);
 	        issueTrickStart();
 	    };
 	};

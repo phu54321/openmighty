@@ -145,6 +145,8 @@ module.exports = function (cmdTranslatorMap) {
         const friendType = decodeFriend(game.bidShape, msg);
         const friendString = $('#template-fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
         Materialize.toast(friendString, 2000);
+        game.ftype = msg.ftype;
+        game.fargs = msg.args;
 
         const $title = $('#title');
         $title.text($title.text() + ' - ' + friendString);

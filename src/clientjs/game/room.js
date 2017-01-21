@@ -31,7 +31,7 @@ exports.viewRoom = function () {
     }
 
     const $playerSlots = $('.player-slot');
-    $playerSlots.removeClass('player-owner player-president player-self');
+    $playerSlots.removeClass('player-empty player-owner player-president player-self player-leading');
 
     let self = null;
 
@@ -51,6 +51,7 @@ exports.viewRoom = function () {
 
     for(let i = users.length ; i < 5 ; i++) {
         const $playerSlot = $($playerSlots[i]);
+        $playerSlot.addClass('player-empty');
         $playerSlot.find('.player-name').text("Empty");
         $playerSlot.find('.game-card-container').empty();
     }
@@ -71,6 +72,7 @@ function addStartButton() {
     template($gameCardContainer, 'button');
     $gameCardContainer.find('button').click(function(e) {
         conn.sendCmd('start');
+        $('.player-has').empty();
         e.preventDefault();
     });
 }

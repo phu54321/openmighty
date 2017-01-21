@@ -72,10 +72,8 @@ module.exports = function (MightyRoom) {
 
         // 공약을 수정한다.
         if(msg.bidch2) {
-            const bidCount = msg.bidch2.bidCount;
-            const bidShape = msg.bidch2.bidShape;
-            this.bidCount = bidCount;
-            this.bidShape = bidShape;
+            this.bidCount = msg.bidch2.num;;
+            this.bidShape = msg.bidch2.shape;;
             cmdout.emitGameBidding(this);
         }
 

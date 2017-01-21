@@ -24,12 +24,34 @@
     left: 0;
     right: 0;
 
+    .player-name {
+      background-color: #f48fb1;
+    }
+
     .player-owner .player-name {
       @extend .blue.lighten-3;
     }
 
     .player-empty .player-name {
       @extend .grey.lighten-2;
+    }
+
+    .player-self .player-name {
+      background-color: #9ccc65;
+    }
+
+    .player-leading .player-name {
+      background-color: #81d4fa;
+    }
+
+    .player-leading.player-president .player-name {
+      @extend .light-blue.lighten-1;
+    }
+
+
+    .player-leading .player-has .has-slot {
+      opacity: 0;
+      transition: opacity 0.5s;
     }
 
     .player-slot {
@@ -41,7 +63,6 @@
 
       .player-name {
         @extend .z-depth-1;
-        @extend .pink.lighten-2;
         position: absolute;
         top: 0;
         left: 0;
@@ -86,34 +107,38 @@
 
       .player-has {
         @extend .grey.lighten-3;
-        height: 2.6em;
+        height: 2.8em;
         padding: 0.2em;
         z-index: 2;
+        word-wrap: normal;
 
-        %has-slot {
-          line-height: 1em;
+        .has-slot + .has-slot {
+          margin-left: .1em;
+        }
+
+        .has-slot {
+          display: inline-block;
+          line-height: .7em;
+          font-size: .7em;
+          padding: -2em;
         }
 
         .has-spade {
-          @extend %has-slot;
           &:before { content: '♠'; }
           color: black;
         }
 
         .has-clover {
-          @extend %has-slot;
           &:before { content: '♣'; }
           color: black;
         }
 
         .has-heart {
-          @extend %has-slot;
           &:before { content: '♥'; }
           color: red;
         }
 
         .has-diamond {
-          @extend %has-slot;
           &:before { content: '♦'; }
           color: red;
         }

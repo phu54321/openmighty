@@ -156,6 +156,8 @@ module.exports = function (cmdTranslatorMap) {
         game.bidShape = msg.shape;
         game.bidCount = msg.num;
         game.president = msg.president;
+        $($('.player-slot')[game.president])
+            .addClass('player-leading player-president');
     };
 };
 
