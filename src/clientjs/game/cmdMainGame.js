@@ -100,10 +100,14 @@ exports = module.exports = function (cmdTranslatorMap) {
             const card = decodeCard($selected.find('.game-card'));
 
             // 조커콜 처리
-            if(game.trick != 1 && card.num == 3 && (
-                game.bidShape == 'clover' && card.shape == 'spade' ||
-                game.bidShape != 'clover' && card.shape == 'clover'
-            )) {
+            if(
+                game.trick != 1 &&
+                card.num == 3 &&
+                game.starter == game.selfIndex && (
+                    game.bidShape == 'clover' && card.shape == 'spade' ||
+                    game.bidShape != 'clover' && card.shape == 'clover'
+                )
+            ) {
                 const $jokerCallModal = $('#jokerCallModal');
                 $jokerCallModal.find('button[name=no]').click(() => {
                     conn.sendCmd('cp', {

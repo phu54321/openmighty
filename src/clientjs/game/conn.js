@@ -8,35 +8,40 @@ const Materialize = window.Materialize;
 const io = window.io;
 
 const cmdproc = require('./procCmd');
+const cardImage = require('./cardImage');
 
 let socket;
 
-
 const $gameDiv = $('#gameDiv');
-if($gameDiv.length != 0) {
-    $gameDiv.ready(function () {
-        socket = io();
+if($gameDiv.length !== 0) {
+    $gameDiv.ready(function() {
+        Materialize.toast('로딩중', 1500);
+        cardImage(initSocket);
+    });
+}
 
-        socket.on('err', function (msg) {
-            Materialize.toast(msg, 3000);
-        });
+function initSocket() {
+    socket = io();
 
-        socket.on('info', function (msg) {
-            "use strict";
-            // console.log('info', msg);
-        });
+    socket.on('err', function (msg) {
+        Materialize.toast(msg, 3000);
+    });
+
+    socket.on('info', function (msg) {
+        "use strict";
+        // console.log('info', msg);
+    });
 
 
-        socket.on('cmd', function (msg) {
-            "use strict";
-            // console.log('cmd', msg);
-            cmdproc.translateCmdMessage(msg);
-        });
+    socket.on('cmd', function (msg) {
+        "use strict";
+        // console.log('cmd', msg);
+        cmdproc.translateCmdMessage(msg);
+    });
 
-        socket.on('disconnect', function () {
-            "use strict";
-            // alert('서버와의 연결이 끊겼습니다.');
-        });
+    socket.on('disconnect', function () {
+        "use strict";
+        // alert('서버와의 연결이 끊겼습니다.');
     });
 }
 

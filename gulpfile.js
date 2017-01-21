@@ -23,8 +23,8 @@ gulp.task('babel', function () {
             console.log(e.codeFrame);
             this.emit('end');
         })
-        .pipe(uglify())
         .pipe(sourcemaps.write())
+        .pipe(uglify({outSourceMap: true}))
         .pipe(gulp.dest("public/"));
 });
 
@@ -33,6 +33,7 @@ gulp.task('sass', function () {
     const sass = require('gulp-sass');
     const sourcemaps = require('gulp-sourcemaps');
     const autoprefixer = require('gulp-autoprefixer');
+    const cleanCSS = require('gulp-clean-css');
 
     return gulp.src('src/scss/style.scss')
         .pipe(sourcemaps.init())
@@ -41,6 +42,7 @@ gulp.task('sass', function () {
             browsers: ['last 2 versions'],
             cascade: false
         }))
+        .pipe(cleanCSS({compatibility: 'ie8'}))
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('public/'))
         .pipe(browserSync.stream());
