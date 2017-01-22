@@ -19,7 +19,8 @@ $(document).on('click', '#toast-container .toast', function() {
     });
 });
 
-// Disable scrolling.
-document.ontouchmove = function (e) {
+// Disable double tap
+$(document).bind('touchend', function(e) {
     e.preventDefault();
-};
+    // Add your code here.
+});
