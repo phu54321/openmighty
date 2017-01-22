@@ -43,26 +43,33 @@ function decodeCard($card) {
 
 exports = module.exports = function (cmdTranslatorMap) {
     function filterSelectableCards(msg) {
+        const $deck = $('.deck');
+        // 마이티랑 조커는 닥치고 선택 가능
+        const jokerCard = $deck.find('.game-card-j0');
+        const mightyCard = $deck.find((game.bidShape == 'spade') ? '.game-card-d14' : '.game-card-s14');
+        jokerCard.parents('.deck-card').addClass('deck-card-selectable');
+        mightyCard.parents('.deck-card').addClass('deck-card-selectable');
+        console.log(game.bidShape, jokerCard, mightyCard);
+
         // 조커콜
         if(msg.jcall) {
-            const jokerCard = $('.game-card-shape-j');
             if(jokerCard.length !== 0) {
-                jokerCard
-                    .parents('.deck-card')
-                    .addClass('deck-card-selectbale');
+                console.log('type A');
                 return;
             }
         }
         // 기존 문양이 있을 경우
         else if(msg.shaperq) {
-            const $rqShapeCards = $('.game-card-shape-' + msg.shaperq[0]);
+            const $rqShapeCards = $deck.find('.game-card-shape-' + msg.shaperq[0]);
             if($rqShapeCards.length !== 0) {
                 $rqShapeCards
                     .parents('.deck-card')
                     .addClass('deck-card-selectable');
+                console.log('type B');
                 return;
             }
         }
+        console.log('type C');
         $('.deck-card').addClass('deck-card-selectable');
     }
 

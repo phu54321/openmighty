@@ -15,8 +15,15 @@ const properties = [
     'disabled'
 ];
 
+let $templateZip;
+
+$(function() {
+    $templateZip = $('#game-template');
+    $templateZip.detach();
+});
+
 module.exports = function ($parent, name, attrs) {
-    const $template = $('#template-' + name).clone().removeAttr('id');
+    const $template = $templateZip.find('#template-' + name).clone().removeAttr('id');
     let $elm;
 
     if(attrs) {

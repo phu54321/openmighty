@@ -35,6 +35,9 @@ exports.viewRoom = function () {
 
     let self = null;
 
+    $playerSlots.find('.player-has').empty();
+    $('.last-trick').empty();
+
     for(let i = 0 ; i < users.length ; i++) {
         const $playerSlot = $($playerSlots[i]);
         const user = users[i];
@@ -55,8 +58,8 @@ exports.viewRoom = function () {
         $playerSlot.addClass('player-empty');
         $playerSlot.find('.player-name').text("Empty");
         $playerSlot.find('.game-card-container').empty();
-        $playerSlot.find('.player-has').empty();
     }
+
 
     if(!room.playing) {
         if (owner === self) {

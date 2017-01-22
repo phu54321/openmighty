@@ -180,6 +180,10 @@
                     transition: transform 0.5s;
                 }
 
+                .deck-card-selectable {
+                    outline: 2px solid rgba(0, 0, 0, .3);
+                }
+
                 .deck-card-selected {
                     transform: translate(0, -15%);
                 }
