@@ -84,10 +84,14 @@ exports = module.exports = function (cmdTranslatorMap) {
 
         // 카드 선택 활성화.
         filterSelectableCards(msg);
-        $('.deck-card-selectable').click(function () {
+        const $selectableCards = $('.deck-card-selectable');
+        $selectableCards.click(function () {
             $('.deck-card').removeClass('deck-card-selected');
             $(this).addClass('deck-card-selected');
             $gameCardContainer.find('button').prop('disabled', false);
+        });
+        $selectableCards.dblclick(function () {
+            $gameCardContainer.find('button').click();
         });
 
         // 카드 내기를 할 때
