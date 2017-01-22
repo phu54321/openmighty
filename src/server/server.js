@@ -8,12 +8,16 @@ const _ = require('underscore');
 const async = require('async');
 const cmdproc = require("./io/cmdproc");
 const cmdout = require('./io/cmdout');
+const rSock = require('./rsocket');
 
 module.exports = function(io) {
     "use strict";
 
     io.use(validateCookie);
-    io.on('connection', onConnect);
+    io.on('connection', function (socket_) {
+        const socket = rSock.reconnectableSocket(socket_);
+        onConnect(socket);
+    });
 };
 
 
@@ -26,9 +30,10 @@ function validateCookie(socket, next) {
 
     let identity = socket.request.signedCookies.identity;
     let roomID = socket.request.signedCookies.roomID;
+    let accessID = socket.request.signedCookies.accessID;
 
     // signedCookies가 잘못되었을 경우
-    if(!identity || !roomID) {
+    if(!identity || !roomID || !accessID) {
         return next(new Error('Invalid access'));
     }
 
@@ -40,6 +45,7 @@ function validateCookie(socket, next) {
     socket.username = identity.username;
     socket.useridf = identity.useridf;
     socket.roomID = roomID;
+    socket.accessID = accessID;
     next();
 }
 
@@ -51,7 +57,7 @@ function validateCookie(socket, next) {
 function onConnect(socket) {
     "use strict";
 
-    // console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
+    console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
     socket.emit('info', 'Welcome to openMighty server');
 
     const roomID = socket.roomID;
@@ -101,7 +107,7 @@ function onRoomJoin(socket) {
 
     // Process disconnection
     socket.on('disconnect', function(){
-        // console.log('user disconnected : ' + socket.useridf);
+        console.log('user disconnected : ' + socket.useridf);
         room.removeUser(socket.useridf, (err) => {});
         cmdout.emitRoomLeft(room, socket.useridf);
         roomsys.gcRoom(socket.roomID);

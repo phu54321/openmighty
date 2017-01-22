@@ -39,9 +39,13 @@ function initSocket() {
         cmdproc.translateCmdMessage(msg);
     });
 
+    socket.on('reconnect', function () {
+        "use strict";
+        alert('Reconnect.');
+    });
     socket.on('disconnect', function () {
         "use strict";
-        // alert('서버와의 연결이 끊겼습니다.');
+        alert('서버와의 연결이 끊겼습니다.');
     });
 }
 
