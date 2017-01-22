@@ -51,6 +51,22 @@ exports = module.exports = function (cmdTranslatorMap) {
         mightyCard.parents('.deck-card').addClass('deck-card-selectable');
         console.log(game.bidShape, jokerCard, mightyCard);
 
+        // 첫 턴 선일 경우
+        if(game.trick == 1 && game.president == game.selfIndex) {
+            // 주공은 모든 패가 기루다가 아닌 이상 기루다를 첫 턴에 낼 수 없다.
+            let i;
+            for(i = 0 ; i < 10 ; i++) {
+                if(game.deck[i].shape != game.bidShape) break;
+            }
+            if(i != 10) {
+                $('.deck-card').addClass('deck-card-selectable');
+                $('.deck-card .game-card-shape-' + game.bidShape[0])
+                    .parents('.deck-card')
+                    .removeClass('deck-card-selectable');
+                return;
+            }
+        }
+
         // 조커콜
         if(msg.jcall) {
             if(jokerCard.length !== 0) {
