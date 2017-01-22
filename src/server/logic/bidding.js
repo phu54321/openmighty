@@ -86,7 +86,6 @@ exports = module.exports = function (MightyRoom) {
         // 딜미스 처리
         if(bidShape == 'dealmiss') {
             const score = _.sum(_.map(userEntry.deck, mutils.cardDealMissScore));
-            console.log(userEntry.deck, score);
             if(score <= 1) {  // 딜미스 요건 만족
                 cmdout.emitGameAbort(this, '딜 미스입니다. (' + score + ')');
                 this.endGame();

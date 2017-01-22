@@ -110,7 +110,7 @@ module.exports = function (cmdTranslatorMap) {
             const $fSelectForm = $('#friendSelectForm');
 
             // 고른 카드 선택
-            const cards = $('.deck .deck-card').toArray();
+            const cards = $('#gameDiv .deck .deck-card').toArray();
             const selected = [];
             for(let i = 0 ; i < cards.length ; i++) {
                 if($(cards[i]).hasClass('deck-card-selected')) {
@@ -152,7 +152,7 @@ module.exports = function (cmdTranslatorMap) {
      */
     cmdTranslatorMap.fs = function (msg) {
         const friendType = decodeFriend(game.bidShape, msg);
-        const friendString = $('#template-fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
+        const friendString = template.getTemplate('fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
         Materialize.toast(friendString, 2000);
         game.ftype = msg.ftype;
         game.fargs = msg.args;

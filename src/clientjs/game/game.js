@@ -12,7 +12,7 @@ exports = module.exports = game;
 
 
 exports.viewDeck = function () {
-    const $playerDeck = $('.deck');
+    const $playerDeck = $('#gameDiv .deck');
     $playerDeck.empty();
 
     for (let i = 0; i < game.deck.length; i++) {

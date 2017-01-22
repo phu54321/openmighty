@@ -148,50 +148,17 @@
         flex-flow: column;
         flex: 1;
 
-        .deck-downer { flex: 1; }
-
-        // Deck related
         .deck {
+            width: 50%;
+
             @extend %debug;
             @extend .z-depth-1;
             @extend .yellow.lighten-2;
             align-self: flex-end;
             margin-top: auto;
-            width: 50%;
-            left: 0;
-            right: 0;
             bottom: 0;
             padding: 2% 2% 0 2%;
             transform: translateY(5%);
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
-
-            .deck-card-container {
-                display: inline-block;
-                width: 16%;
-                margin-right: -9.1%;
-
-                .deck-card {
-                    @extend .z-depth-3;
-                    background-size: 100% 100%;
-                    background-repeat: no-repeat;
-
-                    transition: transform 0.5s;
-                }
-
-                .deck-card-selectable {
-                    outline: 2px solid rgba(0, 0, 0, .3);
-                }
-
-                .deck-card-selected {
-                    transform: translate(0, -15%);
-                }
-            }
-
-            .deck-card-container:last-child {
-                margin-right: 0;
-            }
         }
 
         @media all and (max-width: 800px) {
@@ -206,6 +173,48 @@
             }
         }
     }
+}
+
+
+// Deck related
+.deck {
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    padding: 2% 2% 0 2%;
+    text-align: center;
+
+
+    .deck-card-container {
+        display: inline-block;
+        width: 16%;
+        margin-right: -9.1%;
+
+        .deck-card {
+            @extend .z-depth-3;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+
+            transition: transform 0.5s;
+        }
+
+        .deck-card-selectable {
+            outline: 2px solid rgba(0, 0, 0, .3);
+        }
+
+        .deck-card-selected {
+            transform: translate(0, -15%);
+        }
+    }
+
+    .deck-card-container:last-child {
+        margin-right: 0;
+    }
+}
+
+.modal .deck {
+    width: 80%;
 }
 
 

@@ -65,11 +65,13 @@ module.exports = function (MightyRoom) {
         ///////////////////////////////////////////////////////////////////////
         /// 실제 액션. 모든 예외사항이 위에서 처리되었으므로 여기선 유저 데이터를 믿는다.
 
+        this.discardedCards = [];
+
         // 카드를 제거하고 덱을 다시 쓴다.
         const pUser = this.gameUsers[this.president];
-        pUser.deck.splice(cardIdxs[2], 1);
-        pUser.deck.splice(cardIdxs[1], 1);
-        pUser.deck.splice(cardIdxs[0], 1);
+        this.discardedCards.push(pUser.deck.splice(cardIdxs[2], 1)[0]);
+        this.discardedCards.push(pUser.deck.splice(cardIdxs[1], 1)[0]);
+        this.discardedCards.push(pUser.deck.splice(cardIdxs[0], 1)[0]);
         cmdout.emitGamePlayerDeck(this, this.president);
 
         // 공약을 수정한다.

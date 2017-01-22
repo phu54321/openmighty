@@ -17,7 +17,7 @@ function issueTrickStart() {
 }
 
 function unbindClick() {
-    $('.deck-card')
+    $('#gameDiv .deck-card')
         .removeClass('deck-card-selected')
         .unbind('click');
 }
@@ -43,13 +43,12 @@ function decodeCard($card) {
 
 exports = module.exports = function (cmdTranslatorMap) {
     function filterSelectableCards(msg) {
-        const $deck = $('.deck');
+        const $deck = $('#gameDiv .deck');
         // 마이티랑 조커는 닥치고 선택 가능
         const jokerCard = $deck.find('.game-card-j0');
         const mightyCard = $deck.find((game.bidShape == 'spade') ? '.game-card-d14' : '.game-card-s14');
         jokerCard.parents('.deck-card').addClass('deck-card-selectable');
         mightyCard.parents('.deck-card').addClass('deck-card-selectable');
-        console.log(game.bidShape, jokerCard, mightyCard);
 
         // 첫 턴 선일 경우
         if(game.trick == 1 && game.president == game.selfIndex) {
@@ -279,8 +278,37 @@ exports = module.exports = function (cmdTranslatorMap) {
     cmdTranslatorMap.gend = function (msg) {
         const bid = game.bidCount;
         const got = 20 - msg.oppcc;
-        const $modal = $('#gameEndModal');
-        const $modalText = $modal.find('.modal-content p');
+
+        let $modal;
+
+        // 셋으로 끝났으면 -> 그에 맞게 화면을 꾸며준다.
+        if(msg.setUser) {
+            $modal = $('#gameEndWithSetModal');
+            $modal.find('.set').text(
+                '게임 결과 - 셋 (' + game.gameUsers[msg.setUser].username + ')'
+            );
+
+            const $setDeck = $modal.find('.deck');
+            $setDeck.empty();
+            msg.setDeck.forEach((card) => {
+                const [shape, num] = [card.shape, card.num];
+
+                const $deckCardContainer = template(null, 'deck-card');
+                const cardIdf = shape[0] + num;
+                $deckCardContainer.find('.game-card')
+                    .attr('card', cardIdf)
+                    .addClass('game-card-' + cardIdf)
+                    .addClass('game-card-shape-' + shape[0]);
+                $setDeck.append($deckCardContainer);
+            });
+        }
+
+        // 아니면 그냥 간단하게.
+        else {
+            $modal = $('#gameEndModal');
+        }
+
+        const $modalText = $modal.find('.modal-content p.score');
         if(got >= bid) $modalText.text('[' + got + '/' + bid + '] 여당 승리입니다.');
         else $modalText.text('[' + got + '/' + bid + '] 야당 승리입니다.');
         room.playing = false;

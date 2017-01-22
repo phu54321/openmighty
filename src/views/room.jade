@@ -42,7 +42,15 @@ block content
     #gameEndModal.modal
         .modal-content
             h4 게임 결과
-            p [13장/13장] 여당 승리입니다.
+            p.score [13장/13장] 여당 승리입니다.
+        .modal-footer
+            button.modal-action.modal-close.waves-effect.waves-green.btn-flat OK
+
+    #gameEndWithSetModal.modal.modal-fixed-footer
+        .modal-content
+            h4.set 게임 결과
+            p.score [13장/13장] 여당 승리입니다.
+            .deck
         .modal-footer
             button.modal-action.modal-close.waves-effect.waves-green.btn-flat OK
 

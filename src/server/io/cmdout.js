@@ -178,11 +178,16 @@ exports.emitGameTrickEnd = function (room, winner) {
     });
 };
 
-exports.emitGameEnd = function (room, oppObtainedCardCount) {
-    room.emit('cmd', {
+exports.emitGameEnd = function (room, oppObtainedCardCount, setUser) {
+    const obj = {
         type: 'gend',
         oppcc: oppObtainedCardCount
-    });
+    };
+    if(setUser !== undefined) {
+        obj.setUser = setUser;
+        obj.setDeck = room.gameUsers[setUser].deck;
+    }
+    room.emit('cmd', obj);
 };
 
 ////

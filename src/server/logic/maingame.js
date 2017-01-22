@@ -11,7 +11,7 @@
 const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
 const mutils = require('./mutils');
-
+const setCheck = require('./setcheck');
 
 module.exports = function (MightyRoom) {
     /**
@@ -212,12 +212,14 @@ module.exports = function (MightyRoom) {
      * 한번의 트릭이 끝났을 경우.
      */
     MightyRoom.prototype.onTrickEnd = function () {
+        // 낸 카드를 업데이트하고, 각 플레이어가 얻은 점수 카드를 업데이트한다.
         const winnerObtainedCards = this.obtainedCards[this.trickWinner];
-
-        // 지금까지 모아진 카드중에 점수카드를 승자에게 준다.
         this.playedCards.forEach((card) => {
+            this.discardedCards.push(card);
             if(card.num >= 10) winnerObtainedCards.push(card);
         });
+        mutils.sortDeck(this.discardedCards);
+
 
         // 초구 프렌드 처리
         if(
@@ -235,15 +237,23 @@ module.exports = function (MightyRoom) {
             return;
         }
 
-        cmdout.emitGameTrickEnd(this, this.trickWinner);
+        // startTurn을 업데이트한다.
         this.startTurn = this.trickWinner;
+
+        const setUser = setCheck(this);
+        if(setUser !== null) {
+            this.onGameEnd(setUser);
+            return;
+        }
+
+        cmdout.emitGameTrickEnd(this, this.trickWinner);
         this.startNewTrick();
     };
 
     /**
      * 게임이 끝났을 경우
      */
-    MightyRoom.prototype.onGameEnd = function () {
+    MightyRoom.prototype.onGameEnd = function (setUser) {
         let oppObtainedCardCount = 0;
         for(let i = 0 ; i < 5 ; i++) {
             if(i != this.president && i != this.friend) {
@@ -251,7 +261,20 @@ module.exports = function (MightyRoom) {
             }
         }
 
-        cmdout.emitGameEnd(this, oppObtainedCardCount);
+        // set으로 끝났으면
+        if(setUser !== undefined) {
+            // 야당이 set했으면 모든 남은 점카를 준다.
+            if(setUser != this.president && setUser != this.friend) {
+                for(let i = 0 ; i < 5 ; i++) {
+                    const deck = this.gameUsers[i].deck;
+                    for(let j = 0 ; j < deck.length ; j++) {
+                        if(deck[j].num >= 10) oppObtainedCardCount++;
+                    }
+                }
+            }
+        }
+
+        cmdout.emitGameEnd(this, oppObtainedCardCount, setUser);
         this.endGame();
     };
 };

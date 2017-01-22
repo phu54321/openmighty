@@ -64,3 +64,7 @@ module.exports = function ($parent, name, attrs) {
 
     return $template;
 };
+
+module.exports.getTemplate = function (name) {
+    return $templateZip.find('#template-' + name);
+};

@@ -162,7 +162,7 @@ module.exports = function (cmdTranslatorMap) {
                 });
                 return false;
             }]]
-        ]);
+        ]).focus();
     };
 
     /**
