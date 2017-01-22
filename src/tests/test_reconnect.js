@@ -171,12 +171,12 @@ describe('RSocket', function() {
         done();
     });
 
-    it('Cannot reconnect to unbroken socket', function(done) {
+    it('Reconnect to unbroken socket yields null', function(done) {
         const rawsocket1 = createMock(1);
         const rawsocket2 = createMock(1);
         const socket1 = rsock.checkNewConnection(rawsocket1);
         const socket2 = rsock.checkNewConnection(rawsocket2);
-        assert(socket1 != socket2);
+        assert(socket2 == null);
         done();
     });
 });

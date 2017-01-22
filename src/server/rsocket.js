@@ -89,7 +89,7 @@ RSocket.prototype.onDisconnect = function (socket, data) {
         return handler();
     }
     else {
-        this.waitTimer = setTimeout(handler, 20000);
+        this.waitTimer = setTimeout(handler, this.waitTime * 1000);
     }
 };
 
