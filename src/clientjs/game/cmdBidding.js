@@ -27,6 +27,18 @@ module.exports = function (cmdTranslatorMap) {
         room.viewRoom();
     };
 
+    function isDealMiss(game) {
+        const deck = game.deck;
+        let dealMissScore = 0;
+        deck.forEach((card) => {
+            if(card.shape == 'spade' && card.num == 14) dealMissScore -= 1;
+            else if(card.num == 10) dealMissScore += 0.5;
+            else if(card.num >= 11) dealMissScore += 1;
+        });
+        if(dealMissScore <= 1) return true;
+        return false;
+    }
+
 
     /**
      * 덱이 왔을 때 처리
@@ -83,6 +95,14 @@ module.exports = function (cmdTranslatorMap) {
         const $playerCardContainer = $('.player-self .game-card-container');
 
         const $bidForm = template($playerCardContainer, 'bidding');
+        if(isDealMiss(game)) {
+            $bidForm.find('select[name=bidShape]')
+                .prepend(
+                    $('<option/>')
+                        .text('딜미스')
+                        .val('dealmiss'))
+                .val('dealmiss');
+        }
         $bidForm.attr('id', 'bidForm');
         $bidForm.find('input[name="bidCount"]')
             .attr('min', bidCount)

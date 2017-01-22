@@ -103,14 +103,18 @@ AISocket.prototype.proc_cprq = function(msg) {
 
     // 문양 요청시
     if(msg.shaperq) {
+        let sStart = null, sEnd = null;
         for(let i = 0 ; i < deck.length ; i++) {
             if(deck[i].shape == msg.shaperq) {
-                this.cmd({
-                    type: 'cp',
-                    cardIdx: i
-                });
-                return;
+                if(sStart === null) sStart = i;
+                sEnd = i;
             }
+        }
+        if(sStart !== null) {
+            this.cmd({
+                type: 'cp',
+                cardIdx: _.random(sStart, sEnd)
+            });
         }
     }
 

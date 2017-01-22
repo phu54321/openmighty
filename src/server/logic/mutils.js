@@ -76,8 +76,8 @@ exports.isScoreCard = function (card) {
 };
 
 exports.cardDealMissScore = function (card) {
-    if(card.shape == 'spade' && card.num == 14) return 0; // 마이티 0점
-    else if(card.shape == 'joker') return -1;  // 조커 -1점
+    if(card.shape == 'spade' && card.num == 14) return -1; // 마이티 0점
+    else if(card.shape == 'joker') return 0;  // 조커 -1점
     else if(card.num == 10) return 0.5;  // 10은 0.5점
     else if(card.num >= 11) return 1;  // JQKA는 1점
     else return 0;  // 나머지는 0점

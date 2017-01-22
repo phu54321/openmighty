@@ -4,6 +4,7 @@
 
 "use strict";
 
+const _ = require('lodash');
 const cmdout = require('../io/cmdout');
 const mutils = require('./mutils');
 
@@ -82,6 +83,17 @@ exports = module.exports = function (MightyRoom) {
         const bidShape = bidType.shape;
         const bidCount = bidType.num;
 
+        // 딜미스 처리
+        if(bidShape == 'dealmiss') {
+            const score = _.sum(_.map(userEntry.deck, mutils.cardDealMissScore));
+            console.log(userEntry.deck, score);
+            if(score <= 1) {  // 딜미스 요건 만족
+                cmdout.emitGameAbort(this, '딜 미스입니다. (' + score + ')');
+                this.endGame();
+                return;
+            }
+        }
+
         // 패스 처리
         if(bidShape == 'pass') {
             bidding.passStatus[bidding.currentBidder] = true;
@@ -108,7 +120,10 @@ exports = module.exports = function (MightyRoom) {
         return null;
 
         function passBidding(room) {
-            if(!room.findNextBidder()) {
+            if(
+                room.lastBidCount == 20 ||  // 런 공약
+                !room.findNextBidder()  // 마지막 공약
+            ) {
                 room.submitBidder();
             }
             else {
