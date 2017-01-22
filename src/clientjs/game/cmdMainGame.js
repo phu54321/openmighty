@@ -70,7 +70,6 @@ exports = module.exports = function (cmdTranslatorMap) {
         // 조커콜
         if(msg.jcall) {
             if(jokerCard.length !== 0) {
-                console.log('type A');
                 return;
             }
         }
@@ -81,11 +80,9 @@ exports = module.exports = function (cmdTranslatorMap) {
                 $rqShapeCards
                     .parents('.deck-card')
                     .addClass('deck-card-selectable');
-                console.log('type B');
                 return;
             }
         }
-        console.log('type C');
         $('.deck-card').addClass('deck-card-selectable');
     }
 
