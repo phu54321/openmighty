@@ -27,7 +27,7 @@ MockSocket.prototype.emit = function (event, data) {
     // console.log('[MockSocket Out]', event, data);
 };
 
-MockSocket.prototype.msgin = function (event, data) {
+MockSocket.prototype.inMsg = function (event, data) {
     // console.log('[MockSocket In]', event, data);
     assert(!this.disconnected);
 
@@ -45,31 +45,86 @@ MockSocket.prototype.disconnect = function () {
     this.disconnected = true;
 };
 
-
+MockSocket.prototype.inDisconnect = function() {
+    this.inMsg('disconnect');
+    this.disconnected = true;
+};
 
 ///////////////
 
 describe('MockSocket', function() {
-    describe('#connect()', function() {
-        it('should initiate new connection', function(done) {
-            const socket = new MockSocket();
-            socket.on('cmd', console.log);
-            socket.on('async', (data) => {
-                assert(data == 'test');
-                done();
-            });
-            socket.msgin('async', 'test');
-        });
-    });
-
     describe('#disconnect()', function() {
         it('should cut down any transmission', function(done) {
             const socket = new MockSocket();
             socket.disconnect();
             assert.throws(function() {
-                socket.msgin('async', 'test');
+                socket.inMsg('async', 'test');
+            }, Error, 'Connection not cut down');
+            assert.throws(function() {
+                socket.emit('cmd', 'out');
             }, Error, 'Connection not cut down');
             done();
         });
+    });
+
+    describe('#on()', function() {
+        it('should register hander', function (done) {
+            const socket = new MockSocket();
+            socket.on('async', (data) => {
+                assert(data == 'test');
+                done();
+            });
+            socket.inMsg('async', 'test');
+        });
+        it('should handle multiple handlers', function (done) {
+            const socket = new MockSocket();
+            let flag = false;
+            socket.on('async', (data) => {
+                assert(!flag && data == 'test');
+                flag = true;
+            });
+            socket.on('async', (data) => {
+                assert(flag && data == 'test');
+                done();
+            });
+            socket.inMsg('async', 'test');
+        })
+    });
+});
+
+
+/////////////////////////////////////////////////////
+
+const rsock = require('../server/rsocket');
+
+function createMock(userIndex, accessID) {
+    const socket = new MockSocket();
+    socket.username = 'testuser' + userIndex;
+    socket.useridf = 'useridf' + userIndex;
+    socket.roomID = 'room0001';
+    socket.accessID = 'accessID' + accessID;
+    return socket;
+}
+
+describe('RSocket', function() {
+    it('should act as normal socket', function() {
+        const rawsocket = createMock(0, 0);
+        const socket = rsock.reconnectableSocket(rawsocket);
+
+        socket.on('async', (data) => { assert(data == 'test'); });
+        rawsocket.inMsg('async', 'test');
+
+        socket.disconnect();
+        assert.throws(function() {
+            socket.emit('async', 'test');
+        }, Error, 'Connection not cut down');
+    });
+
+
+    it('should fail with zero latency', function() {
+        const rawsocket = createMock(0, 0);
+        const socket = rsock.reconnectableSocket(rawsocket);
+        rawsocket.inDisconnect();
+        assert(socket.disconnected);
     });
 });
