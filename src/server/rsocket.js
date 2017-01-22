@@ -15,6 +15,7 @@ function RSocket(socket) {
     // Public
     this.accessID = socket.accessID;
     this.disconnected = false;
+    this.waitTime = 0;
 
     this.username = socket.username;
     this.useridf = socket.useridf;
@@ -24,6 +25,7 @@ function RSocket(socket) {
     // Internal
     this.evList = {};
     this.socket = socket;
+    this.waitTimer = null;
 
     this.initSocketEventHandler();
 }
@@ -65,12 +67,18 @@ RSocket.prototype.emit = function (event, data) {
 
 RSocket.prototype.onDisconnect = function (data) {
     const handler = () => {
+        this.waitTime = null;
         this.onEvent('disconnect', data);
         delete socketTable[this.accessID];
         this.disconnected = true;
     };
 
-    return handler();
+    if(this.waitTime === 0) {
+        return handler();
+    }
+    else {
+        this.waitTimer = setTimeout(handler, this.waitTime * 1000);
+    }
 };
 
 ///////////////////////////////////

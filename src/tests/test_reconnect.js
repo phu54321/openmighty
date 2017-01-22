@@ -127,4 +127,17 @@ describe('RSocket', function() {
         rawsocket.inDisconnect();
         assert(socket.disconnected);
     });
+
+    it('should persist with non-zero latency', function(done) {
+        const rawsocket = createMock(0, 0);
+        const socket = rsock.reconnectableSocket(rawsocket);
+        socket.waitTime = 0.1;
+
+        rawsocket.inDisconnect();
+        assert(!socket.disconnected);
+        setTimeout(() => {
+            assert(socket.disconnected);
+            done();
+        }, 300);
+    });
 });
