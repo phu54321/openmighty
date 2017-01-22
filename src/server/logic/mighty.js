@@ -70,8 +70,10 @@ MightyRoom.prototype.onStartGame = function () {
     if(this.playing) return "이미 플레이중입니다.";
 
     this.playing = true;
+
+    // timeout을 30초로 설정
     this.users.forEach((user) => {
-        user.socket.waitTime = 60;
+        user.socket.waitTime = 30;
     });
 
     // Initialize game-related variables.
