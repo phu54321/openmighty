@@ -22,8 +22,8 @@ module.exports = function (cmdTranslatorMap) {
         game.president = -1;
         game.remainingBidder = 5;
         game.lastBidder = null;
-        game.lastBidCount = null;
-        game.lastBidShape = null;
+        game.bidCount = null;
+        game.bidShape = null;
 
         room.playing = true;
         room.viewRoom();
