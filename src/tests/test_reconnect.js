@@ -97,10 +97,10 @@ describe('MockSocket', function() {
 
 const rsock = require('../server/rsocket');
 
-function createMock(userIndex, accessID) {
+function createMock(accessID) {
     const socket = new MockSocket();
-    socket.username = 'testuser' + userIndex;
-    socket.useridf = 'useridf' + userIndex;
+    socket.username = 'testuser';
+    socket.useridf = 'useridf';
     socket.roomID = 'room0001';
     socket.accessID = 'accessID' + accessID;
     return socket;
@@ -108,8 +108,8 @@ function createMock(userIndex, accessID) {
 
 describe('RSocket', function() {
     it('should act as normal socket', function() {
-        const rawsocket = createMock(0, 0);
-        const socket = rsock.reconnectableSocket(rawsocket);
+        const rawsocket = createMock(0);
+        const socket = rsock.checkNewConnection(rawsocket);
 
         socket.on('async', (data) => { assert(data == 'test'); });
         rawsocket.inMsg('async', 'test');
@@ -122,15 +122,15 @@ describe('RSocket', function() {
 
 
     it('should fail with zero latency', function() {
-        const rawsocket = createMock(0, 0);
-        const socket = rsock.reconnectableSocket(rawsocket);
+        const rawsocket = createMock(0);
+        const socket = rsock.checkNewConnection(rawsocket);
         rawsocket.inDisconnect();
         assert(socket.disconnected);
     });
 
     it('should persist with non-zero latency', function(done) {
-        const rawsocket = createMock(0, 0);
-        const socket = rsock.reconnectableSocket(rawsocket);
+        const rawsocket = createMock(0);
+        const socket = rsock.checkNewConnection(rawsocket);
         socket.waitTime = 0.1;
 
         rawsocket.inDisconnect();
@@ -139,5 +139,44 @@ describe('RSocket', function() {
             assert(socket.disconnected);
             done();
         }, 300);
+    });
+
+    it('should reconnect', function(done) {
+        const rawsocket = createMock(0);
+        const socket = rsock.checkNewConnection(rawsocket);
+        socket.waitTime = 0.1;
+
+        rawsocket.inDisconnect();
+        assert(!socket.disconnected);
+
+        const rawsocket1 = createMock(0);
+        const socket2 = rsock.checkNewConnection(rawsocket1);
+        assert(socket2 == null);
+
+        setTimeout(() => {
+            assert(!socket.disconnected);
+            socket.on('async', (data) => { assert(data == 'test'); });
+            rawsocket1.inMsg('async', 'test');
+            done();
+        }, 300);
+    });
+
+
+    it('should not mix', function(done) {
+        const rawsocket1 = createMock(1);
+        const rawsocket2 = createMock(2);
+        const socket1 = rsock.checkNewConnection(rawsocket1);
+        const socket2 = rsock.checkNewConnection(rawsocket2);
+        assert(socket1 != socket2);
+        done();
+    });
+
+    it('Cannot reconnect to unbroken socket', function(done) {
+        const rawsocket1 = createMock(1);
+        const rawsocket2 = createMock(1);
+        const socket1 = rsock.checkNewConnection(rawsocket1);
+        const socket2 = rsock.checkNewConnection(rawsocket2);
+        assert(socket1 != socket2);
+        done();
     });
 });

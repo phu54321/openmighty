@@ -15,8 +15,8 @@ module.exports = function(io) {
 
     io.use(validateCookie);
     io.on('connection', function (socket_) {
-        const socket = rSock.reconnectableSocket(socket_);
-        onConnect(socket);
+        const socket = rSock.checkNewConnection(socket_);
+        if(socket) onConnect(socket);
     });
 };
 

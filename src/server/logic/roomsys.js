@@ -44,14 +44,14 @@ module.exports = function (MightyRoom) {
     MightyRoom.prototype.addUser = function(socket, username, useridf, cb) {
         "use strict";
 
-        // No re-entering
-        if(this.hasUser(useridf)) {
-            return cb(new Error('이미 들어간 방에 재입장할 수 없습니다.'));
+        // Cannot add player to already-playing game
+        if(this.playing) {
+            return cb(new Error('이미 게임중인 방입니다.'));
         }
 
-        // Cannot add player to already-playing game
-        else if(this.playing) {
-            return cb(new Error('이미 게임중인 방입니다.'));
+        // No re-entering
+        else if(this.hasUser(useridf)) {
+            return cb(new Error('이미 들어간 방에 재입장할 수 없습니다.'));
         }
 
         // Cannot add player to room already having 5 players

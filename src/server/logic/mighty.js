@@ -70,6 +70,9 @@ MightyRoom.prototype.onStartGame = function () {
     if(this.playing) return "이미 플레이중입니다.";
 
     this.playing = true;
+    this.users.forEach((user) => {
+        user.socket.waitTime = 60;
+    });
 
     // Initialize game-related variables.
     // Add AI user if nessecary
@@ -97,6 +100,9 @@ MightyRoom.prototype.onStartGame = function () {
 
 MightyRoom.prototype.endGame = function () {
     this.playing = false;
+    this.users.forEach((user) => {
+        user.socket.waitTime = 0;
+    });
     delete this.gameUsers;
 };
 
