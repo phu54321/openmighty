@@ -5,6 +5,7 @@
 "use strict";
 
 const _ = require('underscore');
+const AISocket = require('./aisocket');
 
 // Room related
 
@@ -52,7 +53,8 @@ exports.emitGamePlayers = function (room) {
         (user) => {
             return {
                 username: user.username,
-                useridf: user.useridf
+                useridf: user.useridf,
+                ai: user.socket instanceof AISocket
             };
         });
     room.emit('cmd', {

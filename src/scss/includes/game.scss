@@ -32,6 +32,11 @@
         .player-leading .player-name { background-color: #81d4fa; }
         .player-president .player-name { background-color: #0091ea; }
 
+        .player-ai.player-slot {
+            // 26c6da
+            outline: 2px dashed rgba(0, 0, 0, .3);
+        }
+
         // Hide leading team's score
         .player-leading .player-has .has-slot {
             opacity: 0;

@@ -31,7 +31,7 @@ exports.viewRoom = function () {
     }
 
     const $playerSlots = $('.player-slot');
-    $playerSlots.removeClass('player-empty player-owner player-president player-self player-leading');
+    $playerSlots.removeClass('player-empty player-owner player-president player-self player-ai player-leading');
 
     let self = null;
 
@@ -47,6 +47,7 @@ exports.viewRoom = function () {
             $playerSlot.addClass('player-self');
             self = i;
         }
+        if(user.ai) $playerSlot.addClass('player-ai');
     }
 
     for(let i = users.length ; i < 5 ; i++) {
