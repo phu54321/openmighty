@@ -20,7 +20,12 @@ $(document).on('click', '#toast-container .toast', function() {
 });
 
 // Disable double tap
-$(document).bind('touchend', function(e) {
-    e.preventDefault();
-    // Add your code here.
+let doubleTouchStartTimestamp = 0;
+$(document).bind("touchstart", function (event) {
+    const now = +(new Date());
+    if (doubleTouchStartTimestamp + 500 > now) {
+        event.preventDefault();
+    }
+    doubleTouchStartTimestamp = now;
 });
+
