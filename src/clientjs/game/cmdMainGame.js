@@ -43,6 +43,7 @@ function decodeCard($card) {
 
 exports = module.exports = function (cmdTranslatorMap) {
     function filterSelectableCards(msg) {
+        /*
         const $deck = $('#gameDiv .deck');
         // 마이티랑 조커는 닥치고 선택 가능
         const jokerCard = $deck.find('.game-card-j0');
@@ -82,6 +83,7 @@ exports = module.exports = function (cmdTranslatorMap) {
                 return;
             }
         }
+        */
         $('.deck-card').addClass('deck-card-selectable');
     }
 
