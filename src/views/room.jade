@@ -3,13 +3,15 @@ extends layout
 block content
     .game#gameDiv
         .player
-            each i in new Array(5)
-                .player-slot.player-empty
-                    .player-name
-                        | Empty
-                    .player-card
-                        .game-card-container
-                    .player-has
+            img.aspect-preserver(src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAB4CAQAAACu/58/AAAAdklEQVR42u3PAQ0AAAwCoNu/9HPooAG5ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER6fSjvgB5Ld9VYgAAAABJRU5ErkJggg==')
+            .player-slot-container
+                each i in new Array(5)
+                    .player-slot.player-empty
+                        .player-name
+                            | Empty
+                        .player-card
+                            .game-card-container
+                        .player-has
         .last-trick
         .deck-container
             .deck-downer
