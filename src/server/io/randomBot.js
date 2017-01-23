@@ -4,6 +4,9 @@
 
 "use strict";
 
+module.exports = require('../../ai/aiBot');
+
+return;
 
 const cmdproc = require("./cmdproc");
 const mutils = require('../logic/mutils');

@@ -5,6 +5,7 @@
 "use strict";
 
 const mutils = require('./../server/logic/mutils');
+const _ = require('underscore');
 
 function createZeroArray(length) {
     return new Array(length).fill(0);
@@ -43,7 +44,13 @@ function GameEnv(game) {
     this.giruda = createOneHotEncoding(5, mutils.bidShapes.indexOf(game.bidShape));
     this.president = createOneHotEncoding(5, game.president);
     this.friend = createZeroArray(5);
-    this.discardedCards = createZeroArray(53);
+    this.discardedCards = [
+        createZeroArray(53),
+        createZeroArray(53),
+        createZeroArray(53),
+        createZeroArray(53),
+        createZeroArray(53),
+    ];
     this.playerCards = createZeroArray(20);
 }
 exports = module.exports = GameEnv;
@@ -55,10 +62,6 @@ GameEnv.prototype.onTrickStart = function () {
 
     this.currentTrick[0] = game.currentTrick;
     applyOneHotEncoding(this.startPlayer, 5, game.startTurn);
-    this.discardedCards.fill(0);
-    game.discardedCards.forEach((card) => {
-        this.discardedCards[card.cardEnvID] = 1;
-    });
     this.playerCards.fill(0);
 };
 
@@ -74,6 +77,7 @@ GameEnv.prototype.onTurnEnd = function (card) {
     const sID = (card.cardEnvID / 13) | 0;
     const nID = card.cardEnvID % 13 + 2;
     this.playerCards[slotIndex * 5 + sID] = nID;
+    this.discardedCards[game.currentTurn][card.cardEnvID] = 1;
 
     if(game.friend !== null) {
         applyOneHotEncoding(this.friend, 5, game.friend);
@@ -88,7 +92,11 @@ GameEnv.prototype.logEnv = function () {
     console.log('giruda', this.giruda.join(','));
     console.log('president', this.president.join(','));
     console.log('friend', this.friend.join(','));
-    console.log('discardedCards', this.discardedCards.join(','));
+    console.log('dc[0]', this.discardedCards[0].join(''));
+    console.log('dc[1]', this.discardedCards[1].join(''));
+    console.log('dc[2]', this.discardedCards[2].join(''));
+    console.log('dc[3]', this.discardedCards[3].join(''));
+    console.log('dc[4]', this.discardedCards[4].join(''));
     console.log('playerCard', this.playerCards.join(','));
 };
 
