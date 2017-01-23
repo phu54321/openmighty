@@ -47,3 +47,8 @@ exports.shapeStringTable = {
     'clover': '클로버',
     'none': '노기루다',
 };
+
+exports.numStringTable = [
+    undefined, undefined, '2', '3', '4', '5',
+    '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'
+];

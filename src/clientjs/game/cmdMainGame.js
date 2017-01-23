@@ -82,6 +82,7 @@ exports = module.exports = function (cmdTranslatorMap) {
                 return;
             }
         }
+
         $('.deck-card').addClass('deck-card-selectable');
     }
 

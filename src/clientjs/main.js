@@ -29,3 +29,7 @@ $(document).bind("touchstart", function (event) {
     doubleTouchStartTimestamp = now;
 });
 
+// On material select
+$(document).ready(function() {
+    $('select').material_select();
+});

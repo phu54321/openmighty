@@ -24,12 +24,15 @@ module.exports = function (cmdTranslatorMap) {
         game.lastBidder = null;
         game.bidCount = null;
         game.bidShape = null;
+        game.canDealMiss = true;
 
         room.playing = true;
         room.viewRoom();
     };
 
     function isDealMiss(game) {
+        if(!game.canDealMiss) return false;
+
         const deck = game.deck;
         let dealMissScore = 0;
         deck.forEach((card) => {
@@ -57,6 +60,11 @@ module.exports = function (cmdTranslatorMap) {
      */
     cmdTranslatorMap.pbinfo = function (msg) {
         const $bidderCardContainer = $($('.player-slot .game-card-container')[msg.bidder]);
+
+        // 한번 공약하면 더이상 딜미스 불가능
+        if(msg.bidder == game.selfIndex) {
+            game.canDealMiss = false;
+        }
 
         // 패스가 아니라면 마지막 공약 업데이트
         if (msg.bidShape != 'pass') {
