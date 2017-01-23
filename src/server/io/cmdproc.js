@@ -12,7 +12,6 @@ exports.start = function (socket, room, userEntry) {
         return socket.emit('err', '방장만 게임을 시작할 수 있습니다.');
     }
 
-    userEntry.ready = true;
     if((errmsg = room.onStartGame()) !== null) {
         return socket.emit('err', errmsg);
     }

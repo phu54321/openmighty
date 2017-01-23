@@ -67,7 +67,7 @@ GameEnv.prototype.onTrickStart = function () {
 
 GameEnv.prototype.onTurnStart = function () {
     applyOneHotEncoding(this.currentPlayer, 5, this.game.currentTurn);
-    this.logEnv();
+    // this.logEnv();
 };
 
 GameEnv.prototype.onTurnEnd = function (card) {
@@ -98,6 +98,7 @@ GameEnv.prototype.logEnv = function () {
     console.log('dc[3]', this.discardedCards[3].join(''));
     console.log('dc[4]', this.discardedCards[4].join(''));
     console.log('playerCard', this.playerCards.join(','));
+    console.log(this.getEnvArray().length);
 };
 
 GameEnv.prototype.getEnvArray = function () {
@@ -108,7 +109,11 @@ GameEnv.prototype.getEnvArray = function () {
         this.giruda,
         this.president,
         this.friend,
-        this.discardedCards,
+        this.discardedCards[0],
+        this.discardedCards[1],
+        this.discardedCards[2],
+        this.discardedCards[3],
+        this.discardedCards[4],
         this.playerCards
     );
 };
