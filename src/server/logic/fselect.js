@@ -50,7 +50,15 @@ module.exports = function (MightyRoom) {
             const bidCount = msg.bidch2.num;
             const bidShape = msg.bidch2.shape;
             if(!bidding.isValidBid(bidShape, bidCount)) return "잘못된 공약입니다.";
-            else if(this.bidCount + 2 > bidCount) return "2장 이상 더 공약해야 합니다.";  // 공약을 변경하려면 2장 이상 더 걸어야 한다
+            else if(
+                this.bidShape != bidShape &&
+                !bidding.isHigherBid(this.bidShape, this.bidCount + 1, bidShape, bidCount)
+            ) {
+                return "2장 이상 더 공약해야 합니다.";  // 공약을 변경하려면 2장 이상 더 걸어야 한다
+            }
+            else if(this.bidShape == bidShape && this.bidCount > bidCount) {
+                return "더 낮은 공약을 걸 수 없습니다.";
+            }
         }
 
         // 프렌드를 카드로 선정
