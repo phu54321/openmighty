@@ -12,7 +12,6 @@ const RL = require('./rl').RL;
 
 const gameEnvSize = 311;
 
-
 // AI Agent for drawing cards
 const aiEnv = {
     getNumStates: () => 311 + 5 + 53,

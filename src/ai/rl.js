@@ -1073,7 +1073,7 @@ var RL = {};
             if(!(this.r0 == null) && this.alpha > 0) {
 
                 // learn from this tuple to get a sense of how "surprising" it is to the agent
-                var tderror = this.learnFromTuple(this.s0, this.a0, this.r0, this.s1, this.a1);
+                var tderror = this.learnFromTuple(this.s0, this.a0, this.r0, this.s1);
                 this.tderror = tderror; // a measure of surprise
 
                 // decide if we should keep this experience in the replay
@@ -1093,7 +1093,7 @@ var RL = {};
             }
             this.r0 = r1; // store for next update
         },
-        learnFromTuple: function(s0, a0, r0, s1, a1) {
+        learnFromTuple: function(s0, a0, r0, s1) {
             // want: Q(s,a) = r + gamma * max_a' Q(s',a')
 
             // compute the target Q value
