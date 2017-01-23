@@ -274,7 +274,38 @@ module.exports = function (MightyRoom) {
             }
         }
 
-        cmdout.emitGameEnd(this, oppObtainedCardCount, setUser);
+        // 점수 계산
+        // 여당 승리점수 = (공약 장수(contract) - 기본장수) × 2 + (여당(declarer's team) 획득 장수 - 공약 장수(bid))
+        const scoreTable = [0, 0, 0, 0, 0];
+        const leadingTeamCardCount = 20 - oppObtainedCardCount;
+        let leadingTeamScore;
+
+        if(leadingTeamCardCount >= this.bidCount) leadingTeamScore = leadingTeamCardCount + this.bidCount - 26;
+        else {
+            leadingTeamScore = 3 * this.bidCount - leadingTeamCardCount- 26;
+            if(oppObtainedCardCount >= 11) leadingTeamScore *= 2;  // 백런
+            leadingTeamScore = -leadingTeamScore;
+        }
+
+        if(this.bidCount == 20) leadingTeamScore *= 2;  // 런
+        if(this.friendType == 'none') leadingTeamScore *= 2;  // 지정 노프렌드
+        if(this.bidShape == 'none') leadingTeamScore *= 2;  // 노기루다
+
+        if(this.friend === null) {
+            for(let i = 0 ; i < 5 ; i++) {
+                if(i == this.president) scoreTable[i] = leadingTeamScore * 4;
+                else scoreTable[i] = -leadingTeamScore;
+            }
+        }
+        else {
+            for(let i = 0 ; i < 5 ; i++) {
+                if(i == this.president) scoreTable[i] = leadingTeamScore * 2;
+                else if(i == this.friend) scoreTable[i] = leadingTeamScore;
+                else scoreTable[i] = -leadingTeamScore;
+            }
+        }
+
+        cmdout.emitGameEnd(this, oppObtainedCardCount, scoreTable, setUser);
         this.endGame();
     };
 };

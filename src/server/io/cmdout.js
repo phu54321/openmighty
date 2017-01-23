@@ -178,9 +178,10 @@ exports.emitGameTrickEnd = function (room, winner) {
     });
 };
 
-exports.emitGameEnd = function (room, oppObtainedCardCount, setUser) {
+exports.emitGameEnd = function (room, oppObtainedCardCount, scoreTable, setUser) {
     const obj = {
         type: 'gend',
+        scores: scoreTable,
         oppcc: oppObtainedCardCount
     };
     if(setUser !== undefined) {
