@@ -37,6 +37,7 @@ exports = module.exports = function (MightyRoom) {
     MightyRoom.prototype.startBidding = function (remainingDeck) {
         // Remaining deck
         this.playState = 'bidding';
+        this.canDealMiss = true;
         this.bidding = {
             passStatus: [false, false, false, false, false],
             currentBidder: 0,
@@ -59,6 +60,7 @@ exports = module.exports = function (MightyRoom) {
         let nextBidder = (bidding.currentBidder + 1) % 5;
         while(nextBidder != initialBidder && bidding.passStatus[nextBidder] === true) {
             nextBidder = (nextBidder + 1) % 5;
+            if(nextBidder) this.canDealMiss = false;
         }
 
         // All passed or only initialBidder left
@@ -85,6 +87,8 @@ exports = module.exports = function (MightyRoom) {
 
         // 딜미스 처리
         if(bidShape == 'dealmiss') {
+            if(!this.canDealMiss) return "딜 미스는 처음에만 할 수 있습니다.";
+
             const score = _.sum(_.map(userEntry.deck, mutils.cardDealMissScore));
             if(score <= 1) {  // 딜미스 요건 만족
                 cmdout.emitGameAbort(this, '딜 미스입니다. (' + score + ')');
