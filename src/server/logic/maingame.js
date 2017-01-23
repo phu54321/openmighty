@@ -115,6 +115,15 @@ module.exports = function (MightyRoom) {
             this.trickWinner = this.currentTurn;
         }
 
+        // 카드 프렌드 처리
+        if(
+            this.friend === null &&
+            this.friendType == 'card' &&
+            mutils.compareCard(this.friendCard, playingCard) === 0
+        ) {
+            this.friend = this.currentTurn;
+        }
+
         // 조커콜 처리
         if(isJokerCall) this.jokerCalled = true;
 

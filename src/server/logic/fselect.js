@@ -93,38 +93,20 @@ module.exports = function (MightyRoom) {
         if(msg.ftype == 'card') {
             const card = mutils.createCard(msg.shape, msg.num);
             cmdout.emitFriendSelection(this, 'card', card);
-
-            // Find friend
-            let friend = null;
-            for(let player = 0 ; player < 5 ; player++) {
-                const pUserEntry = this.gameUsers[player];
-                for(let i = 0 ; i < 10 ; i++) {
-                    if(pUserEntry.deck[i].equals(card)) {
-                        friend = player;
-                        break;
-                    }
-                }
-                if(friend !== null) break;
-            }
-
-            // 자기 자신은 프렌드가 될 수 없습니다.
-            if(friend == this.president) friend = null;
-
             this.friendType = 'card';
-            this.friend = friend;
+            this.friendCard = card;
         }
 
         else if(msg.ftype == 'first') {
             this.friendType = 'first';
-            this.friend = null;
             cmdout.emitFriendSelection(this, 'first');
         }
 
         else if(msg.ftype == 'none') {
             this.friendType = 'none';
-            this.friend = null;
             cmdout.emitFriendSelection(this, 'none');
         }
+        this.friend = null;
 
         this.startMainGame();
         return null;

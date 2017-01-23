@@ -68,10 +68,16 @@ GameEnv.prototype.onTurnStart = function () {
 };
 
 GameEnv.prototype.onTurnEnd = function (card) {
-    const slotIndex = this.game.playedCards.length - 1;
+    const game = this.game;
+
+    const slotIndex = game.playedCards.length - 1;
     const sID = (card.cardEnvID / 13) | 0;
     const nID = card.cardEnvID % 13 + 2;
     this.playerCards[slotIndex * 5 + sID] = nID;
+
+    if(game.friend !== null) {
+        applyOneHotEncoding(this.friend, 5, game.friend);
+    }
 };
 
 GameEnv.prototype.logEnv = function () {
