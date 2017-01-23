@@ -4,23 +4,25 @@
 
 "use strict";
 
-
+const gameenv = require('./gameenv');
 const cmdproc = require("../server/io/cmdproc");
 const mutils = require('../server/logic/mutils');
 const _ = require('underscore');
 const RL = require('./rl').RL;
+const assert = require('assert');
 
-const gameEnvSize = 311;
+const gameEnvSize = 312;
 
 // AI Agent for drawing cards
 const aiEnv = {
-    getNumStates: () => 311 + 5 + 53,
+    getNumStates: () => gameEnvSize + 5 + 53,
     getMaxNumActions: () => 10
 };
 const aiSpec = {
-    alpha: 0.01
+    gamma: 0.95,
+    alpha: 0.01,
+    epsilon: 0.2,
 };
-const aiMap = new RL.DQNAgent(aiEnv, aiSpec);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -35,6 +37,10 @@ function AIBot(room, userEntry) {
     this.deck = null;
     this.playedCards = [];
     this.shouldLog = (this.userEntry.useridf == 'AI0');
+
+    this.selfIndexEncoding = gameenv.createZeroArray(5);
+    this.deckEncoding = gameenv.createZeroArray(53);
+    this.aiMap = new RL.DQNAgent(aiEnv, aiSpec);
 
     console.log('Started', userEntry.useridf);
 }
@@ -99,13 +105,31 @@ module.exports = AIBot;
 
 AIBot.prototype.proc_gusers = function(msg) {
     this.bidded = false;
+    for(let i = 0 ; i < 5 ; i++) {
+        if(msg.useridf == this.userEntry.useridf) {
+            gameenv.applyOneHotEncoding(this.selfIndexEncoding, 5, i);
+            this.selfIndex = i;
+            break;
+        }
+    }
 };
 
 AIBot.prototype.proc_deck = function (msg) {
     this.deck = msg.deck;
     if(this.shouldLog) console.log('deck', this.userEntry.useridf, msg.deck);
+    this.deckEncoding.fill(0);
+    msg.deck.forEach((card) => {
+        this.deckEncoding[card.cardEnvID] = 1;
+    });
 };
 
+AIBot.prototype.getGameState = function (msg) {
+    const env = this.room.gameEnv.getEnvArray();
+    return env.concat(
+        this.selfIndexEncoding,
+        this.deckEncoding
+    );
+};
 
 AIBot.prototype.proc_pbinfo = function (msg) {
     if(msg.shape != 'pass') this.bidded = true;
@@ -193,35 +217,23 @@ AIBot.prototype.proc_cprq = function(msg) {
     // 조커 콜 처리
     if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
 
-    // 문양 요청시
-    if(msg.shaperq) {
-        let sStart = null, sEnd = null;
-        for(let i = 0 ; i < deck.length ; i++) {
-            if(deck[i].shape == msg.shaperq) {
-                if(sStart === null) sStart = i;
-                sEnd = i;
-            }
-        }
-        if(sStart !== null) {
-            this.cmd({
-                type: 'cp',
-                cardIdx: _.random(sStart, sEnd)
-            });
-            return;
-        }
-    }
+    // 그 외엔 알아서
+    const gameState = this.getGameState();
 
     let cardIdx;
     while(true) {
-        cardIdx =  _.random(0, deck.length - 1);
+        cardIdx = this.aiMap.act(gameState);
         // 못 내는 카드
-        if(!this.room.canPlayCard(deck[cardIdx])) {
+        if(cardIdx >= deck.length || !this.room.canPlayCard(deck[cardIdx])) {
+            this.aiMap.learn(-5);
             continue;
         }
         this.cmd({
             type: 'cp',
             cardIdx: cardIdx
         });
+        if(this.room.currentTrick < 10)
+            this.aiMap.learn(0);
         break;
     }
 };
@@ -238,4 +250,11 @@ AIBot.prototype.proc_tend = function() {
 
 AIBot.prototype.proc_gend = function (msg) {
     if(this.shouldLog) console.log(msg);
+    this.aiMap.learn(msg.scores[this.selfIndex]);
+    if(this.onEnd) this.onEnd();
+};
+
+AIBot.prototype.proc_gabort = function (msg) {
+    if(this.shouldLog) console.log(msg);
+    if(this.onEnd) this.onEnd();
 };

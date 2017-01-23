@@ -43,7 +43,7 @@ function GameEnv(game) {
     this.currentPlayer = createZeroArray(5);
     this.giruda = createOneHotEncoding(5, mutils.bidShapes.indexOf(game.bidShape));
     this.president = createOneHotEncoding(5, game.president);
-    this.friend = createZeroArray(5);
+    this.friend = createZeroArray(6);
     this.discardedCards = [
         createZeroArray(53),
         createZeroArray(53),
@@ -54,6 +54,9 @@ function GameEnv(game) {
     this.playerCards = createZeroArray(20);
 }
 exports = module.exports = GameEnv;
+
+exports.createZeroArray = createZeroArray;
+exports.applyOneHotEncoding = applyOneHotEncoding;
 
 ////
 
@@ -76,7 +79,7 @@ GameEnv.prototype.onTurnEnd = function (card) {
     const slotIndex = game.playedCards.length - 1;
     const sID = (card.cardEnvID / 13) | 0;
     const nID = card.cardEnvID % 13 + 2;
-    this.playerCards[slotIndex * 5 + sID] = nID;
+    if(slotIndex != 4) this.playerCards[slotIndex * 5 + sID] = nID;
     this.discardedCards[game.currentTurn][card.cardEnvID] = 1;
 
     if(game.friend !== null) {
