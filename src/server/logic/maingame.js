@@ -12,6 +12,7 @@ const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
 const mutils = require('./mutils');
 const setCheck = require('./setcheck');
+const GameEnv = require('./../../ai/gameenv');
 
 module.exports = function (MightyRoom) {
     /**
@@ -27,6 +28,7 @@ module.exports = function (MightyRoom) {
         // 초기화
         this.currentTrick = 0;
         this.obtainedCards = [[], [], [], [], []];
+        this.gameEnv = new GameEnv(this);
         this.startTurn = this.president;
         this.startNewTrick();
     };
@@ -59,6 +61,8 @@ module.exports = function (MightyRoom) {
         this.jokerCalled = false;
         this.trickWinner = null;
         this.shapeRequest = null;
+        this.gameEnv.onTrickStart();
+        this.gameEnv.onTurnStart();
         cmdout.emitGameCardPlayRequest(this);
     };
 
@@ -124,10 +128,16 @@ module.exports = function (MightyRoom) {
             this.shapeRequest = playingCard.shape;
         }
 
+        // Env update
+        this.gameEnv.onTurnEnd(playingCard);
+
         // 턴 업데이트
         this.currentTurn = (this.currentTurn + 1) % 5;
         if(this.currentTurn == this.startTurn) this.onTrickEnd();
-        else cmdout.emitGameCardPlayRequest(this);
+        else {
+            this.gameEnv.onTurnStart();
+            cmdout.emitGameCardPlayRequest(this);
+        }
         return null;
     };
 

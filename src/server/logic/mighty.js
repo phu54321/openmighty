@@ -6,7 +6,7 @@
 
 const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
-const AISocket = require('./../io/aisocket');
+const AISocket = require('./../io/randomBot');
 
 const mutils = require('./mutils');
 const cardShapes = require('./mutils');

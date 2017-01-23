@@ -4,7 +4,7 @@
 
 "use strict";
 
-const AISocket = require('../io/aisocket');
+const AISocket = require('../io/randomBot');
 const _ = require('underscore');
 
 

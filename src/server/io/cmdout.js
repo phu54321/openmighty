@@ -5,7 +5,7 @@
 "use strict";
 
 const _ = require('underscore');
-const AISocket = require('./aisocket');
+const AISocket = require('./randomBot');
 
 // Room related
 

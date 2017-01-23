@@ -13,6 +13,8 @@ const bidShapes = exports.bidShapes = ['spade', 'heart', 'clover', 'diamond', 'n
 function Card(shape, num) {
     this.shape = shape;
     this.num = num;
+    if(shape == 'joker') this.cardEnvID = 52;
+    else this.cardEnvID = 13 * cardShapes.indexOf(shape) + num - 2;
 }
 
 Card.prototype.equals = function (rhs) {
