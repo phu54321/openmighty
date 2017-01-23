@@ -38,12 +38,13 @@ module.exports = function (room) {
     // 세트 조건 - 앞으로 모든 트릭에서 내가 선을 먹는다.
     //  1. 마이티/조커중 하나라도 다른 사람에게 있으면 질 수 있다. 이 경우는 그냥 제외
     //  2. 남은 모든 기루다는 내게 있어야 한다.
+    //  3. 모두 기루다/마이티/조커 중 하나면 OK
     //  3. 각 문양마다 짱카를 갖고 있어야함
     //      1. 짱카만 있다면 다른 사람이 그 문양을 내면 내가 선이고 내가 내도 선이다.
     //      2. 해당 문양이 아얘 없다면
     //          1. 내가 지금 선이면 상관 없고
     //          2. 다른 사람이 선이고 그 문양을 내면 내가 기루다로 간을 쳐야하니까
-    //              내게 마이티가 있던가 조커가 있던가 기루다가 있던가 뭐든 하나는 있어야 함
+    //              내가 가지 모든 카드가 마이티/조커/기루다 중 하나여야함. 아니므로 실패
     //  4. 여기까지 왔으면 셋
 
     // console.log('calculating set');
@@ -76,21 +77,26 @@ module.exports = function (room) {
         }
         else userGirudaCount = 0;
 
-        // 3. 각 문양마다 짱카를 갖고 있어야함
-        const canWinAnyway = hasMighty || (room.currentTrick != 10 &&  hasJoker) || (userGirudaCount > 0);
+        // 3. 모두 마이티/조커/기루다 면 셋
+        let girudaJokerMighty = (room.currentTrick != 10 && hasJoker) ? 1 : 0;
+        girudaJokerMighty += hasMighty ? 1 : 0;
+        girudaJokerMighty += userGirudaCount;
+        if(girudaJokerMighty == user.deck.length) return i;
 
+
+        // 4. 각 문양마다 짱카를 갖고 있어야함
         let shapeIdx;
         for(shapeIdx = 0 ; shapeIdx < 4 ; shapeIdx++) {
             const checkShape = mutils.cardShapes[shapeIdx];
             if(checkShape == room.bidShape) continue;  // 기루다는 이미 체크함
 
-            // 2. 해당 문양이 아얘 없다면
+            // z. 해당 문양이 아얘 없다면
             //     1. 내가 지금 선이면 상관 없고
-            //     2. 다른 사람이 선이고 그 문양을 내면 내가 기루다로 간을 쳐야하니까
-            //        내게 마이티가 있던가 조커가 있던가 기루다가 있던가 뭐든 하나는 있어야 함
+            //     2. 다른 사람이 선이면 실수로 다른걸 낼 수 있으므로 실패
             if(userDeckMap[checkShape].length === 0) {
-                if(room.startTurn != i && !canWinAnyway) break;
+                if(room.startTurn != i) break;
             }
+
             // 1. 짱카만 있다면 다른 사람이 그 문양을 내면 내가 선이고 내가 내도 선이다.
             else {
                 const userMinimumCard = _.min(userDeckMap[checkShape], (c) => c.num);
