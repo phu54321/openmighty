@@ -67,6 +67,14 @@ module.exports = function (MightyRoom) {
         }
         else if(msg.ftype == 'first');
         else if(msg.ftype == 'none');
+        else if(msg.ftype == 'player') {
+            if(typeof(msg.friend) != 'number') return "잘못된 프렌드 설정입니다.";
+            msg.friend |= 0;
+            if(!(0 <= msg.friend && msg.friend < 5)) return "잘못된 프렌드 설정입니다.";
+            else if(msg.friend == this.president) {
+                msg.ftype = 'none';
+            }
+        }
         else return "잘못된 프렌드 설정입니다.";
 
 
@@ -112,6 +120,12 @@ module.exports = function (MightyRoom) {
 
             this.friendType = 'card';
             this.friend = friend;
+        }
+
+        else if(msg.ftype == 'player') {
+            this.friendType = 'player';
+            this.friend = msg.friend;
+            cmdout.emitFriendSelection(this, 'player', msg.friend);
         }
 
         else if(msg.ftype == 'first') {

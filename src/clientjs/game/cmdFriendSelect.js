@@ -18,8 +18,20 @@ module.exports = function (cmdTranslatorMap) {
         return {
             'mighty': {shape: bidShape == 'spade' ? 'diamond' : 'spade', num: 14},
             'joker': {shape: 'joker', num: 0},
+
             'girudaA': {shape: bidShape, num: 14},
-            'girudaK': {shape: bidShape, num: 13}
+            'girudaK': {shape: bidShape, num: 13},
+            'girudaQ': {shape: bidShape, num: 12},
+            'girudaJ': {shape: bidShape, num: 11},
+
+            'card_sA': {shape: 'spade', num: 14},
+            'card_sK': {shape: 'spade', num: 13},
+            'card_hA': {shape: 'heart', num: 14},
+            'card_hK': {shape: 'heart', num: 13},
+            'card_dA': {shape: 'diamond', num: 14},
+            'card_dK': {shape: 'diamond', num: 13},
+            'card_cA': {shape: 'clover', num: 14},
+            'card_cK': {shape: 'clover', num: 13},
         };
     }
 
@@ -42,6 +54,11 @@ module.exports = function (cmdTranslatorMap) {
         }
         else if(friendType == 'first') {
             msg.ftype = 'first';
+            return true;
+        }
+        else if(friendType.substr(0, 6) == 'player') {
+            msg.ftype = 'player';
+            msg.friend = parseInt(friendType.substr(7)) - 1;
             return true;
         }
         else if(friendType == 'none') {
@@ -70,11 +87,25 @@ module.exports = function (cmdTranslatorMap) {
                     return true;
                 }
             });
-            return ftype;
+            if(ftype) {
+                return template
+                        .getTemplate('fselect')
+                        .find('option[value="' + ftype + '"]')
+                        .text() + " 프렌드";
+            }
+            else {
+                return (
+                    game.shapeStringTable[msg.args.shape] + ' ' +
+                    game.numStringTable[msg.args.num] + ' 프렌드');
+            }
         }
-        else if(msg.ftype == 'first') return 'first';
-        else if(msg.ftype == 'none') return 'none';
-        else return null;
+        else if(msg.ftype == 'first') return '선구 프렌드';
+        else if(msg.ftype == 'none') return '노프렌드';
+        else if(msg.ftype == 'player') {
+            $($('.player-slot')[msg.args]).addClass('player-leading');
+            return game.gameUsers[msg.args].username + ' 프렌드';
+        }
+        else return '알수없는 프렌드 - ' + String(msg.ftype);
     }
 
     /**
@@ -151,9 +182,7 @@ module.exports = function (cmdTranslatorMap) {
      * @param msg
      */
     cmdTranslatorMap.fs = function (msg) {
-        const friendType = decodeFriend(game.bidShape, msg);
-        console.log(friendType);
-        const friendString = template.getTemplate('fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
+        const friendString = decodeFriend(game.bidShape, msg);
         Materialize.toast(friendString, 2000);
         game.ftype = msg.ftype;
         game.fargs = msg.args;
