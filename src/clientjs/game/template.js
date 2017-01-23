@@ -62,6 +62,8 @@ module.exports = function ($parent, name, attrs) {
         $parent.append($template);
     }
 
+    $('select').material_select();
+
     return $template;
 };
 
