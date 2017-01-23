@@ -29,7 +29,16 @@ router.post('/register', function(req, res) {
         username: username,
         useridf: useridf
     };
-    res.cookie('identity', JSON.stringify(identity), {signed: true});
+    const year = 31536000000;
+    res.cookie(
+        'identity',
+        JSON.stringify(identity),
+        {
+            signed: true,
+            expires: new Date(Date.now() + 3 * year),  // Expire after 3 year (yay)
+            httpOnly: true
+        }
+    );
     return res.json({error: 0});
 });
 
