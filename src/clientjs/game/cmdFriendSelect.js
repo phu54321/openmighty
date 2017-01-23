@@ -73,7 +73,7 @@ module.exports = function (cmdTranslatorMap) {
             return ftype;
         }
         else if(msg.ftype == 'first') return 'first';
-        else if(msg.ftype == 'none') return 'none;';
+        else if(msg.ftype == 'none') return 'none';
         else return null;
     }
 
@@ -152,6 +152,7 @@ module.exports = function (cmdTranslatorMap) {
      */
     cmdTranslatorMap.fs = function (msg) {
         const friendType = decodeFriend(game.bidShape, msg);
+        console.log(friendType);
         const friendString = template.getTemplate('fselect').find('option[value="' + friendType + '"]').text() + " 프렌드";
         Materialize.toast(friendString, 2000);
         game.ftype = msg.ftype;
