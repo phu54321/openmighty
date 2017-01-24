@@ -9,21 +9,22 @@ const cmdproc = require("../server/io/cmdproc");
 const mutils = require('../server/logic/mutils');
 const _ = require('underscore');
 const RL = require('./rl').RL;
-const assert = require('assert');
-
 const gameEnvSize = 312;
+const assert = require('assert');
 
 // AI Agent for drawing cards
 const aiEnv = {
     getNumStates: () => gameEnvSize + 5 + 53,
     getMaxNumActions: () => 10
 };
+
 const aiSpec = {
     gamma: 0.95,
-    alpha: 0.01,
+    alpha: 0.02,
     epsilon: 0.2,
 };
 
+const epsDelta = (0.2 - 0.05) / 10;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -36,11 +37,11 @@ function AIBot(room, userEntry) {
     this.gameUsers = [];
     this.deck = null;
     this.playedCards = [];
-    this.shouldLog = (this.userEntry.useridf == 'AI0');
 
     this.selfIndexEncoding = gameenv.createZeroArray(5);
     this.deckEncoding = gameenv.createZeroArray(53);
     this.aiMap = new RL.DQNAgent(aiEnv, aiSpec);
+    this.shouldLog = (userEntry.useridf == 'AI0');
 
     console.log('Started', userEntry.useridf);
 }
@@ -94,7 +95,7 @@ AIBot.prototype.onCommand = function (msg) {
     });
 };
 
-module.exports = AIBot;
+exports = module.exports = AIBot;
 
 
 ///////////////////////////////////////////////
@@ -105,6 +106,7 @@ module.exports = AIBot;
 
 AIBot.prototype.proc_gusers = function(msg) {
     this.bidded = false;
+    if(!this.shouldLog && !this.training) console.log('gusers', msg);
     for(let i = 0 ; i < 5 ; i++) {
         if(msg.useridf == this.userEntry.useridf) {
             gameenv.applyOneHotEncoding(this.selfIndexEncoding, 5, i);
@@ -116,7 +118,7 @@ AIBot.prototype.proc_gusers = function(msg) {
 
 AIBot.prototype.proc_deck = function (msg) {
     this.deck = msg.deck;
-    if(this.shouldLog) console.log('deck', this.userEntry.useridf, msg.deck);
+    if(!this.training && this.shouldLog) console.log('deck', this.userEntry.useridf, msg.deck);
     this.deckEncoding.fill(0);
     msg.deck.forEach((card) => {
         this.deckEncoding[card.cardEnvID] = 1;
@@ -157,7 +159,7 @@ AIBot.prototype.proc_bidrq = function () {
             bidShape = shape;
         }
     });
-    if(bidShape != 'pass') console.log(this.userEntry.useridf, bidShape);
+    if(!this.training && bidShape != 'pass') console.log(this.userEntry.useridf, bidShape);
     this.cmd({
         type: 'bid',
         shape: bidShape,
@@ -209,10 +211,14 @@ AIBot.prototype.proc_fsrq = function () {
 
 AIBot.prototype.proc_binfo = function () {
     this.playedCards = [];
+    this.aiMap.r0 = null;  // Prevent learning from previous game
+    this.failedTry = 0;
 };
 
 AIBot.prototype.proc_cprq = function(msg) {
+    const room = this.room;
     const deck = this.deck;
+    const aiMap = this.aiMap;
 
     // 조커 콜 처리
     if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
@@ -222,39 +228,45 @@ AIBot.prototype.proc_cprq = function(msg) {
 
     let cardIdx;
     while(true) {
-        cardIdx = this.aiMap.act(gameState);
+        cardIdx = aiMap.act(gameState, deck.length, this.training, (idx) => room.canPlayCard(deck[idx]));
         // 못 내는 카드
-        if(cardIdx >= deck.length || !this.room.canPlayCard(deck[cardIdx])) {
-            this.aiMap.learn(-5);
+        if(cardIdx >= deck.length || !room.canPlayCard(deck[cardIdx])) {
+            if(this.training) aiMap.learn(0);
+            this.failedTry++;
             continue;
         }
         this.cmd({
             type: 'cp',
             cardIdx: cardIdx
         });
-        if(this.room.currentTrick < 10)
-            this.aiMap.learn(0);
+        if(room.currentTrick < 10)
+            if(this.training) this.aiMap.learn(0);
         break;
     }
 };
 
 AIBot.prototype.proc_pcp = function(msg) {
-    if(this.shouldLog) console.log('pcp', msg.player, msg.card.shape, msg.card.num);
+    if(!this.training && this.shouldLog) console.log('pcp', msg.player, msg.card.shape, msg.card.num);
     this.playedCards.push(msg.card);
 };
 
 AIBot.prototype.proc_tend = function() {
     this.playedCards = [];
-    if(this.shouldLog) console.log('---------- trick end');
+    if(!this.training && this.shouldLog) console.log('---------- trick end');
 };
 
 AIBot.prototype.proc_gend = function (msg) {
-    if(this.shouldLog) console.log(msg);
-    this.aiMap.learn(msg.scores[this.selfIndex]);
-    if(this.onEnd) this.onEnd();
+    if(!this.training && this.shouldLog) console.log(msg);
+    if(this.training) this.aiMap.learn(msg.scores[this.selfIndex]);
+    if(this.training) this.aiMap.epsilon -= epsDelta;
+    if(this.onEnd) this.onEnd(1);
 };
 
 AIBot.prototype.proc_gabort = function (msg) {
-    if(this.shouldLog) console.log(msg);
-    if(this.onEnd) this.onEnd();
+    if(!this.training && this.shouldLog) console.log(msg);
+    if(this.onEnd) this.onEnd(-1);
 };
+
+exports.aiEnv = aiEnv;
+exports.aiSpec = aiSpec;
+exports.epsDelta = epsDelta;

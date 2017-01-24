@@ -1,3 +1,5 @@
+const _ =require('lodash');
+
 var R = {}; // the Recurrent library
 
 (function(global) {
@@ -1046,9 +1048,10 @@ var RL = {};
             this.lastG = G; // back this up. Kind of hacky isn't it
             return a2mat;
         },
-        act: function(slist) {
+        act: function(slist, maxAction, training, allowed) {
             // convert to a Mat column vector
             var s = new R.Mat(this.ns, 1);
+            var a;
             s.setFrom(slist);
 
             // epsilon greedy policy
@@ -1057,7 +1060,22 @@ var RL = {};
             } else {
                 // greedy wrt Q function
                 var amat = this.forwardQ(this.net, s, false);
-                var a = R.maxi(amat.w); // returns index of argmax action
+                var exponent = _.map(amat.w.slice(0, maxAction), (w) => Math.exp(w * 5));
+                var expSum = _.sum(exponent);
+                if(training) {
+                    exponent = _.map(exponent, (e) => e / expSum);
+                    a = R.samplei(exponent);
+                } // returns index of argmax action
+                else {
+                    a = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].slice(0, maxAction);
+                    a.sort((p, q) => exponent[q] - exponent[p]);
+                    for(let i = 0 ; i < a.length ; i++) {
+                        if(allowed(a[i])) {
+                            a = a[i];
+                            break;
+                        }
+                    }
+                }
             }
 
             // shift state memory
