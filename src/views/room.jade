@@ -32,13 +32,12 @@ block content
         .modal-content
             h4 조커
             p 나오게 할 문양을 선택해주세요.
-            .input-field
-                select(name='srq')
-                    option(value='none' selected) 없음
-                    option(value='spade') 삽 (스페이드)
-                    option(value='heart') 트 (하트)
-                    option(value='diamond') 다리 (다이아몬드)
-                    option(value='clover') 끌 (클로버)
+            select.browser-default(name='srq')
+                option(value='none' selected) 없음
+                option(value='spade') 삽 (스페이드)
+                option(value='heart') 트 (하트)
+                option(value='diamond') 다리 (다이아몬드)
+                option(value='clover') 끌 (클로버)
         .modal-footer
             button.modal-action.modal-close.waves-effect.waves-green.btn-flat OK
 
@@ -69,14 +68,13 @@ block content
 
         form#template-bidding.game-card.player-form
             span.player-form-title 공약
-            .input-field
-                select(name='bidShape')
-                    option(value='pass' selected) 패스
-                    option(value='spade') 삽 (스페이드)
-                    option(value='heart') 트 (하트)
-                    option(value='diamond') 다리 (다이아몬드)
-                    option(value='clover') 끌 (클로버)
-                    option(value='none') 노 (노기루다)
+            select.browser-default(name='bidShape')
+                option(value='pass' selected) 패스
+                option(value='spade') 삽 (스페이드)
+                option(value='heart') 트 (하트)
+                option(value='diamond') 다리 (다이아몬드)
+                option(value='clover') 끌 (클로버)
+                option(value='none') 노 (노기루다)
             span.range-field
                 input(type='range', name='bidCount', min='13', max='20')
             button.btn.waves-effect.waves-light(type='submit') 공약
@@ -87,43 +85,40 @@ block content
 
         form#template-fselect.game-card.player-form
             span.player-form-title 프렌드 설정
-            .input-field
-                select(name='friendType')
-                    option(value='' disabled selected) 프렌드
-                    option(value='mighty') 마이티
-                    option(value='joker') 조커
-                    option(value='first') 선구
-                    option(value='girudaA') 기루다A
-                    option(value='girudaK') 기루다K
-                    option(value='girudaQ') 기루다Q
-                    option(value='girudaJ') 기루다J
-                    option(value='none') 노프렌드
-                    option(disabled) ──────────
-                    option(value='card_sA') 스페이드 A
-                    option(value='card_sK') 스페이드 K
-                    option(value='card_hA') 하트 A
-                    option(value='card_hK') 하트 K
-                    option(value='card_dA') 다이아 A
-                    option(value='card_dK') 다이아 K
-                    option(value='card_cA') 클로버 A
-                    option(value='card_cK') 클로버 K
-                    option(disabled) ──────────
-                    option(value='player_1') 1플레이어
-                    option(value='player_2') 2플레이어
-                    option(value='player_3') 3플레이어
-                    option(value='player_4') 4플레이어
-                    option(value='player_5') 5플레이어
+            select.browser-default(name='friendType')
+                option(value='' disabled selected) 프렌드
+                option(value='mighty') 마이티
+                option(value='joker') 조커
+                option(value='first') 선구
+                option(value='girudaA') 기루다A
+                option(value='girudaK') 기루다K
+                option(value='girudaQ') 기루다Q
+                option(value='girudaJ') 기루다J
+                option(value='none') 노프렌드
+                option(disabled) ──────────
+                option(value='card_sA') 스페이드 A
+                option(value='card_sK') 스페이드 K
+                option(value='card_hA') 하트 A
+                option(value='card_hK') 하트 K
+                option(value='card_dA') 다이아 A
+                option(value='card_dK') 다이아 K
+                option(value='card_cA') 클로버 A
+                option(value='card_cK') 클로버 K
+                option(disabled) ──────────
+                option(value='player_1') 1플레이어
+                option(value='player_2') 2플레이어
+                option(value='player_3') 3플레이어
+                option(value='player_4') 4플레이어
+                option(value='player_5') 5플레이어
 
 
-
-            .input-field
-                select(name='bidShape')
-                    option(value='pass' selected) 문양 그대로
-                    option(value='spade') 삽 (스페이드)
-                    option(value='heart') 트 (하트)
-                    option(value='diamond') 다리 (다이아몬드)
-                    option(value='clover') 끌 (클로버)
-                    option(value='none') 노 (노기루다)
+            select.browser-default(name='bidShape')
+                option(value='pass' selected) 문양 그대로
+                option(value='spade') 삽 (스페이드)
+                option(value='heart') 트 (하트)
+                option(value='diamond') 다리 (다이아몬드)
+                option(value='clover') 끌 (클로버)
+                option(value='none') 노 (노기루다)
             span.range-field
                 input(type='range', name='bidCount', min='13', max='20')
             button.btn.waves-effect.waves-light(type='submit') 게임시작

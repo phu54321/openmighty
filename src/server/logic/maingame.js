@@ -176,11 +176,12 @@ module.exports = function (MightyRoom) {
             // 조커콜이면 조커를 내야한다. 조커 처리는 위에서 했으니까 여기까지 넘어왓으면 card는 조커가 아닐것이다
             if (this.jokerCalled && mutils.hasShapeOnDeck('joker', playerDeck)) return false;
 
-            // 맨 처음 카드 모양이 있으면 그걸 내야한다.
-            const firstCard = this.playedCards[0];
+            // 부른 카드가 있다면 허용
+            const shapeRequest = this.shapeRequest;
+
             if (
-                card.shape != firstCard.shape &&
-                mutils.hasShapeOnDeck(firstCard.shape, playerDeck)
+                card.shape != shapeRequest &&
+                mutils.hasShapeOnDeck(shapeRequest, playerDeck)
             ) return false;
 
             // 그 외엔 허용
