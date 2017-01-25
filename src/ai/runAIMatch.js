@@ -85,7 +85,6 @@ function loopMain() {
     function onBotComplete(gameDone) {
         if(gameDone) {
             loopCount++;
-            console.log(failedTry);
             if(loopCount % 100 === 0) elapsed_time("Looped " + loopCount);
         }
         process.nextTick(loopMain);

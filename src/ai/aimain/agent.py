@@ -1,4 +1,4 @@
-from DDQN import addExperience, predict
+from DDQN import mainLeaner
 import sys
 import json
 
@@ -10,12 +10,13 @@ class Agent:
         self.reward = 0
 
     def predict(self):
-        return predict(self.state0)
+        return mainLeaner.predict(self.state0)
 
     def setState(self, state):
         assert self.state0 is None or self.action is not None
         if self.state0 is not None:
-            addExperience(self.state0, self.action, self.reward, state)
+            mainLeaner.addExperience(
+                self.state0, self.action, self.reward, state)
         self.state0 = state
         self.action = None
         self.reward = 0
@@ -29,7 +30,8 @@ class Agent:
     def endGame(self):
         assert self.action is not None
         if self.state0 is not None:
-            addExperience(self.state0, self.action, self.reward, None)
+            mainLeaner.addExperience(
+                self.state0, self.action, self.reward, None)
         self.state0 = None
         self.action = None
         self.reward = 0
@@ -38,6 +40,7 @@ class Agent:
 agentMap = {}
 
 if __name__ == '__main__':
+    mainLeaner.loadModel(246)
     sys.stderr.write('AI Agent loaded\n')
 
     while True:
