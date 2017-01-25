@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 
-file = h5py.File('model_00000093_q0.h5', 'r')
+file = h5py.File('model_00000115_q0.h5', 'r')
 model_weights = file['model_weights']
 
 with open("model.js", 'w') as outfile:
