@@ -44,6 +44,7 @@ function GameEnv(game) {
     this.giruda = createOneHotEncoding(5, mutils.bidShapes.indexOf(game.bidShape));
     this.president = createOneHotEncoding(5, game.president);
     this.friend = createZeroArray(6);
+    this.gotCards = createZeroArray(5);
     this.discardedCards = [
         createZeroArray(53),
         createZeroArray(53),
@@ -81,6 +82,7 @@ GameEnv.prototype.onTurnEnd = function (card) {
     const nID = card.cardEnvID % 13 + 2;
     if(slotIndex != 4) this.playerCards[slotIndex * 5 + sID] = nID;
     this.discardedCards[game.currentTurn][card.cardEnvID] = 1;
+    this.gotCards = _.map(game.obtainedCards, (obc) => obc.length);
 
     if(game.friend !== null) {
         applyOneHotEncoding(this.friend, 5, game.friend);
@@ -112,6 +114,7 @@ GameEnv.prototype.getEnvArray = function () {
         this.giruda,
         this.president,
         this.friend,
+        this.gotCards,
         this.discardedCards[0],
         this.discardedCards[1],
         this.discardedCards[2],

@@ -7,7 +7,6 @@
 
 
 const training = true;
-const test_count = 20;
 
 const MightyRoom = require('../server/logic/mighty');
 const AIBot = require('./aiBot');
@@ -61,14 +60,10 @@ asyncLoop(5, (i, next) => {
         next();
     });
 }, function() {
-    if(!training) {
-        loadData();
-    }
     loopMain();
 });
 
 let loopCount = 0;
-let eps = 0.2;
 
 
 
@@ -90,38 +85,10 @@ function loopMain() {
     function onBotComplete(gameDone) {
         if(gameDone) {
             loopCount++;
-            eps -= AIBot.epsDelta;
-            if(loopCount % 10 === 0) elapsed_time("Looped " + loopCount);
-            if(training) {
-                if (eps < 0.05) return saveData();
-                if (loopCount % 100 == 0) saveData();
-            }
-            else {
-                console.log(failedTry + '\n\n\n\n\n\n\n\n\n\n\n\n\n');
-                if(loopCount == test_count) return;
-            }
+            console.log(failedTry);
+            if(loopCount % 100 === 0) elapsed_time("Looped " + loopCount);
         }
         process.nextTick(loopMain);
     }
-}
-
-function loadData() {
-    console.log('=============== Loading... =============');
-    bots.forEach((bot) => {
-        const outPath = path.join(__dirname, 'aidata/' + bot.userEntry.useridf + '.json');
-        const botJson = jsonfile.readFileSync(outPath);
-        bot.aiMap.fromJSON(botJson);
-    });
-    console.log('=============== Loading =============');
-}
-
-
-function saveData() {
-    console.log('=============== Saving... =============');
-    bots.forEach((bot) => {
-        const outPath = path.join(__dirname, 'aidata/' + bot.userEntry.useridf + '.json');
-        jsonfile.writeFileSync(outPath, bot.aiMap.toJSON());
-    });
-    console.log('=============== Saved =============');
 }
 

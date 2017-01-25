@@ -8,23 +8,32 @@ const gameenv = require('./gameenv');
 const cmdproc = require("../server/io/cmdproc");
 const mutils = require('../server/logic/mutils');
 const _ = require('underscore');
-const RL = require('./rl').RL;
-const gameEnvSize = 312;
 const assert = require('assert');
+const path = require('path');
 
-// AI Agent for drawing cards
-const aiEnv = {
-    getNumStates: () => gameEnvSize + 5 + 53,
-    getMaxNumActions: () => 10
-};
+const spawn = require('child_process').spawn;
+const agentMain = spawn('python', ['aimain/agent.py']);
+let onCommand = null;
 
-const aiSpec = {
-    gamma: 0.95,
-    alpha: 0.02,
-    epsilon: 0.2,
-};
+agentMain.stdout.on('data', (data) => {
+    data = data.toString();
+    // console.log('[IN]', data);
+    assert(data.length == 1);
+    onCommand(parseInt(data));
+    onCommand = null;
+});
 
-const epsDelta = (0.2 - 0.05) / 10;
+agentMain.stderr.pipe(process.stdout);
+
+agentMain.on('close', (code) => {
+    console.log(`child process exited with code ${code}`);
+});
+
+function sendAgent(msg, cb) {
+    if(cb) onCommand = cb;
+    // console.log('[OUT]', msg);
+    agentMain.stdin.write(JSON.stringify(msg) + '\n');
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -40,10 +49,9 @@ function AIBot(room, userEntry) {
 
     this.selfIndexEncoding = gameenv.createZeroArray(5);
     this.deckEncoding = gameenv.createZeroArray(53);
-    this.aiMap = new RL.DQNAgent(aiEnv, aiSpec);
     this.shouldLog = (userEntry.useridf == 'AI0');
 
-    console.log('Started', userEntry.useridf);
+    sendAgent({type: 'create', aiIdf: userEntry.useridf});
 }
 
 /**
@@ -108,7 +116,7 @@ AIBot.prototype.proc_gusers = function(msg) {
     this.bidded = false;
     if(!this.shouldLog && !this.training) console.log('gusers', msg);
     for(let i = 0 ; i < 5 ; i++) {
-        if(msg.useridf == this.userEntry.useridf) {
+        if(msg.users[i].useridf == this.userEntry.useridf) {
             gameenv.applyOneHotEncoding(this.selfIndexEncoding, 5, i);
             this.selfIndex = i;
             break;
@@ -211,37 +219,68 @@ AIBot.prototype.proc_fsrq = function () {
 
 AIBot.prototype.proc_binfo = function () {
     this.playedCards = [];
-    this.aiMap.r0 = null;  // Prevent learning from previous game
     this.failedTry = 0;
 };
+
+const exploreFactor = 0.05;
 
 AIBot.prototype.proc_cprq = function(msg) {
     const room = this.room;
     const deck = this.deck;
-    const aiMap = this.aiMap;
+    const bot = this;
+    const aiIdf = bot.userEntry.useridf;
 
     // 조커 콜 처리
     if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
-
-    // 그 외엔 알아서
     const gameState = this.getGameState();
 
-    let cardIdx;
-    while(true) {
-        cardIdx = aiMap.act(gameState, deck.length, this.training, (idx) => room.canPlayCard(deck[idx]));
-        // 못 내는 카드
-        if(cardIdx >= deck.length || !room.canPlayCard(deck[cardIdx])) {
-            if(this.training) aiMap.learn(0);
-            this.failedTry++;
-            continue;
-        }
-        this.cmd({
-            type: 'cp',
-            cardIdx: cardIdx
+    playCard();
+
+    function playCard() {
+        sendAgent({
+            type: 'setstate',
+            aiIdf: aiIdf,
+            state: gameState
         });
-        if(room.currentTrick < 10)
-            if(this.training) this.aiMap.learn(0);
-        break;
+
+        if (Math.random() < exploreFactor) onCardSelect(_.random(0, 9));
+        else {
+            sendAgent({
+                type: 'predict',
+                aiIdf: aiIdf
+            }, onCardSelect);
+        }
+
+        function onCardSelect(cardIdx) {
+            // 못 내는 카드
+            sendAgent({
+                type: 'action',
+                aiIdf: aiIdf,
+                action: cardIdx
+            });
+            if(cardIdx >= deck.length || !room.canPlayCard(deck[cardIdx])) {
+                if(bot.training) {
+                    sendAgent({
+                        type: 'reward',
+                        aiIdf: aiIdf,
+                        reward: -1,  // Basic penalty
+                    });
+                }
+                bot.failedTry++;
+                process.nextTick(playCard);
+            }
+            else {
+                sendAgent({
+                    type: 'reward',
+                    aiIdf: aiIdf,
+                    reward: 1,  // Basic penalty
+                });
+            }
+            bot.cmd({
+                type: 'cp',
+                cardIdx: cardIdx
+            });
+        }
     }
 };
 
@@ -257,8 +296,17 @@ AIBot.prototype.proc_tend = function() {
 
 AIBot.prototype.proc_gend = function (msg) {
     if(!this.training && this.shouldLog) console.log(msg);
-    if(this.training) this.aiMap.learn(msg.scores[this.selfIndex]);
-    if(this.training) this.aiMap.epsilon -= epsDelta;
+    if(this.training) {
+        sendAgent({
+            type: 'reward',
+            aiIdf: this.userEntry.useridf,
+            reward: msg.scores[this.selfIndex]
+        });
+        sendAgent({
+            type: 'endgame',
+            aiIdf: this.userEntry.useridf,
+        });
+    }
     if(this.onEnd) this.onEnd(1);
 };
 
@@ -266,7 +314,3 @@ AIBot.prototype.proc_gabort = function (msg) {
     if(!this.training && this.shouldLog) console.log(msg);
     if(this.onEnd) this.onEnd(-1);
 };
-
-exports.aiEnv = aiEnv;
-exports.aiSpec = aiSpec;
-exports.epsDelta = epsDelta;

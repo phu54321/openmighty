@@ -59,7 +59,7 @@ exports.emitGamePlayers = function (room) {
         });
     room.emit('cmd', {
         type: 'gusers',
-        users: users
+        users: users,
     });
 };
 
