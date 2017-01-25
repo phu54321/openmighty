@@ -1,4 +1,8 @@
 /**
+ * Created by whyask37 on 2017. 1. 25..
+ */
+
+/**
  * Created by whyask37 on 2017. 1. 23..
  */
 
@@ -8,34 +12,32 @@ const gameenv = require('./gameenv');
 const cmdproc = require("../server/io/cmdproc");
 const mutils = require('../server/logic/mutils');
 const _ = require('underscore');
-const assert = require('assert');
-const path = require('path');
 
-const spawn = require('child_process').spawn;
-const agentMain = spawn('python', ['aimain/agent.py']);
-let onCommand = null;
+/////////////////////////////
 
-agentMain.stdout.on('data', (data) => {
-    data = data.toString();
-    // console.log('[IN]', data);
-    assert(data.length == 1);
-    onCommand(parseInt(data));
-    onCommand = null;
-});
+const vectorious = require('vectorious');
+const Matrix = vectorious.Matrix;
+const model = require('./models/model');
 
-agentMain.stderr.pipe(process.stdout);
 
-agentMain.on('close', (code) => {
-    console.log(`child process exited with code ${code}`);
-});
+function select(env) {
+    let v = new Matrix([env]);
+    v = v.multiply(model.W1).map(x => Math.max(x, 0));
+    v = v.multiply(model.W2).map(x => Math.max(x, 0));
+    v = v.multiply(model.W3).map(x => Math.max(x, 0));
+    v = v.multiply(model.W4).map(x => Math.max(x, 0));
+    v = v.multiply(model.W5).toArray();
 
-function sendAgent(msg, cb) {
-    if(cb) onCommand = cb;
-    // console.log('[OUT]', msg);
-    agentMain.stdin.write(JSON.stringify(msg) + '\n');
+    let out = v[0];
+    console.log(out);
+    let index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    index.sort((a, b) => out[b] - out[a]);
+    return index;
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 function AIBot(room, userEntry) {
@@ -50,9 +52,8 @@ function AIBot(room, userEntry) {
     this.selfIndexEncoding = gameenv.createZeroArray(5);
     this.deckEncoding = gameenv.createZeroArray(53);
     this.shouldLog = (userEntry.useridf == 'AI0');
-
-    sendAgent({type: 'create', aiIdf: userEntry.useridf});
 }
+
 
 /**
  * cmd 액션을 게임에 전달합니다.
@@ -93,14 +94,14 @@ AIBot.prototype.emit = function (type, msg) {
  * @param msg
  */
 AIBot.prototype.onCommand = function (msg) {
-    process.nextTick(() => {
-        const badCommand = ['d3rq', 'fsrq'];
+    setTimeout(() => {
+        const badCommand = ['bc1rq', 'fsrq'];
         const mthName = 'proc_' + msg.type;
         if (this[mthName]) return this[mthName](msg);
         else if(badCommand.indexOf(msg.type) != -1) {
             this.cmd({ type: 'abort' });
         }
-    });
+    }, 400);
 };
 
 exports = module.exports = AIBot;
@@ -133,88 +134,14 @@ AIBot.prototype.proc_deck = function (msg) {
     });
 };
 
-AIBot.prototype.getGameState = function (msg) {
-    const env = this.room.gameEnv.getEnvArray();
-    return env.concat(
-        this.selfIndexEncoding,
-        this.deckEncoding
-    );
-};
-
-AIBot.prototype.proc_pbinfo = function (msg) {
-    if(msg.shape != 'pass') this.bidded = true;
-};
-
 
 AIBot.prototype.proc_bidrq = function () {
-    // 내가 A랑 K랑 있고 해당 문양 4장이 있으면 13을 부른다.
-    if(this.bidded) {
-        this.cmd({
-            type: 'bid',
-            shape: 'pass'
-        });
-        return;
-    }
-
-    const cardsByShape =_.groupBy(this.deck, (card) => card.shape);
-    let bidShape = 'pass';
-    _.keys(cardsByShape).forEach((shape) => {
-        const shapeDeck = cardsByShape[shape];
-        if(
-            shapeDeck.length >= 4 &&
-            shapeDeck[0].num == 14
-        ) {
-            bidShape = shape;
-        }
-    });
-    if(!this.training && bidShape != 'pass') console.log(this.userEntry.useridf, bidShape);
     this.cmd({
         type: 'bid',
-        shape: bidShape,
-        num: 13
-    });
-};
-
-AIBot.prototype.proc_bc1rq = function () {
-    this.cmd({
-        type: 'bc1',
         shape: 'pass'
     });
 };
 
-AIBot.prototype.proc_fsrq = function () {
-    const room = this.room;
-    const mightyShape = (this.bidShape == 'spade') ? 'diamond' : 'spade';
-
-    // 버릴 카드 선택
-    // 기루다 빼고 암거나 버리자.
-    const nonGiruda = [];
-    for(let i = 0 ; i < 13 ; i++) {
-        const card = this.deck[i];
-        if(
-            card.shape != room.bidShape &&
-            !(card.shape == mightyShape && card.num == 14) &&
-            card.shape !== 'joker'
-        ) nonGiruda.push(i);
-    }
-
-    let discards;
-    if(nonGiruda.length >= 3) {
-        discards = _.sample(nonGiruda, 3);
-    }
-    else {
-        if(this.deck[9].shape == 'joker') discards = [6, 7, 8];
-        else discards = [7, 8, 9];
-    }
-
-    this.cmd({
-        type: 'fs',
-        ftype: 'card',
-        discards: discards,
-        shape: mightyShape,
-        num: 14
-    });
-};
 
 
 AIBot.prototype.proc_binfo = function () {
@@ -222,95 +149,45 @@ AIBot.prototype.proc_binfo = function () {
     this.failedTry = 0;
 };
 
-const exploreFactor = 0.05;
+
+//////////////////////////////////////////////////
+
+AIBot.prototype.getGameState = function () {
+    const env = this.room.gameEnv.getEnvArray();
+    return env.concat(
+        this.selfIndexEncoding,
+        this.deckEncoding
+    );
+};
+
 
 AIBot.prototype.proc_cprq = function(msg) {
     const room = this.room;
     const deck = this.deck;
     const bot = this;
-    const aiIdf = bot.userEntry.useridf;
 
     // 조커 콜 처리
-    if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
+    if (msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
     const gameState = this.getGameState();
-
-    playCard();
-
-    function playCard() {
-        sendAgent({
-            type: 'setstate',
-            aiIdf: aiIdf,
-            state: gameState
+    const cardIdxV = select(gameState);
+    for (let i = 0; i < 10; i++) {
+        const cardIdx = cardIdxV[i];
+        if (cardIdx >= deck.length || !room.canPlayCard(deck[cardIdx])) continue;
+        console.log(cardIdx, cardIdxV, deck[cardIdx])
+        console.log(this.deck);
+        bot.cmd({
+            type: 'cp',
+            cardIdx: cardIdx
         });
-
-        if (Math.random() < exploreFactor) onCardSelect(_.random(0, 9));
-        else {
-            sendAgent({
-                type: 'predict',
-                aiIdf: aiIdf
-            }, onCardSelect);
-        }
-
-        function onCardSelect(cardIdx) {
-            // 못 내는 카드
-            sendAgent({
-                type: 'action',
-                aiIdf: aiIdf,
-                action: cardIdx
-            });
-            if(cardIdx >= deck.length || !room.canPlayCard(deck[cardIdx])) {
-                if(bot.training) {
-                    sendAgent({
-                        type: 'reward',
-                        aiIdf: aiIdf,
-                        reward: -1,  // Basic penalty
-                    });
-                }
-                bot.failedTry++;
-                process.nextTick(playCard);
-            }
-            else {
-                sendAgent({
-                    type: 'reward',
-                    aiIdf: aiIdf,
-                    reward: 1,  // Basic penalty
-                });
-            }
-            bot.cmd({
-                type: 'cp',
-                cardIdx: cardIdx
-            });
-        }
+        break;
     }
 };
 
 AIBot.prototype.proc_pcp = function(msg) {
-    if(!this.training && this.shouldLog) console.log('pcp', msg.player, msg.card.shape, msg.card.num);
     this.playedCards.push(msg.card);
 };
 
 AIBot.prototype.proc_tend = function() {
+    console.log('----------------------------');
     this.playedCards = [];
-    if(!this.training && this.shouldLog) console.log('---------- trick end');
-};
-
-AIBot.prototype.proc_gend = function (msg) {
-    if(!this.training && this.shouldLog) console.log(msg);
-    if(this.training) {
-        sendAgent({
-            type: 'reward',
-            aiIdf: this.userEntry.useridf,
-            reward: msg.scores[this.selfIndex]
-        });
-        sendAgent({
-            type: 'endgame',
-            aiIdf: this.userEntry.useridf,
-        });
-    }
-    if(this.onEnd) this.onEnd(1);
-};
-
-AIBot.prototype.proc_gabort = function (msg) {
-    if(!this.training && this.shouldLog) console.log(msg);
-    if(this.onEnd) this.onEnd(-1);
 };

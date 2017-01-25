@@ -9,7 +9,7 @@
 const training = true;
 
 const MightyRoom = require('../server/logic/mighty');
-const AIBot = require('./aiBot');
+const AIBot = require('./aiTrainer');
 const jsonfile = require('jsonfile');
 const path = require('path');
 
