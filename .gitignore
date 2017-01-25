@@ -68,6 +68,3 @@ jspm_packages
 # Python thing
 *.pyc
 *.pyo
-
-# Trained models are anyway in rl branch. Ignore here
-*.py
