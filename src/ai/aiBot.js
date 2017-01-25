@@ -29,7 +29,7 @@ function select(env) {
     v = v.multiply(model.W5).toArray();
 
     let out = v[0];
-    console.log(out);
+    // console.log(out);
     let index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     index.sort((a, b) => out[b] - out[a]);
     return index;
@@ -115,7 +115,7 @@ exports = module.exports = AIBot;
 
 AIBot.prototype.proc_gusers = function(msg) {
     this.bidded = false;
-    if(!this.shouldLog && !this.training) console.log('gusers', msg);
+    // if(!this.shouldLog && !this.training) console.log('gusers', msg);
     for(let i = 0 ; i < 5 ; i++) {
         if(msg.users[i].useridf == this.userEntry.useridf) {
             gameenv.applyOneHotEncoding(this.selfIndexEncoding, 5, i);
@@ -127,7 +127,7 @@ AIBot.prototype.proc_gusers = function(msg) {
 
 AIBot.prototype.proc_deck = function (msg) {
     this.deck = msg.deck;
-    if(!this.training && this.shouldLog) console.log('deck', this.userEntry.useridf, msg.deck);
+    // if(!this.training && this.shouldLog) console.log('deck', this.userEntry.useridf, msg.deck);
     this.deckEncoding.fill(0);
     msg.deck.forEach((card) => {
         this.deckEncoding[card.cardEnvID] = 1;
@@ -173,8 +173,8 @@ AIBot.prototype.proc_cprq = function(msg) {
     for (let i = 0; i < 10; i++) {
         const cardIdx = cardIdxV[i];
         if (cardIdx >= deck.length || !room.canPlayCard(deck[cardIdx])) continue;
-        console.log(cardIdx, cardIdxV, deck[cardIdx])
-        console.log(this.deck);
+        // console.log(cardIdx, cardIdxV, deck[cardIdx])
+        // console.log(this.deck);
         bot.cmd({
             type: 'cp',
             cardIdx: cardIdx
@@ -188,6 +188,6 @@ AIBot.prototype.proc_pcp = function(msg) {
 };
 
 AIBot.prototype.proc_tend = function() {
-    console.log('----------------------------');
+    // console.log('----------------------------');
     this.playedCards = [];
 };
