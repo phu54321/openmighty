@@ -15,21 +15,19 @@ const _ = require('underscore');
 
 /////////////////////////////
 
-const vectorious = require('vectorious');
-const Matrix = vectorious.Matrix;
+const math = require('mathjs');
 const model = require('./models/model');
 
 
 function select(env) {
-    let v = new Matrix([env]);
-    v = v.multiply(model.W1).map(x => Math.max(x, 0));
-    v = v.multiply(model.W2).map(x => Math.max(x, 0));
-    v = v.multiply(model.W3).map(x => Math.max(x, 0));
-    v = v.multiply(model.W4).map(x => Math.max(x, 0));
-    v = v.multiply(model.W5).toArray();
+    let v = math.matrix([env]);
+    v = math.multiply(v, model.W1).map(x => Math.max(x, 0));
+    v = math.multiply(v, model.W2).map(x => Math.max(x, 0));
+    v = math.multiply(v, model.W3).map(x => Math.max(x, 0));
+    v = math.multiply(v, model.W4).map(x => Math.max(x, 0));
+    v = math.multiply(v, model.W5).toArray();
 
     let out = v[0];
-    // console.log(out);
     let index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     index.sort((a, b) => out[b] - out[a]);
     return index;
