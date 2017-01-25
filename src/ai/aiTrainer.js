@@ -10,6 +10,8 @@ const mutils = require('../server/logic/mutils');
 const _ = require('underscore');
 const assert = require('assert');
 const path = require('path');
+const isHigherBid = require('../server/logic/bidding').isHigherBid;
+
 
 const spawn = require('child_process').spawn;
 const agentMain = spawn('python', ['aimain/agent.py']);
@@ -17,9 +19,8 @@ let onCommand = null;
 
 agentMain.stdout.on('data', (data) => {
     data = data.toString();
-    // console.log('[IN]', data);
-    assert(data.length == 1);
-    onCommand(parseInt(data));
+    // console.log('[IN]', data.charCodeAt(0));
+    onCommand(data.charCodeAt(0));
     onCommand = null;
 });
 
@@ -54,6 +55,7 @@ function AIBot(room, userEntry) {
     sendAgent({type: 'create', aiIdf: userEntry.useridf});
 }
 
+
 /**
  * cmd 액션을 게임에 전달합니다.
  * @param msg
@@ -61,7 +63,7 @@ function AIBot(room, userEntry) {
  */
 AIBot.prototype.cmd = function (msg) {
     "use strict";
-    // if(this.shouldLog) console.log('[Out]', this.userEntry.useridf, msg);
+    if(this.shouldLog) console.log('[Out]', this.userEntry.useridf, msg);
 
     const cmdProcessor = cmdproc[msg.type];
     if(!cmdProcessor) {
@@ -78,7 +80,7 @@ AIBot.prototype.cmd = function (msg) {
  */
 AIBot.prototype.emit = function (type, msg) {
     "use strict";
-    // if(type == 'err' || this.shouldLog) console.log('[In]', type, this.userEntry.useridf, msg);
+    if(type == 'err' || this.shouldLog) console.log('[In]', type, this.userEntry.useridf, msg);
 
     if(type == 'cmd') {
         this.onCommand(msg);
@@ -113,7 +115,6 @@ exports = module.exports = AIBot;
 // Ignored actions
 
 AIBot.prototype.proc_gusers = function(msg) {
-    this.bidded = false;
     if(!this.shouldLog && !this.training) console.log('gusers', msg);
     for(let i = 0 ; i < 5 ; i++) {
         if(msg.users[i].useridf == this.userEntry.useridf) {
@@ -122,6 +123,7 @@ AIBot.prototype.proc_gusers = function(msg) {
             break;
         }
     }
+    this.bidID = null;
 };
 
 AIBot.prototype.proc_deck = function (msg) {
@@ -141,14 +143,9 @@ AIBot.prototype.getGameState = function (msg) {
     );
 };
 
-AIBot.prototype.proc_pbinfo = function (msg) {
-    if(msg.shape != 'pass') this.bidded = true;
-};
-
 
 AIBot.prototype.proc_bidrq = function () {
-    // 내가 A랑 K랑 있고 해당 문양 4장이 있으면 13을 부른다.
-    if(this.bidded) {
+    if(this.bidID !== null) {
         this.cmd({
             type: 'bid',
             shape: 'pass'
@@ -156,24 +153,55 @@ AIBot.prototype.proc_bidrq = function () {
         return;
     }
 
-    const cardsByShape =_.groupBy(this.deck, (card) => card.shape);
-    let bidShape = 'pass';
-    _.keys(cardsByShape).forEach((shape) => {
-        const shapeDeck = cardsByShape[shape];
-        if(
-            shapeDeck.length >= 4 &&
-            shapeDeck[0].num == 14
-        ) {
-            bidShape = shape;
+    // 내가 A랑 K랑 있고 해당 문양 4장이 있으면 13을 부른다.
+    const aiIdf = this.userEntry.useridf;
+    const bot = this;
+
+    if (Math.random() < exploreFactor) onBidSelect(_.random(0, 40));
+    else {
+        sendAgent({
+            type: 'bidpredict',
+            aiIdf: aiIdf,
+            deck: this.deckEncoding
+        }, onBidSelect);
+    }
+
+    function onBidSelect(bidID) {
+        bot.bidID = bidID;
+
+        let bidShape, bidCount;
+        if (bidID == 40) {
+            bidShape = 'pass';
+            bidCount = 0;
         }
-    });
-    if(!this.training && bidShape != 'pass') console.log(this.userEntry.useridf, bidShape);
-    this.cmd({
-        type: 'bid',
-        shape: bidShape,
-        num: 13
-    });
+        else {
+            bidShape = mutils.bidShapes[(bidID / 8) | 0];
+            bidCount = bidID % 8 + 13;
+        }
+
+        const bidding = bot.room.bidding;
+        const lastBidShape = bidding.lastBidShape || 'none';
+        const lastBidCount = bidding.lastBidCount || 12;
+
+        if (bidShape != 'pass' && isHigherBid(
+                lastBidShape, lastBidCount,
+                bidShape, bidCount
+            )) {
+            bot.cmd({
+                type: 'bid',
+                shape: bidShape,
+                num: bidCount
+            });
+        }
+        else {
+            bot.cmd({
+                type: 'bid',
+                shape: 'pass'
+            });
+        }
+    }
 };
+
 
 AIBot.prototype.proc_bc1rq = function () {
     this.cmd({
@@ -197,6 +225,8 @@ AIBot.prototype.proc_fsrq = function () {
             card.shape !== 'joker'
         ) nonGiruda.push(i);
     }
+
+    // 잘 모르겠고, 버릴 카드를 선택한다.
 
     let discards;
     if(nonGiruda.length >= 3) {
@@ -268,6 +298,7 @@ AIBot.prototype.proc_cprq = function(msg) {
                 }
                 bot.failedTry++;
                 process.nextTick(playCard);
+                return;
             }
             else {
                 sendAgent({
@@ -301,6 +332,13 @@ AIBot.prototype.proc_gend = function (msg) {
             type: 'reward',
             aiIdf: this.userEntry.useridf,
             reward: msg.scores[this.selfIndex]
+        });
+        sendAgent({
+            type: 'bidreward',
+            aiIdf: this.userEntry.useridf,
+            deck: this.deckEncoding,
+            bid: this.bidID,
+            reward:  msg.scores[this.selfIndex]
         });
         sendAgent({
             type: 'endgame',

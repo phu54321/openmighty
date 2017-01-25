@@ -1,4 +1,6 @@
-from DDQN import mainLeaner
+from mainGameAI import mainLeaner
+from bidderAI import bidderLearn
+import numpy as np
 import sys
 import json
 
@@ -8,6 +10,21 @@ class Agent:
         self.state0 = None
         self.action = None
         self.reward = 0
+
+    # Bidding related
+
+    def bidPredict(self, deck):
+        deckRepr = np.zeros(53)
+        deckRepr[deck] = 1
+        self.deckrepr = repr
+        return bidderLearn.predict(deckRepr)
+
+    def bidReward(self, deck, bid, reward):
+        deckRepr = np.zeros(53)
+        deckRepr[deck] = 1
+        bidderLearn.addExperience(deckRepr, bid, reward, None)
+
+    # Main game related
 
     def predict(self):
         return mainLeaner.predict(self.state0)
@@ -48,8 +65,18 @@ if __name__ == '__main__':
         obj = json.loads(line)
         if obj['type'] == 'create':
             agentMap[obj['aiIdf']] = Agent()
+        elif obj['type'] == 'bidpredict':
+            sys.stdout.write(chr(agentMap[obj['aiIdf']].bidPredict(
+                obj['deck']
+            )))
+        elif obj['type'] == 'bidreward':
+            agentMap[obj['aiIdf']].bidReward(
+                obj['deck'],
+                obj['bid'],
+                obj['reward']
+            )
         elif obj['type'] == 'predict':
-            sys.stdout.write(str(agentMap[obj['aiIdf']].predict()))
+            sys.stdout.write(chr(agentMap[obj['aiIdf']].predict()))
         elif obj['type'] == 'setstate':
             agentMap[obj['aiIdf']].setState(obj['state'])
         elif obj['type'] == 'action':

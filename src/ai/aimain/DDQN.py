@@ -1,7 +1,5 @@
+from keras.models import load_model
 import numpy as np
-from keras.models import Sequential, load_model
-from keras.layers.core import Activation, Dense
-from keras.optimizers import Adagrad
 import sys
 
 
@@ -14,7 +12,7 @@ class DDQNLearner:
         modelFunc, inputN, outputN, discountFactor,
         expBufferLen=200,
         batchFreq=10,
-        batchSize=20
+        batchSize=40
     ):
         self.models = [modelFunc(), modelFunc()]
         self.inputN = inputN
@@ -122,30 +120,3 @@ class DDQNLearner:
             'models/model_%s_%08d_q1.h5'
             % (self.name, modelID)
         )
-
-
-# Game main model
-
-
-gameEnvSize = 317 + 5 + 53
-actionSize = 10
-
-
-def createMainModel():
-    model = Sequential()
-    model.add(Dense(100, input_dim=gameEnvSize))
-    model.add(Activation('relu'))
-    model.add(Dense(50))
-    model.add(Activation('relu'))
-    model.add(Dense(50))
-    model.add(Activation('relu'))
-    model.add(Dense(50))
-    model.add(Activation('relu'))
-    model.add(Dense(actionSize))
-    model.compile(loss='mean_squared_error', optimizer=Adagrad())
-    return model
-
-
-mainLeaner = DDQNLearner(
-    'main', createMainModel, gameEnvSize, actionSize, 0.97
-)
