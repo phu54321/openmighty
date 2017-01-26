@@ -26,8 +26,8 @@ function ReLU(v) {
     # Layer info
     for i in range(layerNum):
         denseLayer = model_weights['dense_%d' % (i + 1)]
-        W = denseLayer['dense_%d_W' % (i + 1)]
-        b = denseLayer['dense_%d_b' % (i + 1)]
+        W = denseLayer['dense_%d_W:0' % (i + 1)]
+        b = denseLayer['dense_%d_b:0' % (i + 1)]
         inSize, outSize = W.shape
         outFile.write('const W%d = math.matrix([\n' % i)
         for j in range(inSize):
