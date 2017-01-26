@@ -1,7 +1,7 @@
 from DDQN import DDQNLearner
 from keras.models import Sequential
 from keras.layers.core import Activation, Dense
-from keras.optimizers import Adagrad
+from keras.optimizers import SGD
 
 
 gameEnvSize = 317 + 5 + 53
@@ -19,10 +19,10 @@ def createMainModel():
     model.add(Dense(50))
     model.add(Activation('relu'))
     model.add(Dense(actionSize))
-    model.compile(loss='mean_squared_error', optimizer=Adagrad())
+    model.compile(loss='mean_squared_error', optimizer=SGD())
     return model
 
 
-mainLeaner = DDQNLearner(
+mainLearner = DDQNLearner(
     'main', createMainModel, gameEnvSize, actionSize, 0.97
 )

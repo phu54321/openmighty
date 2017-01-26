@@ -1,5 +1,7 @@
 from DDQN import DDQNLearner
-from keras.models import load_model
+from keras.models import Sequential
+from keras.layers.core import Activation, Dense
+from keras.optimizers import SGD
 
 # Envionments:
 #   - My deck [53]
@@ -12,10 +14,21 @@ actionSize = 40 + 1
 
 
 def createBidderModel():
-    return load_model('models/base_bidder_model.h5')
+    model = Sequential()
+    model.add(Dense(50, input_dim=gameEnvSize))
+    model.add(Activation('relu'))
+    model.add(Dense(50))
+    model.add(Activation('relu'))
+    model.add(Dense(actionSize))
+    model.compile(loss='mean_squared_error', optimizer=SGD())
+    return model
 
 
-bidderLearn = DDQNLearner(
+bidderLearner = DDQNLearner(
     'bidder', createBidderModel, gameEnvSize, actionSize, 0.97,
-    100, 10, 10, saveFreq=500
+    expBufferLen=400,
+    batchFreq=10,
+    batchSize=100,
+    batchIter=2,
+    saveFreq=1000
 )

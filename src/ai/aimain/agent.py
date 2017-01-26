@@ -1,5 +1,5 @@
-from mainGameAI import mainLeaner
-from bidderAI import bidderLearn
+from mainGameAI import mainLearner
+from bidderAI import bidderLearner
 import numpy as np
 import sys
 import json
@@ -17,25 +17,23 @@ class Agent:
         deckRepr = np.zeros(53)
         deckRepr[deck] = 1
         self.deckrepr = repr
-        return bidderLearn.predict(deckRepr)
+        return bidderLearner.predict(deckRepr)
 
     def bidReward(self, deck, bid, reward):
         deckRepr = np.zeros(53)
         deckRepr[deck] = 1
-        bidderLearn.addExperience(deckRepr, bid, reward, None)
+        bidderLearner.addExperience(deckRepr, bid, reward, None)
 
     # Main game related
 
     def predict(self):
-        return mainLeaner.predict(self.state0)
+        return mainLearner.predict(self.state0)
 
     def setState(self, state):
         assert self.state0 is None or self.action is not None
-        '''
         if self.state0 is not None:
-            mainLeaner.addExperience(
+            mainLearner.addExperience(
                 self.state0, self.action, self.reward, state)
-        '''
         self.state0 = state
         self.action = None
         self.reward = 0
@@ -48,11 +46,9 @@ class Agent:
 
     def endGame(self):
         assert self.action is not None
-        '''
         if self.state0 is not None:
-            mainLeaner.addExperience(
+            mainLearner.addExperience(
                 self.state0, self.action, self.reward, None)
-        '''
         self.state0 = None
         self.action = None
         self.reward = 0
@@ -61,7 +57,8 @@ class Agent:
 agentMap = {}
 
 if __name__ == '__main__':
-    mainLeaner.loadModel(246)
+    mainLearner.loadModel(246)
+    bidderLearner.loadModel(1)
     sys.stderr.write('AI Agent loaded\n')
 
     while True:

@@ -1,4 +1,5 @@
 from keras.models import load_model
+from keras.optimizers import SGD
 import numpy as np
 import sys
 
@@ -13,6 +14,7 @@ class DDQNLearner:
         expBufferLen=200,
         batchFreq=10,
         batchSize=40,
+        batchIter=10,
         saveFreq=10000
     ):
         self.models = [modelFunc(), modelFunc()]
@@ -25,6 +27,7 @@ class DDQNLearner:
         self.discountFactor = discountFactor,
         self.batchFreq = batchFreq
         self.batchSize = batchSize
+        self.batchIter = batchIter
 
         # Experience buffers
         self.bufferIndex = 0
@@ -56,7 +59,7 @@ class DDQNLearner:
         history = self.models[0].fit(
             state0V, target,
             batch_size=self.batchSize,
-            nb_epoch=10,
+            nb_epoch=self.batchIter,
             verbose=0
         )
         self.models[:] = self.models[::-1]
@@ -99,7 +102,7 @@ class DDQNLearner:
                     # Save automatically
                     sys.stderr.write(
                         '[%s] Trained %d times, loss=%g\n'
-                        % (self.name, self.trainCount, np.sum(loss))
+                        % (self.name, self.trainCount, np.mean(loss))
                     )
                     modelID = self.trainCount / self.saveFreq
                     self.models[0].save(
@@ -121,3 +124,6 @@ class DDQNLearner:
             'models/model_%s_%08d_q1.h5'
             % (self.name, modelID)
         )
+        self.models[0].compile(loss='mean_squared_error', optimizer=SGD())
+        self.models[1].compile(loss='mean_squared_error', optimizer=SGD())
+
