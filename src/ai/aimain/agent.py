@@ -31,9 +31,11 @@ class Agent:
 
     def setState(self, state):
         assert self.state0 is None or self.action is not None
+        '''
         if self.state0 is not None:
             mainLeaner.addExperience(
                 self.state0, self.action, self.reward, state)
+        '''
         self.state0 = state
         self.action = None
         self.reward = 0
@@ -46,9 +48,11 @@ class Agent:
 
     def endGame(self):
         assert self.action is not None
+        '''
         if self.state0 is not None:
             mainLeaner.addExperience(
                 self.state0, self.action, self.reward, None)
+        '''
         self.state0 = None
         self.action = None
         self.reward = 0
@@ -82,8 +86,6 @@ if __name__ == '__main__':
         elif obj['type'] == 'action':
             agentMap[obj['aiIdf']].doAction(obj['action'])
         elif obj['type'] == 'reward':
-            if 'reward' not in obj:
-                sys.stderr.write(str(obj) + '\n')
             agentMap[obj['aiIdf']].addReward(obj['reward'])
         elif obj['type'] == 'endgame':
             agentMap[obj['aiIdf']].endGame()

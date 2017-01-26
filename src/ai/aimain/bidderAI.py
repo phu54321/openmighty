@@ -16,5 +16,6 @@ def createBidderModel():
 
 
 bidderLearn = DDQNLearner(
-    'main', createBidderModel, gameEnvSize, actionSize, 0.97
+    'bidder', createBidderModel, gameEnvSize, actionSize, 0.97,
+
 )
