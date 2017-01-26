@@ -15,7 +15,7 @@ class DDQNLearner:
         batchFreq=10,
         batchSize=40,
         batchIter=10,
-        saveFreq=10000
+        saveFreq=100
     ):
         self.models = [modelFunc(), modelFunc()]
         self.inputN = inputN
@@ -63,6 +63,7 @@ class DDQNLearner:
             verbose=0
         )
         self.models[:] = self.models[::-1]
+        sys.stderr.write('%s\n' % history.history)
         return history.history['loss']
 
     def predict(self, state):
@@ -101,8 +102,8 @@ class DDQNLearner:
                 if self.trainCount % self.saveFreq == 0:
                     # Save automatically
                     sys.stderr.write(
-                        '[%s] Trained %d times, loss=%g\n'
-                        % (self.name, self.trainCount, np.mean(loss))
+                        '[%s] Trained %d times\n'
+                        % (self.name, self.trainCount, loss)
                     )
                     modelID = self.trainCount / self.saveFreq
                     self.models[0].save(
@@ -124,6 +125,4 @@ class DDQNLearner:
             'models/model_%s_%08d_q1.h5'
             % (self.name, modelID)
         )
-        self.models[0].compile(loss='mean_squared_error', optimizer=SGD())
-        self.models[1].compile(loss='mean_squared_error', optimizer=SGD())
 

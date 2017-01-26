@@ -16,23 +16,8 @@ const _ = require('underscore');
 /////////////////////////////
 
 const math = require('mathjs');
-const model = require('./models/model');
-
-
-function select(env) {
-    let v = math.matrix([env]);
-    v = math.multiply(v, model.W1).map(x => Math.max(x, 0));
-    v = math.multiply(v, model.W2).map(x => Math.max(x, 0));
-    v = math.multiply(v, model.W3).map(x => Math.max(x, 0));
-    v = math.multiply(v, model.W4).map(x => Math.max(x, 0));
-    v = math.multiply(v, model.W5).toArray();
-
-    let out = v[0];
-    let index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    index.sort((a, b) => out[b] - out[a]);
-    return index;
-}
-
+const mainModel = require('./models/modelMain');
+const bidderModel = require('./models/modelBidder');
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -99,7 +84,7 @@ AIBot.prototype.onCommand = function (msg) {
         else if(badCommand.indexOf(msg.type) != -1) {
             this.cmd({ type: 'abort' });
         }
-    }, 400);
+    }, 800);
 };
 
 exports = module.exports = AIBot;
@@ -134,10 +119,41 @@ AIBot.prototype.proc_deck = function (msg) {
 
 
 AIBot.prototype.proc_bidrq = function () {
-    this.cmd({
-        type: 'bid',
-        shape: 'pass'
-    });
+    let bidID = bidderModel.forward(this.deckEncoding)[0];
+    let bidShape, bidCount;
+
+    // Try bidding
+    if (bidID == 40) {
+        this.cmd({
+            type: 'bid',
+            shape: 'pass'
+        });
+        return;
+    }
+
+    bidShape = mutils.bidShapes[(bidID / 8) | 0];
+    bidCount = bidID % 8 + 13;
+
+    const bidding = this.room.bidding;
+    const lastBidShape = bidding.lastBidShape || 'none';
+    const lastBidCount = bidding.lastBidCount || 12;
+
+    if (bidShape != 'pass' && isHigherBid(
+            lastBidShape, lastBidCount,
+            bidShape, bidCount
+        )) {
+        this.cmd({
+            type: 'bid',
+            shape: bidShape,
+            num: bidCount
+        });
+    }
+    else {
+        this.cmd({
+            type: 'bid',
+            shape: 'pass'
+        });
+    }
 };
 
 
@@ -167,7 +183,7 @@ AIBot.prototype.proc_cprq = function(msg) {
     // 조커 콜 처리
     if (msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
     const gameState = this.getGameState();
-    const cardIdxV = select(gameState);
+    const cardIdxV = mainModel.forward(gameState);
     for (let i = 0; i < 10; i++) {
         const cardIdx = cardIdxV[i];
         if (cardIdx >= deck.length || !room.canPlayCard(deck[cardIdx])) continue;
