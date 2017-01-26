@@ -194,6 +194,7 @@ AIBot.prototype.proc_bidrq = function () {
             });
         }
         else {
+            bot.bidID = 40;
             bot.cmd({
                 type: 'bid',
                 shape: 'pass'

@@ -119,7 +119,9 @@ AIBot.prototype.proc_deck = function (msg) {
 
 
 AIBot.prototype.proc_bidrq = function () {
+    console.log(this.deck);
     let bidID = bidderModel.forward(this.deckEncoding)[0];
+
     let bidShape, bidCount;
 
     // Try bidding
