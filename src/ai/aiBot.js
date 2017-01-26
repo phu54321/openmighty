@@ -18,6 +18,7 @@ const _ = require('underscore');
 const math = require('mathjs');
 const mainModel = require('./models/modelMain');
 const bidderModel = require('./models/modelBidder');
+const isHigherBid = require('../server/logic/bidding').isHigherBid;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -78,7 +79,7 @@ AIBot.prototype.emit = function (type, msg) {
  */
 AIBot.prototype.onCommand = function (msg) {
     setTimeout(() => {
-        const badCommand = ['bc1rq', 'fsrq'];
+        const badCommand = [];
         const mthName = 'proc_' + msg.type;
         if (this[mthName]) return this[mthName](msg);
         else if(badCommand.indexOf(msg.type) != -1) {
@@ -119,43 +120,53 @@ AIBot.prototype.proc_deck = function (msg) {
 
 
 AIBot.prototype.proc_bidrq = function () {
-    console.log(this.deck);
-    let bidID = bidderModel.forward(this.deckEncoding)[0];
+    this.cmd({
+        type: 'bid',
+        shape: 'pass'
+    });
+};
 
-    let bidShape, bidCount;
+AIBot.prototype.proc_bc1rq = function () {
+    this.cmd({
+        type: 'bc1',
+        shape: 'pass'
+    });
+};
 
-    // Try bidding
-    if (bidID == 40) {
-        this.cmd({
-            type: 'bid',
-            shape: 'pass'
-        });
-        return;
+AIBot.prototype.proc_fsrq = function () {
+    const room = this.room;
+    const mightyShape = (this.bidShape == 'spade') ? 'diamond' : 'spade';
+
+    // 버릴 카드 선택
+    // 기루다 빼고 암거나 버리자.
+    const nonGiruda = [];
+    for(let i = 0 ; i < 13 ; i++) {
+        const card = this.deck[i];
+        if(
+            card.shape != room.bidShape &&
+            !(card.shape == mightyShape && card.num == 14) &&
+            card.shape !== 'joker'
+        ) nonGiruda.push(i);
     }
 
-    bidShape = mutils.bidShapes[(bidID / 8) | 0];
-    bidCount = bidID % 8 + 13;
+    // 잘 모르겠고, 버릴 카드를 선택한다.
 
-    const bidding = this.room.bidding;
-    const lastBidShape = bidding.lastBidShape || 'none';
-    const lastBidCount = bidding.lastBidCount || 12;
-
-    if (bidShape != 'pass' && isHigherBid(
-            lastBidShape, lastBidCount,
-            bidShape, bidCount
-        )) {
-        this.cmd({
-            type: 'bid',
-            shape: bidShape,
-            num: bidCount
-        });
+    let discards;
+    if(nonGiruda.length >= 3) {
+        discards = _.sample(nonGiruda, 3);
     }
     else {
-        this.cmd({
-            type: 'bid',
-            shape: 'pass'
-        });
+        if(this.deck[9].shape == 'joker') discards = [6, 7, 8];
+        else discards = [7, 8, 9];
     }
+
+    this.cmd({
+        type: 'fs',
+        ftype: 'card',
+        discards: discards,
+        shape: mightyShape,
+        num: 14
+    });
 };
 
 

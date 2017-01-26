@@ -49,6 +49,7 @@ module.exports = function (room) {
 
     // console.log('calculating set');
 
+    const isLastTurn = (room.currentTrick == 10);
     const discardedMap = postGroupBy(_.groupBy(room.discardedCards, (c) => c.shape));  // 문양당 버려진 카드
     const isMightyDown = deckHasCard(room.discardedCards, room.mighty);  // 마이티가 버려졌나
     const isJokerDown = (discardedMap.joker.length == 1);  // 조커가 버려졌나.
@@ -64,7 +65,8 @@ module.exports = function (room) {
 
         //  1. 마이티/조커중 하나라도 다른 사람에게 있으면 질 수 있다. 이 경우는 그냥 제외
         if(!isMightyDown && !hasMighty) continue;
-        if(!isJokerDown && !hasJoker) continue;
+        if(!isLastTurn && !isJokerDown && !hasJoker) continue;
+        if(isLastTurn && hasJoker) continue;  // 왜 마지막 카드가 조커니
 
         // 2. 남은 모든 기루다는 내게 있어야 한다.
         let userGirudaCount;

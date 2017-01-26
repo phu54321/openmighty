@@ -187,8 +187,10 @@ exports.forward = function (env) {
     v = Dense(v, W1, b1);
     v = ReLU(v);
     v = Dense(v, W2, b2);
-    let out = v.toArray()[0];
-    console.log(out);
+    return v.toArray()[0];
+};
+
+exports.fwIndex = function (out) {
     let index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40];
     index.sort((a, b) => out[b] - out[a]);
     return index;
