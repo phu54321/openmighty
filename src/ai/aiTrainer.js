@@ -145,7 +145,7 @@ AIBot.prototype.getGameState = function (msg) {
 
 
 AIBot.prototype.proc_bidrq = function () {
-    if(this.bidID !== null) {
+    if (this.bidID !== null) {
         this.cmd({
             type: 'bid',
             shape: 'pass'
@@ -154,53 +154,23 @@ AIBot.prototype.proc_bidrq = function () {
     }
 
     // 내가 A랑 K랑 있고 해당 문양 4장이 있으면 13을 부른다.
-    const aiIdf = this.userEntry.useridf;
-    const bot = this;
-
-    if (Math.random() < exploreFactor) onBidSelect(_.random(0, 40));
-    else {
-        sendAgent({
-            type: 'bidpredict',
-            aiIdf: aiIdf,
-            deck: this.deckEncoding
-        }, onBidSelect);
-    }
-
-    function onBidSelect(bidID) {
-        bot.bidID = bidID;
-
-        let bidShape, bidCount;
-        if (bidID == 40) {
-            bidShape = 'pass';
-            bidCount = 0;
+    const cardsByShape = _.groupBy(this.deck, (card) => card.shape);
+    let bidShape = 'pass';
+    _.keys(cardsByShape).forEach((shape) => {
+        const shapeDeck = cardsByShape[shape];
+        if (
+            shapeDeck.length >= 4 &&
+            shapeDeck[0].num == 14
+        ) {
+            bidShape = shape;
         }
-        else {
-            bidShape = mutils.bidShapes[(bidID / 8) | 0];
-            bidCount = bidID % 8 + 13;
-        }
-
-        const bidding = bot.room.bidding;
-        const lastBidShape = bidding.lastBidShape || 'none';
-        const lastBidCount = bidding.lastBidCount || 12;
-
-        if (bidShape != 'pass' && isHigherBid(
-                lastBidShape, lastBidCount,
-                bidShape, bidCount
-            )) {
-            bot.cmd({
-                type: 'bid',
-                shape: bidShape,
-                num: bidCount
-            });
-        }
-        else {
-            bot.bidID = 40;
-            bot.cmd({
-                type: 'bid',
-                shape: 'pass'
-            });
-        }
-    }
+    });
+    if (!this.training && bidShape != 'pass') console.log(this.userEntry.useridf, bidShape);
+    this.cmd({
+        type: 'bid',
+        shape: bidShape,
+        num: 13
+    });
 };
 
 
