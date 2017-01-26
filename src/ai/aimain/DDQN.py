@@ -12,7 +12,8 @@ class DDQNLearner:
         modelFunc, inputN, outputN, discountFactor,
         expBufferLen=200,
         batchFreq=10,
-        batchSize=40
+        batchSize=40,
+        saveFreq=10000
     ):
         self.models = [modelFunc(), modelFunc()]
         self.inputN = inputN
@@ -37,7 +38,7 @@ class DDQNLearner:
         self.expGC = np.zeros((expBufferLen,), dtype='bool')
 
         self.trainCount = 0
-        self.saveFreq = 100
+        self.saveFreq = saveFreq
 
     def Q(self, stateV, index):
         return self.models[index].predict(stateV, stateV.shape[0])
