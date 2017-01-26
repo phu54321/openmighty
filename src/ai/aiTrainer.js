@@ -333,13 +333,15 @@ AIBot.prototype.proc_gend = function (msg) {
             aiIdf: this.userEntry.useridf,
             reward: msg.scores[this.selfIndex]
         });
-        sendAgent({
-            type: 'bidreward',
-            aiIdf: this.userEntry.useridf,
-            deck: this.deckEncoding,
-            bid: this.bidID,
-            reward:  msg.scores[this.selfIndex]
-        });
+        if(this.bidID !== null) {  // Run bid -> Later people can't bid anymore
+            sendAgent({
+                type: 'bidreward',
+                aiIdf: this.userEntry.useridf,
+                deck: this.deckEncoding,
+                bid: this.bidID,
+                reward:  msg.scores[this.selfIndex]
+            });
+        }
         sendAgent({
             type: 'endgame',
             aiIdf: this.userEntry.useridf,
