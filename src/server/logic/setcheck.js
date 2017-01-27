@@ -49,7 +49,7 @@ module.exports = function (room) {
 
     // console.log('calculating set');
 
-    const isLastTurn = (room.currentTrick == 10);
+    const isLastTurn = (room.currentTrick == 9);  // setcheck 다음에 trick이 10으로 증가되서 여기선 9와 비교
     const discardedMap = postGroupBy(_.groupBy(room.discardedCards, (c) => c.shape));  // 문양당 버려진 카드
     const isMightyDown = deckHasCard(room.discardedCards, room.mighty);  // 마이티가 버려졌나
     const isJokerDown = (discardedMap.joker.length == 1);  // 조커가 버려졌나.

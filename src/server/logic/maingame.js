@@ -294,22 +294,25 @@ module.exports = function (MightyRoom) {
             }
         }
 
-        // 점수 계산
+        // 점수 계산 - 방식은 http://no-smok.net/nsmk/마이티 를 따름
         // 여당 승리점수 = (공약 장수(contract) - 기본장수) × 2 + (여당(declarer's team) 획득 장수 - 공약 장수(bid))
         const scoreTable = [0, 0, 0, 0, 0];
         const leadingTeamCardCount = 20 - oppObtainedCardCount;
         let leadingTeamScore;
 
-        if(leadingTeamCardCount >= this.bidCount) leadingTeamScore = leadingTeamCardCount + this.bidCount - 26;
+        if(leadingTeamCardCount >= this.bidCount) leadingTeamScore = leadingTeamCardCount - 10;
         else {
-            leadingTeamScore = 3 * this.bidCount - leadingTeamCardCount- 26;
+            leadingTeamScore = this.bidCount - leadingTeamCardCount;
             if(oppObtainedCardCount >= 11) leadingTeamScore *= 2;  // 백런
             leadingTeamScore = -leadingTeamScore;
         }
 
-        if(this.bidCount == 20) leadingTeamScore *= 2;  // 런
+        if(this.bidCount == 20) {  // 예고 런
+            if(this.bidShape == 'none') leadingTeamScore *= 3;  // 노기루다 런은 *2*2가 아니라 *1.5만 한다.
+            else leadingTeamScore *= 2;
+        }
+        else if(this.bidShape == 'none') leadingTeamScore *= 2;  // 노기루다
         if(this.friendType == 'none') leadingTeamScore *= 2;  // 지정 노프렌드
-        if(this.bidShape == 'none') leadingTeamScore *= 2;  // 노기루다
 
         if(this.friend === null) {
             for(let i = 0 ; i < 5 ; i++) {
