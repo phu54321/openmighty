@@ -283,7 +283,7 @@ module.exports = function (MightyRoom) {
 
         // set으로 끝났으면
         if(setUser !== undefined) {
-            // 조커 프렌드였으면 조커가 남은 사람을 프렌으로 지정
+            // 카드 프렌드였으면 해당 카드가 남은 플레이어를 프렌드로 지정
             if(this.friend === null && this.friendType == 'card') {
                 for (let i = 0; i < 5; i++) {
                     if (mutils.hasCardOnDeck(this.friendCard, this.gameUsers[i].deck)) {
