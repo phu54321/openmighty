@@ -124,7 +124,7 @@ exports = module.exports = function (MightyRoom) {
 
         function passBidding(room) {
             if(
-                room.lastBidCount == 20 ||  // 런 공약
+                bidding.lastBidCount == 20 ||  // 런 공약
                 !room.findNextBidder()  // 마지막 공약
             ) {
                 room.submitBidder();
