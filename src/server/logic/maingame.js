@@ -283,6 +283,16 @@ module.exports = function (MightyRoom) {
 
         // set으로 끝났으면
         if(setUser !== undefined) {
+            // 조커 프렌드였으면 조커가 남은 사람을 프렌으로 지정
+            if(this.friend === null && this.friendType == 'card') {
+                for (let i = 0; i < 5; i++) {
+                    if (mutils.hasCardOnDeck(this.friendCard, this.gameUsers[i].deck)) {
+                        this.friend = i;
+                        break;
+                    }
+                }
+            }
+
             // 야당이 set했으면 모든 남은 점카를 준다.
             if(setUser != this.president && setUser != this.friend) {
                 for(let i = 0 ; i < 5 ; i++) {

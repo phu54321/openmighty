@@ -1,3 +1,3 @@
 import modelWriter
 
-modelWriter.writeModel('main', 432, 5)
+modelWriter.writeModel('main', 1312, 5)

@@ -53,13 +53,26 @@ exports.sortDeck = function (deck) {
 
 
 /**
- * 덱에 카드가 있는지 봅니다
+ * 덱에 카드 문양이 있는지 봅니다
  */
 function hasShapeOnDeck(shape, deck) {
     return !_.every(deck, (card) => card.shape != shape);
 }
 
 exports.hasShapeOnDeck = hasShapeOnDeck;
+
+
+/**
+ * 덱에 카드가 있는지 봅니다
+ */
+function hasCardOnDeck(card, deck) {
+    return !_.every(deck, (c) => compareCard(card, c) !== 0);
+}
+
+exports.hasCardOnDeck = hasCardOnDeck;
+
+
+
 
 //////////
 
