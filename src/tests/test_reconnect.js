@@ -151,7 +151,7 @@ describe('RSocket', function() {
 
         const rawsocket1 = createMock(0);
         const socket2 = rsock.checkNewConnection(rawsocket1);
-        assert(socket2 == null);
+        assert(socket2 === null);
 
         setTimeout(() => {
             assert(!socket.disconnected);

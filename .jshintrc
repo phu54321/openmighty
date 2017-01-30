@@ -2,6 +2,7 @@
   "node": true,
   "browser": true,
   "jquery": true,
+  "mocha": true,
   "esversion": 6,
   "-W034": true
 }
