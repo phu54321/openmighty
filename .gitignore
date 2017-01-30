@@ -68,3 +68,4 @@ jspm_packages
 # Python thing
 *.pyc
 *.pyo
+/knexfile.js

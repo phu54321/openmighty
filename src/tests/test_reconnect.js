@@ -131,20 +131,20 @@ describe('RSocket', function() {
     it('should persist with non-zero latency', function(done) {
         const rawsocket = createMock(0);
         const socket = rsock.checkNewConnection(rawsocket);
-        socket.waitTime = 0.1;
+        socket.waitTime = 0.01;
 
         rawsocket.inDisconnect();
         assert(!socket.disconnected);
         setTimeout(() => {
             assert(socket.disconnected);
             done();
-        }, 300);
+        }, 100);
     });
 
     it('should reconnect', function(done) {
         const rawsocket = createMock(0);
         const socket = rsock.checkNewConnection(rawsocket);
-        socket.waitTime = 0.1;
+        socket.waitTime = 0.01;
 
         rawsocket.inDisconnect();
         assert(!socket.disconnected);
@@ -158,7 +158,7 @@ describe('RSocket', function() {
             socket.on('async', (data) => { assert(data == 'test'); });
             rawsocket1.inMsg('async', 'test');
             done();
-        }, 300);
+        }, 100);
     });
 
 
@@ -176,7 +176,7 @@ describe('RSocket', function() {
         const rawsocket2 = createMock(1);
         const socket1 = rsock.checkNewConnection(rawsocket1);
         const socket2 = rsock.checkNewConnection(rawsocket2);
-        assert(socket2 == null);
+        assert(socket2 === null);
         done();
     });
 });

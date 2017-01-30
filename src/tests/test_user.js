@@ -8,27 +8,48 @@
 
 "use strict";
 
+const knexfile = require('../../knexfile');
+knexfile.development.connection.database = 'test';  // Mockup
+
 const assert = require('assert');
 const users = require('../model/users');
+const db = require('../model/db');
 const async = require('async');
 
 ////
 
 describe('User', function() {
+    beforeEach(function(done) {
+        db('users').truncate().then(() => done());
+    });
+
+    afterEach(function(done) {
+        db('users').truncate().then(() => done());
+    });
+
     describe('#addUser', function() {
-        it('should add user to database', function(done) {
+        it('should add user to database', function (done) {
             async.waterfall([
-                (cb) => users.addUser({
-                    username: 'test',
-                    password: 'password'
-                }, cb),
-                (cb) => {
-                    users.findUserWithUsername('test', cb);
-                },
+                (cb) => users.addUser({ username: 'test', password: 'password' }, cb),
+                (cb) =>  users.findUserWithUsername('test', cb),
                 (user, cb) => {
-                    assert.equal(user.username, 'test', 'Invalid username!');
+                    assert.equal(user.username, 'test');
                     cb();
                 }
+            ], (err) => {
+                done(err);
+            });
+        });
+
+        it('should do duplicate username check', function (done) {
+            async.waterfall([
+                (cb) => users.addUser({username: 'test', password: 'password'}, cb),
+                (cb) => {
+                    users.addUser({username: 'test', password: 'password'}, (err) => {
+                        assert.notEqual(err, null);
+                        cb(null);
+                    });
+                },
             ], (err) => {
                 done(err);
             });
