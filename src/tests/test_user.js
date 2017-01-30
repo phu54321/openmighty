@@ -54,5 +54,23 @@ describe('User', function() {
                 done(err);
             });
         });
+
+        it('should be able to manage multiple accounts', function (done) {
+            async.waterfall([
+                (cb) => users.addUser({ username: 'test1', password: 'password' }, cb),
+                (cb) => users.addUser({ username: 'test2', password: 'password' }, cb),
+                (cb) => users.findUserWithUsername('test1', cb),
+                (user, cb) => {
+                    assert.equal(user.username, 'test1');
+                    users.findUserWithUsername('test2', cb);
+                },
+                (user, cb) => {
+                    assert.equal(user.username, 'test2');
+                    cb(null);
+                }
+            ], (err) => {
+                done(err);
+            });
+        });
     });
 });

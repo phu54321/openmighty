@@ -12,14 +12,21 @@ exports.addUser = function (userinfo, cb) {
         password: userinfo.password,
         email: userinfo.email
     })
-        .then(function (id) {
+        .then(function () {
             cb(null);
-        })
-        .catch(function (err) {
+        }, function (err) {
             cb(err);
         });
 };
 
 exports.findUserWithUsername = function (username, cb) {
-    cb(null, {username: 'test'});
+    db('users')
+        .select('username', 'email')
+        .where({username: username})
+        .limit(1)
+        .then(function (entry) {
+            cb(null, entry[0]);
+        }, function (err) {
+            cb(err);
+        });
 };
