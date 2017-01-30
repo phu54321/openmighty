@@ -31,7 +31,7 @@ describe('User', function() {
         it('should add user to database', function (done) {
             async.waterfall([
                 (cb) => users.addUser({ username: 'test', password: 'password' }, cb),
-                (cb) =>  users.findUserWithUsername('test', cb),
+                (_, cb) =>  users.findUserWithUsername('test', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test');
                     cb();
@@ -44,7 +44,7 @@ describe('User', function() {
         it('should do duplicate username check', function (done) {
             async.waterfall([
                 (cb) => users.addUser({username: 'test', password: 'password'}, cb),
-                (cb) => {
+                (_, cb) => {
                     users.addUser({username: 'test', password: 'password'}, (err) => {
                         assert.notEqual(err, null);
                         cb(null);
@@ -58,8 +58,8 @@ describe('User', function() {
         it('should be able to manage multiple accounts', function (done) {
             async.waterfall([
                 (cb) => users.addUser({ username: 'test1', password: 'password' }, cb),
-                (cb) => users.addUser({ username: 'test2', password: 'password' }, cb),
-                (cb) => users.findUserWithUsername('test1', cb),
+                (_, cb) => users.addUser({ username: 'test2', password: 'password' }, cb),
+                (_, cb) => users.findUserWithUsername('test1', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test1');
                     users.findUserWithUsername('test2', cb);
