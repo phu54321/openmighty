@@ -17,7 +17,9 @@ db.schema.hasTable('users').then(function(exists) {
         db.schema.createTable('users', function(table) {
             table.increments('id').primary();
             table.string('username').unique();
+            table.string('email').unique();
             table.string('pwhash');
+            table.boolean('activated');
             table.timestamps();
         }).then(() => {
             dbInitialized = true;
@@ -32,10 +34,26 @@ while(!dbInitialized) {
 
 //// Utility functions
 
+
+/**
+ * 올바른 아이디인지
+ * @param username
+ * @returns {boolean}
+ */
 function isValidUsername(username) {
-    return /^\w{4,12}$/.test(username);
+    return username && /^\w{4,16}$/.test(username);
 }
 exports.isValidUsername = isValidUsername;
+
+
+/**
+ * 올바른 이메일인지
+ * @param email
+ * @returns {boolean}
+ */
+function isValidEmail(email) {
+    return email && /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email);
+}
 
 
 /**
@@ -44,6 +62,10 @@ exports.isValidUsername = isValidUsername;
  * @param cb - Callback
  */
 exports.addUser = function (userinfo, cb) {
+    // Basic check
+    if(!isValidEmail(userinfo.email) || !isValidUsername(userinfo.username)) {
+        return cb(new Error('Incomplete data'));
+    }
     // Create password hash
     bcrypt.hash(userinfo.password, 10, function(err, hash) {
         if(err) return cb(err);

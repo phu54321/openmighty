@@ -12,11 +12,19 @@ const knexfile = require('../../knexfile');
 knexfile.development.connection.database = 'test';  // Mockup
 
 const assert = require('assert');
-const users = require('../model/users');
-const db = require('../model/db');
+const users = require('../models/users');
+const db = require('../models/db');
 const async = require('async');
 
 ////
+
+function generateUser(username) {
+    return {
+        username: username,
+        email: 'test@test.com',
+        password: 'password'
+    };
+}
 
 describe('User', function() {
     beforeEach(function(done) {
@@ -26,7 +34,7 @@ describe('User', function() {
     describe('#addUser', function() {
         it('should add user to database', function (done) {
             async.waterfall([
-                (cb) => users.addUser({ username: 'test', password: 'password' }, cb),
+                (cb) => users.addUser(generateUser('test'), cb),
                 (_, cb) =>  users.findUserWithUsername('test', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test');
@@ -39,7 +47,7 @@ describe('User', function() {
 
         it('should do duplicate username check', function (done) {
             async.waterfall([
-                (cb) => users.addUser({username: 'test', password: 'password'}, cb),
+                (cb) => users.addUser(generateUser('test'), cb),
                 (_, cb) => {
                     users.addUser({username: 'test', password: 'password'}, (err) => {
                         assert.notEqual(err, null);
@@ -53,8 +61,8 @@ describe('User', function() {
 
         it('should be able to manage multiple accounts', function (done) {
             async.waterfall([
-                (cb) => users.addUser({ username: 'test1', password: 'password' }, cb),
-                (_, cb) => users.addUser({ username: 'test2', password: 'password' }, cb),
+                (cb) => users.addUser(generateUser('test1'), cb),
+                (_, cb) => users.addUser(generateUser('test2'), cb),
                 (_, cb) => users.findUserWithUsername('test1', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test1');
@@ -74,7 +82,7 @@ describe('User', function() {
         it('should return valid userid', function (done) {
             let expected_userid;
             async.waterfall([
-                (cb) => users.addUser({username: 'test', password: 'password'}, cb),
+                (cb) => users.addUser(generateUser('test'), cb),
                 (userid, cb) => {
                     expected_userid = userid;
                     users.authenticate('test', 'password', cb);
@@ -90,7 +98,7 @@ describe('User', function() {
 
         it('should reject bad username', function (done) {
             async.waterfall([
-                (cb) => users.addUser({username: 'test', password: 'password'}, cb),
+                (cb) => users.addUser(generateUser('test'), cb),
                 (_, cb) => users.authenticate('test1', 'password', cb),
                 (userid, cb) => {
                     assert(userid === null);
@@ -103,7 +111,7 @@ describe('User', function() {
 
         it('should reject bad password', function (done) {
             async.waterfall([
-                (cb) => users.addUser({username: 'test', password: 'password'}, cb),
+                (cb) => users.addUser(generateUser('test'), cb),
                 (_, cb) => users.authenticate('test', 'password1', cb),
                 (userid, cb) => {
                     assert(userid === null);

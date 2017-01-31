@@ -1,11 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-
-router.get('/register', function (req,res) {
-    let newUserIdf = crypto.randomBytes(8).toString('hex');
-    return res.render('join', {useridf: newUserIdf});
-});
+const users = require('./users');
 
 router.post('/logout', function (req, res) {
     const keyList = ['identity', 'roomID'];

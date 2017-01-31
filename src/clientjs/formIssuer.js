@@ -6,8 +6,9 @@ window.issueRegister = function () {
         '/users/register',
         'registerForm',
         [
-            ['username', 'username', formVerifier_NoBlank, '이름을 입력하세요.'],
-            ['useridf', 'useridf', formVerifier_AlwaysAllow, ''],
+            ['username', 'username', formVerifier_NoBlank, '아이디를 입력하세요.'],
+            ['password', 'password', formVerifier_NoBlank, '패스워드를 입력하세요.'],
+            ['email', 'email', formVerifier_NoBlank, '이메일을 입력하세요.'],
         ],
         function() {
             window.location.reload(true);
