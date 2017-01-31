@@ -69,19 +69,22 @@ exports.addUser = function (userinfo, cb) {
 exports.authenticate = function (username, password, callback) {
     let entry;
     async.waterfall([
-        (cb) => db('users').select('id', 'pwhash').where({username: username})
+        (cb) => db('users')
+            .select('id', 'pwhash')
+            .where({username: username})
             .limit(1).asCallback(cb),
         (entries, cb) => {
+            if(entries.length === 0) return cb(1);
             entry = entries[0];
             bcrypt.compare(password, entry.pwhash, cb);
         }
     ], function (err, match) {
-        if(err) return callback(err);
+        if(err) return callback(null, null);
         if (match) {
             return callback(null, entry.id);
         }
         else {
-            return callback(new Error("Authentication failed"));
+            return callback(null, null);
         }
     });
 };
