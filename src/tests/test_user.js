@@ -23,10 +23,6 @@ describe('User', function() {
         db('users').truncate().then(() => done());
     });
 
-    afterEach(function(done) {
-        db('users').truncate().then(() => done());
-    });
-
     describe('#addUser', function() {
         it('should add user to database', function (done) {
             async.waterfall([
@@ -66,6 +62,25 @@ describe('User', function() {
                 },
                 (user, cb) => {
                     assert.equal(user.username, 'test2');
+                    cb(null);
+                }
+            ], (err) => {
+                done(err);
+            });
+        });
+    });
+
+    describe('#authenticate', function() {
+        it('should return valid userid', function (done) {
+            let expected_userid;
+            async.waterfall([
+                (cb) => users.addUser({ username: 'test', password: 'password' }, cb),
+                (userid, cb) => {
+                    expected_userid = userid;
+                    users.authenticate('test', 'password', cb);
+                },
+                (userid, cb) => {
+                    assert(expected_userid == userid);
                     cb(null);
                 }
             ], (err) => {
