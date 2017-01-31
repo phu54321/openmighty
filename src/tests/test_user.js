@@ -15,13 +15,14 @@ const assert = require('assert');
 const users = require('../models/users');
 const db = require('../models/db');
 const async = require('async');
+const deasync = require('deasync');
 
 ////
 
 function generateUser(username) {
     return {
         username: username,
-        email: 'test@test.com',
+        email: username + '@test.com',
         password: 'password'
     };
 }
@@ -30,12 +31,16 @@ describe('User', function() {
     beforeEach(function(done) {
         db('users').truncate().then(() => done());
     });
+    after(function(done) {
+        db.schema.dropTable('users');
+        done();
+    });
 
     describe('#addUser', function() {
         it('should add user to database', function (done) {
             async.waterfall([
                 (cb) => users.addUser(generateUser('test'), cb),
-                (_, cb) =>  users.findUserWithUsername('test', cb),
+                (_, cb) =>  users.findUserByUsername('test', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test');
                     cb();
@@ -63,10 +68,10 @@ describe('User', function() {
             async.waterfall([
                 (cb) => users.addUser(generateUser('test1'), cb),
                 (_, cb) => users.addUser(generateUser('test2'), cb),
-                (_, cb) => users.findUserWithUsername('test1', cb),
+                (_, cb) => users.findUserByUsername('test1', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test1');
-                    users.findUserWithUsername('test2', cb);
+                    users.findUserByUsername('test2', cb);
                 },
                 (user, cb) => {
                     assert.equal(user.username, 'test2');
@@ -87,8 +92,8 @@ describe('User', function() {
                     expected_userid = userid;
                     users.authenticate('test', 'password', cb);
                 },
-                (userid, cb) => {
-                    assert(expected_userid == userid);
+                (entry, cb) => {
+                    assert(expected_userid == entry.id);
                     cb(null);
                 }
             ], (err) => {
@@ -100,8 +105,8 @@ describe('User', function() {
             async.waterfall([
                 (cb) => users.addUser(generateUser('test'), cb),
                 (_, cb) => users.authenticate('test1', 'password', cb),
-                (userid, cb) => {
-                    assert(userid === null);
+                (entry, cb) => {
+                    assert(entry === null);
                     cb();
                 }
             ], (err) => {
@@ -113,8 +118,8 @@ describe('User', function() {
             async.waterfall([
                 (cb) => users.addUser(generateUser('test'), cb),
                 (_, cb) => users.authenticate('test', 'password1', cb),
-                (userid, cb) => {
-                    assert(userid === null);
+                (entry, cb) => {
+                    assert(entry === null);
                     cb();
                 }
             ], (err) => {

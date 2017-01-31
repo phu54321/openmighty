@@ -1,9 +1,25 @@
 "use strict";
 
+window.issueLogin = function () {
+    'use strict';
+    issueForm(
+        '/users/login',
+        'loginForm',
+        [
+            ['username', 'username', formVerifier_NoBlank, '아이디를 입력하세요.'],
+            ['password', 'password', formVerifier_NoBlank, '패스워드를 입력하세요.'],
+        ],
+        function() {
+            window.location.reload(true);
+        }
+    );
+};
+
+
 window.issueRegister = function () {
     'use strict';
     issueForm(
-        '/users/register',
+        '/users/join',
         'registerForm',
         [
             ['username', 'username', formVerifier_NoBlank, '아이디를 입력하세요.'],
@@ -11,7 +27,7 @@ window.issueRegister = function () {
             ['email', 'email', formVerifier_NoBlank, '이메일을 입력하세요.'],
         ],
         function() {
-            window.location.reload(true);
+            window.location.href = "/";
         }
     );
 };

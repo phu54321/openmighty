@@ -19,9 +19,9 @@ html
             .main.valign.left-align
                 .topStrip
                     span#title.left(onclick='window.location.href="/"') openMighty
-                    if request.username
+                    if request.user
                         .right
-                            | #{request.username} &nbsp;
+                            | #{request.user.username} &nbsp;
                             span(onclick='javscript:issueLogout();') Logout
 
                 block content

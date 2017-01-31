@@ -1,6 +1,6 @@
 const express = require('express');
-const users = require('./users');
 const crypto = require('crypto');
+const users = require('../routes/users');
 
 let router = express.Router();
 module.exports = router;
@@ -9,6 +9,7 @@ module.exports = router;
 router.get('/', users.checkLogon, function(req, res) {
     res.render('index', {title: '방 찾기'});
 });
+
 
 // Room
 router.get('/:room', users.checkLogon, (req, res) => {

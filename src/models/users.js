@@ -6,33 +6,24 @@
 
 const db = require('./db');
 const bcrypt = require('bcrypt');
-const deasync = require('deasync');
 const async = require('async');
 
 // SCHEMA
-let dbInitialized = false;
-db.schema.hasTable('users').then(function(exists) {
-    if (exists) dbInitialized = true;
-    else {
-        db.schema.createTable('users', function(table) {
-            table.increments('id').primary();
-            table.string('username').unique();
-            table.string('email').unique();
-            table.string('pwhash');
-            table.boolean('activated');
-            table.timestamps();
-        }).then(() => {
-            dbInitialized = true;
-        });
-    }
+db.initScheme('users', function(table) {
+    table.increments('id').primary();
+    table.string('username').unique();
+    table.string('email').unique();
+    table.string('pwhash');
+    table.boolean('activated');
+    table.timestamps();
 });
 
-while(!dbInitialized) {
-    deasync.sleep(100);
-}
+const userFields = ['id', 'username', 'email'];
+
+///////
 
 
-//// Utility functions
+
 
 
 /**
@@ -57,7 +48,7 @@ function isValidEmail(email) {
 
 
 /**
- * Add user to db
+ * 유저를 새로 등록
  * @param userinfo - User info in dictionary
  * @param cb - Callback
  */
@@ -72,6 +63,7 @@ exports.addUser = function (userinfo, cb) {
         db('users').insert({
             username: userinfo.username,
             pwhash: hash,
+            email: userinfo.email,
         })
             .then(function (id) {
                 cb(null, id);
@@ -83,16 +75,16 @@ exports.addUser = function (userinfo, cb) {
 
 
 /**
- * Authenticate by username & password
+ * 아이디와 패스워드로 유저 확인
  * @param username
  * @param password
  * @param callback(err, accountId)
  */
-exports.authenticate = function (username, password, callback) {
+function authenticate(username, password, callback) {
     let entry;
     async.waterfall([
         (cb) => db('users')
-            .select('id', 'pwhash')
+            .select(userFields.concat(['pwhash']))
             .where({username: username})
             .limit(1).asCallback(cb),
         (entries, cb) => {
@@ -103,23 +95,26 @@ exports.authenticate = function (username, password, callback) {
     ], function (err, match) {
         if(err) return callback(null, null);
         if (match) {
-            return callback(null, entry.id);
+            delete entry.pwhash;
+            return callback(null, entry);
         }
         else {
             return callback(null, null);
         }
     });
-};
+}
+
+exports.authenticate = authenticate;
 
 
 /**
- * Find user by Username
+ * 아이디로 유저를 찾는다.
  * @param username
  * @param callback(err, entry)
  */
-exports.findUserWithUsername = function (username, callback) {
+exports.findUserByUsername = function (username, callback) {
     db('users')
-        .select('id', 'username')
+        .select(userFields)
         .where({username: username})
         .limit(1)
         .then(function (entry) {
@@ -130,13 +125,13 @@ exports.findUserWithUsername = function (username, callback) {
 };
 
 /**
- * Find user by ID
+ * 유저를 아이디로 찾는다.
  * @param id
  * @param cb
  */
 exports.findUserByID = function (id, cb) {
     db('users')
-        .select('id', 'username')
+        .select(userFields)
         .where({id: id})
         .limit(1)
         .then(function (entry) {
@@ -145,3 +140,35 @@ exports.findUserByID = function (id, cb) {
             cb(err);
         });
 };
+
+
+
+////////////////////////////////////////////////////////
+
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+
+passport.use(new LocalStrategy(
+    {
+        usernameField: 'username',
+        passwordField: 'password'
+    },
+    function (username, password, done) {
+        'use strict';
+        authenticate(username, password, function (err, userid) {
+            if (err) return done(err);
+            if (userid === null) return done(null, false, {message: '로그인에 실패했습니다.'});
+            return done(null, userid);
+        });
+    }
+));
+
+passport.serializeUser(function (user, done) {
+    'use strict';
+    done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+    'use strict';
+    done(null, user);
+});

@@ -1,0 +1,16 @@
+extends layout
+
+block content
+    .container
+        h1 로그인
+        form#loginForm(action='javascript:issueLogin();', method="POST")
+            .row.input-field
+                input(id='username', type='text', required, pattern='\\w{4,16}')
+                label(for='username') 아이디
+
+            .row.input-field
+                input(id='password', type='password', required)
+                label(for='username') 패스워드
+
+            .row
+                button.waves-effect.btn.waves-effect.waves-light.right(type='submit') 로그인

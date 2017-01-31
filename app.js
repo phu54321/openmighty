@@ -7,8 +7,9 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const compression = require('compression');
-
-const cookieSecret = 'kefahdskjjhjkhvihkjbhtkgkjgb';
+const passport = require('passport');
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
 
 const app = express();
 
@@ -18,7 +19,19 @@ app.set('views', path.join(__dirname, 'src/views'));
 app.set('view engine', 'pug');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser(cookieSecret));
+app.use(cookieParser());
+app.use(session({
+    store: new RedisStore({
+        host: '127.0.0.1',
+        port: 6379
+    }),
+    resave: true,
+    saveUninitialized: false,
+    secret: 'kefahdskjjhjkhvihkjbhtkgkjgb'
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Add req to pug local variable
 app.use(function (req, res, next) {
@@ -49,7 +62,7 @@ app.use(
 
 // Routes
 app.use('/', require('./src/routes/index'));
-app.use('/users', require('./src/routes/users'));
+app.use('/', require('./src/routes/users'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -74,7 +87,7 @@ app.use(function(err, req, res, next) {
 
 app.initSocketIO = function (io) {
     const socketIOCookieParser = require('socket.io-cookie-parser');
-    io.use(socketIOCookieParser(cookieSecret));
+    io.use(socketIOCookieParser());
     require('./src/server/server')(io);
 };
 
