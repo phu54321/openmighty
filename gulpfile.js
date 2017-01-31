@@ -57,7 +57,7 @@ gulp.task('reload', function () {
 gulp.task('watch', ['babel', 'sass'], function () {
     gulp.watch('src/scss/**/*.scss', ['sass']);
     gulp.watch('src/clientjs/**/*.js', ['babel', 'reload']);
-    gulp.watch('src/views/**/*.jade', ['reload']);
+    gulp.watch('src/**/*.pug', ['reload']);
 });
 
 

@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser(cookieSecret));
 
-// Add req to jade local variable
+// Add req to pug local variable
 app.use(function (req, res, next) {
     res.locals.request = req;
     next();

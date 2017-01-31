@@ -1,12 +1,16 @@
 extends layout
 
 block content
-    h1 openMighty
-    p 이름을 입력해주세요.
-    form#registerForm(action='javascript:issueRegister();', method="POST")
-        .row.input-field
-            input(id='username', type='text', required)
-            label(for='username') 이름
+    .container
+        h1 openMighty
+        p 이름을 입력해주세요.
+        form#registerForm(action='javascript:issueRegister();', method="POST")
+            .row.input-field
+                input(id='username', type='text', required, pattern='\\w{4,12}')
+                label(for='username') 아이디
+            .row.input-field
+                input(id='password', type='password', required)
+                label(for='username') 패스워드
 
-        .row
-            button.waves-effect.btn.waves-effect.waves-light.right(type='submit') 로그인
+            .row
+                button.waves-effect.btn.waves-effect.waves-light.right(type='submit') 로그인
