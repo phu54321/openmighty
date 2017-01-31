@@ -5,6 +5,35 @@
 "use strict";
 
 const db = require('./db');
+const bcrypt = require('bcrypt');
+const deasync = require('deasync');
+
+// SCHEMA
+let dbInitialized = false;
+db.schema.hasTable('users').then(function(exists) {
+    if (exists) dbInitialized = true;
+    else {
+        db.schema.createTable('users', function(table) {
+            table.increments('id').primary();
+            table.string('username').unique();
+            table.string('password');
+            table.timestamps();
+        }).then(() => {
+            dbInitialized = true;
+        });
+    }
+});
+
+while(!dbInitialized) {
+    deasync.sleep(100);
+}
+
+
+function isValidUsername(username) {
+    return /^\w{4,12}$/.test(username);
+}
+exports.isValidUsername = isValidUsername;
+
 
 /**
  * Add user to db
@@ -15,7 +44,6 @@ exports.addUser = function (userinfo, cb) {
     db('users').insert({
         username: userinfo.username,
         password: userinfo.password,
-        email: userinfo.email
     })
         .then(function (id) {
             cb(null, id);
@@ -31,7 +59,7 @@ exports.addUser = function (userinfo, cb) {
  */
 exports.findUserWithUsername = function (username, cb) {
     db('users')
-        .select('id', 'username', 'email')
+        .select('id', 'username')
         .where({username: username})
         .limit(1)
         .then(function (entry) {
@@ -48,7 +76,7 @@ exports.findUserWithUsername = function (username, cb) {
  */
 exports.findUserByID = function (id, cb) {
     db('users')
-        .select('id', 'username', 'email')
+        .select('id', 'username')
         .where({id: id})
         .limit(1)
         .then(function (entry) {
