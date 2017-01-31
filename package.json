@@ -19,7 +19,6 @@
     "crypto": "0.0.3",
     "deasync": "^0.1.9",
     "express": "~4.14.0",
-    "jade": "~1.11.0",
     "knex": "^0.12.6",
     "lodash": "^4.17.4",
     "mathjs": "^3.9.0",
@@ -28,9 +27,9 @@
     "node-mysql": "^0.4.2",
     "node-sass-middleware": "^0.11.0",
     "orm": "^3.2.3",
+    "pug": "^2.0.0-beta10",
     "queryize": "^2.0.0",
     "serve-favicon": "~2.3.0",
-    "sinon": "^1.17.7",
     "socket.io": "^1.7.2",
     "socket.io-cookie-parser": "^1.0.0",
     "underscore": "^1.8.3"
@@ -52,6 +51,7 @@
     "jsonfile": "^2.4.0",
     "mocha": "^3.2.0",
     "sass": "^0.5.0",
+    "sinon": "^1.17.7",
     "webpack": "^1.14.0",
     "webpack-stream": "^3.2.0"
   }
