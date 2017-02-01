@@ -91,7 +91,7 @@ app.use(
 
 // Routes
 app.use('/', require('./src/routes/index'));
-app.use('/', require('./src/routes/users'));
+app.use('/users', require('./src/routes/users'));
 
 
 // 404 Error

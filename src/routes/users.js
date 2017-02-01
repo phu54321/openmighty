@@ -5,10 +5,11 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const users = require('../models/users');
+const async = require('async');
 
 
 /// Login
-router.post('/users/login', function (req, res, next) {
+router.post('/login', function (req, res, next) {
     passport.authenticate('local', function(err, user) {
         if (err) {
             return next(err);
@@ -27,7 +28,7 @@ router.post('/users/login', function (req, res, next) {
 
 
 /// Logout
-router.post('/users/logout', function (req, res) {
+router.post('/logout', function (req, res) {
     if (!req.user) {  // Not logged in -> Failed
         return res.json({error: '로그인 상태가 아닙니다.'});
     }
@@ -52,17 +53,13 @@ router.post('/join', function (req, res) {
         return res.json({error: '잘못된 정보입니다.'});
     }
 
-    users.addUser({
-        username: username,
-        password: password,
-        email: email,
-    }, function (err, userid) {
-        if (err) return res.json({error: '가입에 실패했습니다 : ' + err.message});
-        // 해당 유저로 자동 로그인까지
-        req.login(userid, function (err) {
-            if (err) return res.json({error: err.message});
-            else return res.json({error: 0});
-        });
+    async.waterfall([
+        (cb) => users.addUser({username: username, password: password, email: email}, cb),
+        (userid, cb) => users.findUserByID(userid, cb),
+        (userEntry, cb) => req.logIn(userEntry, cb)
+    ], (err) => {
+        if(err) return res.json({error: '가입에 실패했습니다 : ' + err.message});
+        else return res.json({error: 0});
     });
 });
 
