@@ -69,7 +69,7 @@ gulp.task('nodemon', ['watch'], function (cb) {
 
     browserSync.init({
         proxy: {
-            target: "http://localhost:3000",
+            target: "https://localhost:3000",
             ws: true,
         },
         ghostMode: false,

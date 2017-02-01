@@ -69,3 +69,4 @@ jspm_packages
 *.pyc
 *.pyo
 /knexfile.js
+/signature/
