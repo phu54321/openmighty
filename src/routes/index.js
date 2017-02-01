@@ -17,7 +17,7 @@ router.get('/:room', users.checkLogon, (req, res) => {
     if(!/^[0-9a-zA-Z]{8}$/.test(roomID)) {
         return res.render('index', {title: '방 찾기', errormsg: '잘못된 방 번호입니다.'});
     }
-    res.cookie('roomID', roomID, {signed: true});
-    res.cookie('accessID', crypto.randomBytes(16).toString('hex'), {signed: true});
+    req.session.roomID = roomID;
+    req.session.accessID = crypto.randomBytes(16).toString('hex');
     res.render('room');
 });

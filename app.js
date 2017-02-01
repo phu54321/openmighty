@@ -12,6 +12,7 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 
 const app = express();
+const SESSION_SECRET = 'kefahdskjjhjkhvihkjbhtkgkjgb';
 
 app.use(logger('dev'));
 
@@ -20,15 +21,21 @@ app.set('view engine', 'pug');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({
-    store: new RedisStore({
-        host: '127.0.0.1',
-        port: 6379
-    }),
+
+
+const sessionStore = new RedisStore({
+    host: '127.0.0.1',
+    port: 6379
+});
+
+const sessionMiddleware = session({
+    store: sessionStore,
     resave: true,
     saveUninitialized: false,
-    secret: 'kefahdskjjhjkhvihkjbhtkgkjgb'
-}));
+    secret: SESSION_SECRET
+});
+
+app.use(sessionMiddleware);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -85,9 +92,23 @@ app.use(function(err, req, res, next) {
 
 ////
 
+
 app.initSocketIO = function (io) {
-    const socketIOCookieParser = require('socket.io-cookie-parser');
-    io.use(socketIOCookieParser());
+    // Passport
+    const passportSocketIo = require("passport.socketio");
+    io.use(passportSocketIo.authorize({
+        secret: SESSION_SECRET,
+        store: sessionStore,
+        fail: function (data, message, critical, accept) {
+            console.log(message);
+            accept(new Error(message));
+        }
+    }));
+
+    // Session
+    const sharedsession = require("express-socket.io-session");
+    io.use(sharedsession(sessionMiddleware, {autoSave: true}));
+
     require('./src/server/server')(io);
 };
 

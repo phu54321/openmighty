@@ -13,7 +13,7 @@ const rSock = require('./rsocket');
 module.exports = function(io) {
     "use strict";
 
-    io.use(validateCookie);
+    io.use(validateSession);
     io.on('connection', function (socket_) {
         const socket = rSock.checkNewConnection(socket_);
         if(socket) onConnect(socket);
@@ -25,12 +25,13 @@ module.exports = function(io) {
  * Cookie validator
  */
 
-function validateCookie(socket, next) {
+function validateSession(socket, next) {
     "use strict";
 
-    let identity = socket.request.signedCookies.identity;
-    let roomID = socket.request.signedCookies.roomID;
-    let accessID = socket.request.signedCookies.accessID;
+    let identity = socket.request.user;
+    let roomID = socket.handshake.session.roomID;
+    let accessID = socket.handshake.session.accessID;
+    console.log(socket.request.user);
 
     // signedCookies가 잘못되었을 경우
     if(!identity || !roomID || !accessID) {
@@ -41,9 +42,8 @@ function validateCookie(socket, next) {
     else if(!/[0-9a-zA-Z]{8}/.test(roomID)) {
         return next(new Error('Invalid roomID'));
     }
-    identity = JSON.parse(identity);
     socket.username = identity.username;
-    socket.useridf = identity.useridf;
+    socket.useridf = identity.id;
     socket.roomID = roomID;
     socket.accessID = accessID;
     next();
