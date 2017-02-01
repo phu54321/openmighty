@@ -31,7 +31,6 @@ function validateSession(socket, next) {
     let identity = socket.request.user;
     let roomID = socket.handshake.session.roomID;
     let accessID = socket.handshake.session.accessID;
-    console.log(socket.request.user);
 
     // signedCookies가 잘못되었을 경우
     if(!identity || !roomID || !accessID) {
