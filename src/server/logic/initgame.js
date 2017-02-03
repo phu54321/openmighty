@@ -35,10 +35,8 @@ module.exports = function (MightyRoom) {
     MightyRoom.prototype.initGame = function () {
         // Distribute deck
         const deck = createDeck();
-        console.log(deck);
         for (let player = 0; player < 5; player++) {
             const playerDeck = deck.slice(player * 10, (player + 1) * 10);
-            console.log('pdeck', playerDeck.toString());
             this.gameUsers[player].deck = playerDeck.sort();
             cmdout.emitGamePlayerDeck(this, player);
         }

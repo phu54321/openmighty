@@ -239,7 +239,6 @@ module.exports = function (MightyRoom) {
             if(card.isScoreCard()) winnerObtainedCards.push(card);
         });
         this.discardedCards.sort();
-        console.log('discardedCards', this.discardedCards);
 
 
         // 초구 프렌드 처리
