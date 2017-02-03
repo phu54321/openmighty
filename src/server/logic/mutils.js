@@ -97,3 +97,22 @@ exports.cardDealMissScore = function (card) {
     else if(card.num >= 11) return 1;  // JQKA는 1점
     else return 0;  // 나머지는 0점
 };
+
+
+exports.deckHasCard = function (deck, card) {
+    "use strict";
+    return _.find(deck, (c) => (c.shape == card.shape && c.num == card.num)) !== undefined;
+};
+
+exports.postGroupBy = function (out) {
+    "use strict";
+    cardShapes.forEach((shape) => {
+        if(!out[shape]) out[shape] = [];
+    });
+    return out;
+};
+
+exports.stringifyDeck = function (deck) {
+    "use strict";
+    return '[' + _.map(deck, (c) => c.shape[0] + c.num).join(', ') + ']';
+};
