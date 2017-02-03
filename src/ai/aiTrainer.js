@@ -6,7 +6,6 @@
 
 const gameenv = require('./gameenv');
 const cmdproc = require("../server/io/cmdproc");
-const mutils = require('../server/logic/mutils');
 const _ = require('underscore');
 const assert = require('assert');
 const path = require('path');
@@ -232,7 +231,7 @@ AIBot.prototype.proc_cprq = function(msg) {
     const aiIdf = bot.userEntry.useridf;
 
     // 조커 콜 처리
-    if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
+    if(msg.jcall && deck.hasShape('joker')) msg.shaperq = 'joker';
     const gameState = this.getGameState();
 
     playCard();

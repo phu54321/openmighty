@@ -6,10 +6,8 @@
 
 const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
-const AISocket = require('./../io/randomBot');
 
-const mutils = require('./mutils');
-const cardShapes = require('./mutils');
+const AISocket = require('./../io/randomBot');
 
 
 function MightyRoom(roomID, owner) {
@@ -19,7 +17,6 @@ function MightyRoom(roomID, owner) {
     this.owner = owner;
     this.playing = false;
     this.playState = null;
-    this.playTurn = 0;
 }
 
 /**
@@ -99,50 +96,10 @@ MightyRoom.prototype.onStartGame = function () {
     return null;
 };
 
-
-MightyRoom.prototype.endGame = function () {
-    this.playing = false;
-    this.users.forEach((user) => {
-        user.socket.waitTime = 0;
-    });
-    delete this.gameUsers;
-};
-
-
-/**
- * 랜덤으로 덱을 생성합니다.
- */
-function createDeck() {
-    const deck = [];
-    for(let shape = 0 ; shape < 4 ; shape++) {
-        for(let n = 2 ; n <= 14 ; n++) {
-            deck.push(mutils.createCard(mutils.cardShapes[shape], n));
-        }
-    }
-    deck.push(mutils.createCard('joker'));
-    return _.shuffle(deck);
-}
-
-
-/**
- * 게임을 초기화합니다.
- */
-MightyRoom.prototype.initGame = function () {
-    // Distribute deck
-    const deck = createDeck();
-    for(let player = 0 ; player < 5 ; player++) {
-        const playerDeck = deck.slice(player * 10, (player + 1) * 10);
-        this.gameUsers[player].deck = mutils.sortDeck(playerDeck);
-        cmdout.emitGamePlayerDeck(this, player);
-    }
-
-    return this.startBidding(deck.slice(50));
-};
-
 MightyRoom.prototype.onAIStopRequest = function (userEntry) {
-    if(!this.playing) return "플레이중이 아닙니다.";  // Cannot stop while playing
+    if (!this.playing) return "플레이중이 아닙니다.";  // Cannot stop while playing
 
-    if(userEntry.socket instanceof AISocket) {
+    if (userEntry.socket instanceof AISocket) {
         cmdout.emitGameAbort(this);
         this.endGame();
         return null;
@@ -151,9 +108,11 @@ MightyRoom.prototype.onAIStopRequest = function (userEntry) {
 };
 
 
+
 //// 유틸리티 함수들
 
 
+require('./initgame')(MightyRoom);
 require('./bidding')(MightyRoom);
 require('./roomsys')(MightyRoom);
 require('./fselect')(MightyRoom);

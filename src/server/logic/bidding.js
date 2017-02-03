@@ -6,15 +6,14 @@
 
 const _ = require('lodash');
 const cmdout = require('../io/cmdout');
-const mutils = require('./mutils');
 
-const bidShapes = mutils.bidShapes;
+const bidShapes = ['spade', 'heart', 'clover', 'diamond', 'none'];
 
 /**
  * 공약의 세기를 비교한다
  * @param bidShape 공약 문양
  * @param bidCount 공약 수
- * @returns 공약의 세기
+ * @returns {number} 공약의 세기
  */
 function getBidStrength(bidShape, bidCount) {
     let bidStrength = bidCount * 2;
@@ -22,6 +21,7 @@ function getBidStrength(bidShape, bidCount) {
     if(bidCount == 20) bidStrength *= 10;
     return bidStrength;
 }
+
 
 
 /**
@@ -39,6 +39,10 @@ function isValidBid(bidShape, bidCount) {
 
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 exports = module.exports = function (MightyRoom) {
     /**
@@ -50,7 +54,6 @@ exports = module.exports = function (MightyRoom) {
     MightyRoom.prototype.startBidding = function (remainingDeck) {
         // Remaining deck
         this.playState = 'bidding';
-        this.canDealMiss = true;
         this.bidding = {
             passStatus: [false, false, false, false, false],
             currentBidder: 0,
@@ -58,11 +61,13 @@ exports = module.exports = function (MightyRoom) {
             bidStrength: getBidStrength('none', 12),
             bidShape: 'none',
             bidCount: 12,
-            remainingDeck: remainingDeck
+            remainingDeck: remainingDeck,
+            canDealMiss: true
         };
         cmdout.emitGameBidRequest(this, 0);
         return null;
     };
+
 
     /**
      * 다음으로 추가 공약할 수 있는 사람을 찾습니다.
@@ -76,7 +81,7 @@ exports = module.exports = function (MightyRoom) {
         let nextBidder = (bidding.currentBidder + 1) % 5;
         while(nextBidder != initialBidder && bidding.passStatus[nextBidder] === true) {
             nextBidder = (nextBidder + 1) % 5;
-            if(nextBidder) this.canDealMiss = false;
+            if(nextBidder === 0) this.bidding.canDealMiss = false;
         }
 
         // All passed or only initialBidder left
@@ -103,11 +108,11 @@ exports = module.exports = function (MightyRoom) {
 
         // 딜미스 처리
         if(bidShape == 'dealmiss') {
-            if(!this.canDealMiss) return "딜 미스는 처음에만 할 수 있습니다.";
+            if(!this.bidding.canDealMiss) return "딜 미스는 처음에만 할 수 있습니다.";
 
-            const score = _.sum(_.map(userEntry.deck, mutils.cardDealMissScore));
-            if(score <= 1) {  // 딜미스 요건 만족
-                cmdout.emitGameAbort(this, '딜 미스입니다. (' + score + ')');
+            const dealMissScore = userEntry.deck.getDealMissScore();
+            if(dealMissScore <= 1) {  // 딜미스 요건 만족
+                cmdout.emitGameAbort(this, '딜 미스입니다. (' + dealMissScore + ')');
                 this.endGame();
                 return;
             }
@@ -210,4 +215,5 @@ exports = module.exports = function (MightyRoom) {
 
 exports.getBidStrength = getBidStrength;
 exports.isValidBid = isValidBid;
+exports.bidShapes = bidShapes;
 

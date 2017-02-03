@@ -5,7 +5,15 @@
 "use strict";
 
 const _ = require('lodash');
-const mutils = require('./mutils');
+const card = require('./card');
+
+const postGroupBy = function (out) {
+    "use strict";
+    card.cardShapes.forEach((shape) => {
+        if(!out[shape]) out[shape] = [];
+    });
+    return out;
+};
 
 
 
@@ -31,18 +39,18 @@ module.exports = function (room) {
     // console.log('calculating set');
 
     const isLastTurn = (room.currentTrick == 9);  // setcheck 다음에 trick이 10으로 증가되서 여기선 9와 비교
-    const discardedMap = mutils.postGroupBy(_.groupBy(room.discardedCards, (c) => c.shape));  // 문양당 버려진 카드
-    const isMightyDown = mutils.deckHasCard(room.discardedCards, room.mighty);  // 마이티가 버려졌나
+    const discardedMap = postGroupBy(_.groupBy(room.discardedCards, (c) => c.shape));  // 문양당 버려진 카드
+    const isMightyDown = room.discardedCards.hasCard(room.mighty);  // 마이티가 버려졌나
     const isJokerDown = (discardedMap.joker.length == 1);  // 조커가 버려졌나.
     // console.log(discardedMap, room.mighty, isMightyDown, isJokerDown);
 
     for(let i = 0 ; i < 5 ; i++) {
         const user = room.gameUsers[i];
-        const userDeckMap = mutils.postGroupBy(_.groupBy(user.deck, (c) => c.shape));
+        const userDeckMap = postGroupBy(_.groupBy(user.deck, (c) => c.shape));
         // console.log('checking user', i, stringifyDeck(user.deck));
 
-        const hasMighty = mutils.deckHasCard(user.deck, room.mighty);
-        const hasJoker = mutils.deckHasCard(user.deck, room.joker);
+        const hasMighty = user.deck.hasCard(room.mighty);
+        const hasJoker = user.deck.hasCard(room.joker);
 
         //  1. 마이티/조커중 하나라도 다른 사람에게 있으면 질 수 있다. 이 경우는 그냥 제외
         if(!isMightyDown && !hasMighty) continue;
@@ -70,7 +78,7 @@ module.exports = function (room) {
         // 4. 각 문양마다 짱카를 갖고 있어야함
         let shapeIdx;
         for(shapeIdx = 0 ; shapeIdx < 4 ; shapeIdx++) {
-            const checkShape = mutils.cardShapes[shapeIdx];
+            const checkShape = card.cardShapes[shapeIdx];
             if(checkShape == room.bidShape) continue;  // 기루다는 이미 체크함
 
             // z. 해당 문양이 아얘 없다면
@@ -85,17 +93,13 @@ module.exports = function (room) {
                 const userMinimumCard = _.min(userDeckMap[checkShape], (c) => c.num);
                 const betterCardCount = 14 - userMinimumCard;
                 const userBetterCardCount = userDeckMap[checkShape].length - 1;
-                const discardedBetterCardCount = _.filter(discardedMap[checkShape], function (c) {
-                    return c.num > userMinimumCard;
-                }).length;
-                // console.log(checkShape, userBetterCardCount, discardedBetterCardCount, betterCardCount);
+                const discardedBetterCardCount = discardedMap[checkShape].filter((c) => c.num > userMinimumCard).length;
                 if (userBetterCardCount + discardedBetterCardCount != betterCardCount) break;
             }
         }
         if(shapeIdx != 4) continue;
 
         // 셋이 맞다.
-        // console.log('Set', i);
         return i;
     }
     return null;

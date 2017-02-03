@@ -10,7 +10,7 @@
 
 const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
-const mutils = require('./mutils');
+const card = require('./card');
 const setCheck = require('./setcheck');
 const GameEnv = require('./../../ai/gameenv');
 
@@ -38,15 +38,15 @@ module.exports = function (MightyRoom) {
      */
     MightyRoom.prototype.setSpecialCards = function () {
         // 특수카드들
-        this.mighty = mutils.createCard(
+        this.mighty = card.createCard(
             (this.bidShape == 'spade') ? 'diamond' : 'spade',
             14
         );
-        this.jokerCall = mutils.createCard(
+        this.jokerCall = card.createCard(
             (this.bidShape == 'clover') ? 'spade' : 'clover',
             3
         );
-        this.joker = mutils.createCard('joker');
+        this.joker = card.createCard('joker');
     };
 
 
@@ -93,7 +93,7 @@ module.exports = function (MightyRoom) {
             if(!playingCard.equals(this.joker)) return "잘못된 조커입니다.";
             else if(this.currentTurn != this.startTurn) return "첫 턴에만 문양을 부를 수 있습니다.";
             else if(msg.srq == 'joker') return "조커로 조커를 콜 할 수 없습니다.";
-            else if(mutils.cardShapes.indexOf(msg.srq) == -1) return "잘못된 문양입니다.";
+            else if(card.cardShapes.indexOf(msg.srq) == -1) return "잘못된 문양입니다.";
         }
         // 낼 수 없는 카드 처리
         if(!this.canPlayCard(playingCard)) return "낼 수 없는 카드입니다.";
@@ -119,7 +119,7 @@ module.exports = function (MightyRoom) {
         if(
             this.friend === null &&
             this.friendType == 'card' &&
-            mutils.compareCard(this.friendCard, playingCard) === 0
+            this.friendCard == playingCard
         ) {
             this.friend = this.currentTurn;
         }
@@ -174,14 +174,14 @@ module.exports = function (MightyRoom) {
         // 그 외
         else {
             // 조커콜이면 조커를 내야한다. 조커 처리는 위에서 했으니까 여기까지 넘어왓으면 card는 조커가 아닐것이다
-            if (this.jokerCalled && mutils.hasShapeOnDeck('joker', playerDeck)) return false;
+            if (this.jokerCalled && playerDeck.hasShape('joker')) return false;
 
             // 부른 카드가 있다면 허용
             const shapeRequest = this.shapeRequest;
 
             if (
                 card.shape != shapeRequest &&
-                mutils.hasShapeOnDeck(shapeRequest, playerDeck)
+                playerDeck.hasShape(shapeRequest)
             ) return false;
 
             // 그 외엔 허용
@@ -236,9 +236,10 @@ module.exports = function (MightyRoom) {
         const winnerObtainedCards = this.obtainedCards[this.trickWinner];
         this.playedCards.forEach((card) => {
             this.discardedCards.push(card);
-            if(card.num >= 10) winnerObtainedCards.push(card);
+            if(card.isScoreCard()) winnerObtainedCards.push(card);
         });
-        mutils.sortDeck(this.discardedCards);
+        this.discardedCards.sort();
+        console.log('discardedCards', this.discardedCards);
 
 
         // 초구 프렌드 처리
@@ -286,7 +287,7 @@ module.exports = function (MightyRoom) {
             // 카드 프렌드였으면 해당 카드가 남은 플레이어를 프렌드로 지정
             if(this.friend === null && this.friendType == 'card') {
                 for (let i = 0; i < 5; i++) {
-                    if (mutils.hasCardOnDeck(this.friendCard, this.gameUsers[i].deck)) {
+                    if (this.gameUsers[i].deck.hasCard(this.friendCard)) {
                         this.friend = i;
                         break;
                     }
@@ -304,25 +305,27 @@ module.exports = function (MightyRoom) {
             }
         }
 
-        // 점수 계산 - 방식은 http://no-smok.net/nsmk/마이티 를 따름
-        // 여당 승리점수 = (공약 장수(contract) - 기본장수) × 2 + (여당(declarer's team) 획득 장수 - 공약 장수(bid))
+        // 점수 계산
         const scoreTable = [0, 0, 0, 0, 0];
         const leadingTeamCardCount = 20 - oppObtainedCardCount;
         let leadingTeamScore;
 
-        if(leadingTeamCardCount >= this.bidCount) leadingTeamScore = leadingTeamCardCount - 10;
+        if(leadingTeamCardCount >= this.bidCount) {
+            leadingTeamScore = leadingTeamCardCount + this.bidCount - 26;
+        }
         else {
             leadingTeamScore = this.bidCount - leadingTeamCardCount;
             if(oppObtainedCardCount >= 11) leadingTeamScore *= 2;  // 백런
             leadingTeamScore = -leadingTeamScore;
         }
 
-        if(this.bidCount == 20) {  // 예고 런
+        // 마이티 공약을 여러개 보면서 런 공약을 안했더라도 주공이 기본적으로 런을 목표로 하도록
+        // 보통 룰대로 예고 런 뿐만 아니라 어쩌다 된 런에도 2배 점수를 적용하기로 했습니다.
+        if(leadingTeamScore == 20) {  // 런
             if(this.bidShape == 'none') leadingTeamScore *= 3;  // 노기루다 런은 *2*2가 아니라 *1.5만 한다.
             else leadingTeamScore *= 2;
         }
         else if(this.bidShape == 'none') leadingTeamScore *= 2;  // 노기루다
-        if(this.friendType == 'none') leadingTeamScore *= 2;  // 지정 노프렌드
 
         if(this.friend === null) {
             for(let i = 0 ; i < 5 ; i++) {

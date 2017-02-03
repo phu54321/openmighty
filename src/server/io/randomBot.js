@@ -4,12 +4,8 @@
 
 "use strict";
 
-module.exports = require('../../ai/aiBot');
-return;
-
 
 const cmdproc = require("./cmdproc");
-const mutils = require('../logic/mutils');
 const _ = require('underscore');
 
 
@@ -101,7 +97,7 @@ RandomBotSocket.prototype.proc_cprq = function(msg) {
     const deck = this.deck;
 
     // 조커 콜 처리
-    if(msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
+    if(msg.jcall && deck.hasShape('joker')) msg.shaperq = 'joker';
 
     // 문양 요청시
     if(msg.shaperq) {

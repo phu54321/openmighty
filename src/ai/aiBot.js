@@ -10,7 +10,6 @@
 
 const gameenv = require('./gameenv');
 const cmdproc = require("../server/io/cmdproc");
-const mutils = require('../server/logic/mutils');
 const _ = require('underscore');
 
 /////////////////////////////
@@ -194,7 +193,7 @@ AIBot.prototype.proc_cprq = function(msg) {
     const bot = this;
 
     // 조커 콜 처리
-    if (msg.jcall && mutils.hasShapeOnDeck('joker', deck)) msg.shaperq = 'joker';
+    if (msg.jcall && deck.hasShape('joker')) msg.shaperq = 'joker';
     const gameState = this.getGameState();
     const cardIdxV = mainModel.forward(gameState);
     for (let i = 0; i < 10; i++) {

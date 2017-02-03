@@ -4,7 +4,7 @@
 
 "use strict";
 
-const mutils = require('./../server/logic/mutils');
+const bidding = require('../server/logic/bidding');
 const _ = require('underscore');
 
 function createZeroArray(length) {
@@ -41,7 +41,7 @@ function GameEnv(game) {
     this.currentTrick = [0];
     this.startPlayer = createZeroArray(5);
     this.currentPlayer = createZeroArray(5);
-    this.giruda = createOneHotEncoding(5, mutils.bidShapes.indexOf(game.bidShape));
+    this.giruda = createOneHotEncoding(5, bidding.bidShapes.indexOf(game.bidShape));
     this.president = createOneHotEncoding(5, game.president);
     this.friend = createZeroArray(6);
     this.gotCards = createZeroArray(5);
