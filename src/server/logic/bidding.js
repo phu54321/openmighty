@@ -10,22 +10,35 @@ const mutils = require('./mutils');
 
 const bidShapes = mutils.bidShapes;
 
-function isHigherBid(lastBidShape, lastBidCount, bidShape, bidCount) {
-    if(bidShape == 'none') {
-        if(lastBidShape == 'none' && lastBidCount >= bidCount) return false;
-        else if(lastBidShape != 'none' && lastBidCount > bidCount) return false;
-    }
-    else if(lastBidCount >= bidCount) return false;
-
-    return true;
+/**
+ * 공약의 세기를 비교한다
+ * @param bidShape 공약 문양
+ * @param bidCount 공약 수
+ * @returns 공약의 세기
+ */
+function getBidStrength(bidShape, bidCount) {
+    let bidStrength = bidCount * 2;
+    if(bidShape == 'none') bidStrength++;
+    if(bidCount == 20) bidStrength *= 10;
+    return bidStrength;
 }
 
+
+/**
+ * 정당한 공약인지 체크
+ * @param bidShape
+ * @param bidCount
+ * @returns {boolean}
+ */
 function isValidBid(bidShape, bidCount) {
     if(!bidShape || !bidCount || typeof bidCount !== 'number') return false;
     if(bidShapes.indexOf(bidShape) == -1) return false;  // Invalid shape
     if(bidCount > 20 || bidCount < 12) return false; // Invalid count
     return true;
 }
+
+
+
 
 exports = module.exports = function (MightyRoom) {
     /**
@@ -42,6 +55,9 @@ exports = module.exports = function (MightyRoom) {
             passStatus: [false, false, false, false, false],
             currentBidder: 0,
             lastBidder: null,
+            bidStrength: getBidStrength('none', 12),
+            bidShape: 'none',
+            bidCount: 12,
             remainingDeck: remainingDeck
         };
         cmdout.emitGameBidRequest(this, 0);
@@ -106,25 +122,26 @@ exports = module.exports = function (MightyRoom) {
         }
 
         // 공약 처리
-        const lastBidShape = bidding.lastBidShape || 'none';
-        const lastBidCount = bidding.lastBidCount || 12;
-
         if(!isValidBid(bidShape, bidCount)) return "잘못된 공약입니다.";
 
         // 기존 공약보다 큰지 확인한다.
-        if(!isHigherBid(lastBidShape, lastBidCount, bidShape, bidCount)) return "더 높은 공약을 내야합니다.";
+        const lastBidStrength = bidding.bidStrength;
+        const currentBidStrength = getBidStrength(bidShape, bidCount);
+        if(lastBidStrength >= currentBidStrength) return "더 높은 공약을 내야합니다.";
 
         // 공약 업데이트
         bidding.lastBidder = bidding.currentBidder;
-        bidding.lastBidCount = bidCount;
-        bidding.lastBidShape = bidShape;
+        bidding.bidCount = bidCount;
+        bidding.bidShape = bidShape;
+        bidding.bidStrength = currentBidStrength;
+
         cmdout.emitGamePlayerBidding(this, bidding.currentBidder, bidShape, bidCount);
         passBidding(this);
         return null;
 
         function passBidding(room) {
             if(
-                bidding.lastBidCount == 20 ||  // 런 공약
+                bidding.bidCount == 20 ||  // 런 공약
                 !room.findNextBidder()  // 마지막 공약
             ) {
                 room.submitBidder();
@@ -133,6 +150,16 @@ exports = module.exports = function (MightyRoom) {
                 cmdout.emitGameBidRequest(room, room.bidding.currentBidder);
             }
         }
+    };
+
+    /**
+     * 공약을 설정합니다.
+     */
+    MightyRoom.prototype.setBidding = function (bidShape, bidCount) {
+        this.bidCount = bidCount;
+        this.bidShape = bidShape;
+        this.bidStrength = getBidStrength(bidShapes, bidCount);
+        cmdout.emitGameBidding(this);
     };
 
 
@@ -152,8 +179,7 @@ exports = module.exports = function (MightyRoom) {
 
         // 상태 변경
         this.president = bidding.lastBidder;
-        this.bidCount = bidding.lastBidCount;
-        this.bidShape = bidding.lastBidShape;
+        this.setBidding(bidding.bidShape, bidding.bidCount);
         this.remainingDeck = bidding.remainingDeck;
         delete this.bidding;
 
@@ -172,16 +198,16 @@ exports = module.exports = function (MightyRoom) {
             const bidShape = newbid.shape;
             const bidCount = newbid.num;
             if(!isValidBid(bidShape, bidCount)) return "잘못된 공약입니다.";
-            if(!isHigherBid(this.bidShape, this.bidCount, bidShape, bidCount)) return "더 높은 공약으로 변경해야합니다.";
-            this.bidShape = bidShape;
-            this.bidCount = bidCount;
+
+            const newBidStrength = getBidStrength(bidShape, bidCount);
+            if(this.bidStrength >= newBidStrength) return "더 높은 공약으로 변경해야합니다.";
+            this.setBidding(bidShape, bidCount);
         }
-        cmdout.emitGameBidding(this);
         this.startFriendSelect(this.remainingDeck);
         return null;
     };
 };
 
-exports.isHigherBid = isHigherBid;
+exports.getBidStrength = getBidStrength;
 exports.isValidBid = isValidBid;
 
