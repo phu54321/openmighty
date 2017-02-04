@@ -17,10 +17,10 @@ cmdcmp.registerCompressor({
             msg.push(user.username);
             msg.push(user.useridf);
         });
-        return msg.join('\0');
+        return msg.join(';');
     },
     dcmpf: (s) => {
-        const slist = s.split('\0');
+        const slist = s.split(';');
         const users = [];
         for (let i = 1; i < slist.length; i += 2) {
             users.push({
@@ -43,10 +43,10 @@ cmdcmp.registerCompressor({
         obj.deck.forEach((c) => {
             msg.push(c.cardEnvID);
         });
-        return msg.join('\0');
+        return msg.join(';');
     },
     dcmpf: (s) => {
-        const slist = s.split('\0');
+        const slist = s.split(';');
         const deck = slist.slice(1).map(utils.decodeCard);
         return {
             type: 'deck',

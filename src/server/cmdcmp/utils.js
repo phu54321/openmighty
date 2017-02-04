@@ -16,27 +16,44 @@ function decodeCard(cardEnvID) {
 exports.decodeCard = decodeCard;
 
 
+const typeEncodeTable = {
+    'C': {
+        enc: (c) => c.cardEnvID,
+        dec: (c) => decodeCard(c)
+    },
+    'I': {
+        enc: (c) => c,
+        dec: (c) => c | 0
+    },
+    'B': {
+        enc: (c) => c | 0,
+        dec: Boolean
+    }
+};
+
 exports.createJsonCompressor = function (stringHead, keys) {
     return function (obj) {
-        const msg = [stringHead];
+        const msg = [];
         keys.forEach(key => {
-            if(key[0] == 'I') {
-                msg.push(obj[key.substring(1)]);
+            const typeEncoder = typeEncodeTable[key[0]];
+            if(typeEncoder) {
+                msg.push(typeEncoder.enc(obj[key.substring(1)]));
             }
             else msg.push(obj[key]);
         });
-        return msg.join('\0');
+        return stringHead + msg.join(';');
     };
 };
 
 exports.createJsonDecompressor  = function (type, keys) {
     return function (s) {
-        const sList = s.split('\0');
+        const sList = s.substr(1).split(';');
         const obj = { type: type };
-        let index = 1;
+        let index = 0;
         keys.forEach(key => {
-            if(key[0] == 'I') {
-                obj[key.substring(1)] = sList[index] | 0;
+            const typeEncoder = typeEncodeTable[key[0]];
+            if(typeEncoder) {
+                obj[key.substring(1)] = typeEncoder.dec(sList[index]);
             }
             else {
                 obj[key] = sList[index];

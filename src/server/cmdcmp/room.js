@@ -10,8 +10,7 @@ const utils = require('./utils');
 cmdcmp.registerCompressor({
     type: 'rjoin',
     shead: 'j',
-    cmpf: utils.createJsonCompressor('j', ['username', 'useridf']),
-    dcmpf: utils.createJsonDecompressor('rjoin', ['username', 'useridf'])
+    keys: ['username', 'useridf']
 });
 
 
@@ -25,10 +24,10 @@ cmdcmp.registerCompressor({
             msg.push(user.username);
             msg.push(user.useridf);
         });
-        return msg.join('\0');
+        return msg.join(';');
     },
     dcmpf: (s) => {
-        const slist = s.split('\0');
+        const slist = s.split(';');
         const users = [];
         for(let i = 3 ; i < slist.length ; i += 2) {
             users.push({
@@ -48,16 +47,5 @@ cmdcmp.registerCompressor({
 cmdcmp.registerCompressor({
     type: 'rleft',
     shead: 'l',
-    cmpf: (obj) => {
-        return 'l' + obj.useridf + '\0' + obj.owner;
-    },
-    dcmpf: (s) => {
-        const matches = s.match(/^l(\w+)\0(\d+)$/);
-        if(!matches) return null;
-        return {
-            type: 'rleft',
-            useridf: matches[1],
-            owner: matches[2] | 0
-        };
-    }
+    keys: ['useridf', 'Iowner']
 });

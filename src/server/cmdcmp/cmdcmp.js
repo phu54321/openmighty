@@ -106,12 +106,17 @@ exports.decompressCommand = function (cmd) {
 exports.registerCompressor = function (obj) {
     const cmdType = obj.type;
     const stringHead = obj.shead;
-    const cmpf = obj.cmpf;
-    const dcmpf = obj.dcmpf;
+    let cmpf = obj.cmpf;
+    let dcmpf = obj.dcmpf;
+    const keys = obj.keys;
 
     if(
         compressMap[cmdType] || decompressMap[stringHead]
     ) throw new Error('Duplicate compressor ' + cmdType + " " +stringHead);
+    if(!cmpf && !dcmpf && keys) {
+        cmpf = utils.createJsonCompressor(stringHead, keys);
+        dcmpf = utils.createJsonDecompressor(cmdType, keys);
+    }
     compressMap[cmdType] = cmpf;
     decompressMap[stringHead] = dcmpf;
 };
@@ -119,4 +124,6 @@ exports.registerCompressor = function (obj) {
 // Add compressor here
 require('./room');
 require('./ginit');
+require('./maingame');
+require('./bidding');
 
