@@ -13,7 +13,11 @@ exports.emitRoomUsers = function (room, user) {
     const users = _.map(
         room.users,
         (user) => {
-            return {useridf: user.useridf, username: user.username};
+            return {
+                useridf: user.useridf,
+                username: user.username,
+                rating: user.rating
+            };
         });
     user.emit('cmd', {
         type: 'rusers',
@@ -54,6 +58,7 @@ exports.emitGamePlayers = function (room) {
             return {
                 username: user.username,
                 useridf: user.useridf,
+                rating: user.rating
             };
         });
     room.emit('cmd', {

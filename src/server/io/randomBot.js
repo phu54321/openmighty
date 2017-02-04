@@ -63,7 +63,7 @@ RandomBotSocket.prototype.onCommand = function (msg) {
         else if(badCommand.indexOf(msg.type) != -1) {
             this.cmd({ type: 'abort' });
         }
-    }, 1000);
+    }, 800);
 };
 
 module.exports = RandomBotSocket;

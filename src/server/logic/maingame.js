@@ -9,11 +9,14 @@
 "use strict";
 
 const _ = require('underscore');
+const async = require('async');
+
 const cmdout = require('./../io/cmdout');
 const card = require('./card');
 const setCheck = require('./setcheck');
-const gamelog = require('../../models/gamelog');
 
+const gamelog = require('../../models/gamelog');
+const users = require('../../models/users');
 
 module.exports = function (MightyRoom) {
     /**
@@ -114,7 +117,6 @@ module.exports = function (MightyRoom) {
         }
 
         // 카드 프렌드 처리
-        console.log(this.friendCard);
         if(
             this.friend === null &&
             this.friendType == 'card' &&
@@ -336,10 +338,23 @@ module.exports = function (MightyRoom) {
         }
 
         this.scores = scoreTable;
-        cmdout.emitGameEnd(this, oppObtainedCardCount, scoreTable, setUser);
-        gamelog.addGameLog(this, (err) => {
+
+        // Apply ratings
+        async.series([
+            (cb) => gamelog.addGameLog(this, cb),
+            (cb) => async.eachSeries(this.users, (user, next) => {
+                // Update user's rating
+                users.getUserRating(user.useridf, (err, rating) => {
+                    if (err) return next(err);
+                    user.rating = rating;
+                    next(null);
+                });
+            }, cb),
+        ], (err) => {
+            cmdout.emitGameEnd(this, oppObtainedCardCount, scoreTable, setUser);
+            if (!err) cmdout.emitGamePlayers(this);
             this.endGame();
-            if(err) throw err;
+            if (err) throw err;
         });
     };
 };

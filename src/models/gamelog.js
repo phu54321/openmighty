@@ -33,13 +33,13 @@ exports.addGameLog = function (game, cb) {
         players: game.gameUsers.map(user => user.useridf).join(','),
         gameLog: game.gamelog.toString()
     })
-        .then(function (gameid) {
+        .then(function (gameId) {
             const promises = game.gameUsers.map((user, userIdx) => {
                 let score = game.scores[userIdx];
                 if(typeof(user.useridf) == 'string') {
                     return db('usergame').insert({
                         userid: -1,
-                        gameid: gameid,
+                        gameid: gameId,
                         score: score
                     });
                 }
@@ -47,7 +47,7 @@ exports.addGameLog = function (game, cb) {
                     if(user.ai) score = -30;  // Room leaving penelty;
                     return db('usergame').insert({
                         userid: user.useridf,
-                        gameid: gameid,
+                        gameid: gameId,
                         score: score
                     });
                 }

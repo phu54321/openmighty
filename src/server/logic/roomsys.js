@@ -6,6 +6,7 @@
 
 const cmdcmp = require('../cmdcmp/cmdcmp');
 const AISocket = require('../io/randomBot');
+const users = require('../../models/users');
 const _ = require('underscore');
 
 module.exports = function (MightyRoom) {
@@ -59,19 +60,23 @@ module.exports = function (MightyRoom) {
             return cb(new Error('방이 꽉 찼습니다.'));
         }
 
-        // Add player to user list
-        const userEntry = {
-            socket: socket,
-            username: username,
-            useridf: useridf,
-            emit: function (type, obj) {
-                if(type == 'cmd') obj = cmdcmp.compressCommand(obj);
-                this.socket.emit(type, obj);
-                if(type == 'cmd') this.lastCommand = obj;
-            }
-        };
-        this.users.push(userEntry);
-        cb(null, userEntry);
+        users.getUserRating(useridf, (err, rating) => {
+            if(err) return cb(err);
+            // Add player to user list
+            const userEntry = {
+                socket: socket,
+                username: username,
+                useridf: useridf,
+                rating: rating,
+                emit: function (type, obj) {
+                    if(type == 'cmd') obj = cmdcmp.compressCommand(obj);
+                    this.socket.emit(type, obj);
+                    if(type == 'cmd') this.lastCommand = obj;
+                }
+            };
+            this.users.push(userEntry);
+            cb(null, userEntry);
+        });
     };
 
 

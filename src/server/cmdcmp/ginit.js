@@ -16,16 +16,18 @@ cmdcmp.registerCompressor({
         obj.users.forEach((user) => {
             msg.push(user.username);
             msg.push(user.useridf);
+            msg.push(user.rating);
         });
         return msg.join(';');
     },
     dcmpf: (s) => {
         const slist = s.split(';');
         const users = [];
-        for (let i = 1; i < slist.length; i += 2) {
+        for (let i = 1; i < slist.length; i += 3) {
             users.push({
                 username: slist[i],
                 useridf: slist[i + 1],
+                rating: slist[i + 2] | 0
             });
         }
         return {

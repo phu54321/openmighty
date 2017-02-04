@@ -11,7 +11,7 @@ const async = require('async');
 // SCHEMA
 db.initScheme('users', function(table) {
     table.increments('id').primary();
-    table.string('username').unique().index();
+    table.string('username').unique();
     table.string('email').unique();
     table.string('pwhash');
     table.boolean('activated').index();
@@ -172,3 +172,36 @@ passport.deserializeUser(function (user, done) {
     'use strict';
     done(null, user);
 });
+
+
+////////////////
+
+/**
+ * User의 플레이카운트를 얻는다.
+ * @param userId
+ * @param cb
+ */
+exports.getPlayCount = function (userId, cb) {
+    db('usergame').count('*')
+        .where({userid: userId})
+        .asCallback(cb);
+};
+
+
+/**
+ * 유저의 레이팅을 얻는다
+ * @param userId
+ * @param cb
+ */
+exports.getUserRating = function (userId, cb) {
+    db('usergame').avg('score as rating')
+        .where({userid: userId})
+        // Consider only 100 last games
+        .orderBy('id', 'desc')
+        .limit(100)
+        .asCallback(function (err, r) {
+            if(err) return cb(err);
+            return cb(null, r[0].rating);
+        });
+};
+

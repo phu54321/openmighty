@@ -37,7 +37,6 @@ function initSocket() {
     socket.on('cmd', function (msg) {
         "use strict";
         const dcmp = cmdcmp.decompressCommand(msg);
-        console.log(msg, dcmp);
         cmdproc.translateCmdMessage(dcmp);
     });
 
