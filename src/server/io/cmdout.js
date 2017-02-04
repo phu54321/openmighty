@@ -54,7 +54,6 @@ exports.emitGamePlayers = function (room) {
             return {
                 username: user.username,
                 useridf: user.useridf,
-                ai: user.socket instanceof AISocket
             };
         });
     room.emit('cmd', {

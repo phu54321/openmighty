@@ -50,7 +50,6 @@ exports.viewRoom = function () {
             $playerSlot.addClass('player-self');
             self = i;
         }
-        if(user.ai) $playerSlot.addClass('player-ai');
     }
 
     for(let i = users.length ; i < 5 ; i++) {

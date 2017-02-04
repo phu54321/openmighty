@@ -40,7 +40,6 @@ cmdcmp.registerCompressor({
     dcmpf: (s) => {
         const slist = s.split('\0');
         const users = [];
-        console.log(s, slist);
         for(let i = 3 ; i < slist.length ; i += 2) {
             users.push({
                 username: slist[i],
