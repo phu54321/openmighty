@@ -58,7 +58,9 @@ router.post('/join', function (req, res) {
         (userid, cb) => users.findUserByID(userid, cb),
         (userEntry, cb) => req.logIn(userEntry, cb)
     ], (err) => {
-        if(err) return res.json({error: '가입에 실패했습니다 : ' + err.message});
+        if(err) {
+            return res.json({error: '가입에 실패했습니다.'});
+        }
         else return res.json({error: 0});
     });
 });

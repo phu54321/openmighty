@@ -50,7 +50,6 @@ module.exports = function (MightyRoom) {
             user.socket.waitTime = 0;
         });
         delete this.gameUsers;
-        this.gamelog.print();
         delete this.gamelog;
     };
 };

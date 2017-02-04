@@ -103,6 +103,7 @@ module.exports = function (MightyRoom) {
 
         // 플레이중인 유저라면 AISocket으로 대체
         if(this.playing) {
+            userEntry.ai = true;
             userEntry.socket = new AISocket(this, userEntry);
             userEntry.socket.deck = userEntry.deck;
             if(userEntry.lastCommand) {

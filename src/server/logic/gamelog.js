@@ -9,8 +9,8 @@ class GameLog {
     log(msg) {
         this.logs.push(msg);
     }
-    print() {
-        console.log('gamelog', JSON.stringify(this.logs));
+    toString() {
+        return JSON.stringify(this.logs);
     }
 }
 

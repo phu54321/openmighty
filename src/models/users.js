@@ -11,11 +11,11 @@ const async = require('async');
 // SCHEMA
 db.initScheme('users', function(table) {
     table.increments('id').primary();
-    table.string('username').unique();
+    table.string('username').unique().index();
     table.string('email').unique();
     table.string('pwhash');
-    table.boolean('activated');
-    table.timestamps();
+    table.boolean('activated').index();
+    table.timestamps(true, true);
 });
 
 const userFields = ['id', 'username', 'email'];

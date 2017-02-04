@@ -12,6 +12,8 @@ const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
 const card = require('./card');
 const setCheck = require('./setcheck');
+const gamelog = require('../../models/gamelog');
+
 
 module.exports = function (MightyRoom) {
     /**
@@ -112,6 +114,7 @@ module.exports = function (MightyRoom) {
         }
 
         // 카드 프렌드 처리
+        console.log(this.friendCard);
         if(
             this.friend === null &&
             this.friendType == 'card' &&
@@ -332,7 +335,11 @@ module.exports = function (MightyRoom) {
             }
         }
 
+        this.scores = scoreTable;
         cmdout.emitGameEnd(this, oppObtainedCardCount, scoreTable, setUser);
-        this.endGame();
+        gamelog.addGameLog(this, (err) => {
+            this.endGame();
+            if(err) throw err;
+        });
     };
 };

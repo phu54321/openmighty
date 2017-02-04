@@ -77,6 +77,7 @@ MightyRoom.prototype.onStartGame = function () {
     // timeout을 30초로 설정
     this.users.forEach((user) => {
         user.socket.waitTime = 30;
+        user.ai = false;
     });
 
     // Initialize game-related variables.
@@ -85,7 +86,8 @@ MightyRoom.prototype.onStartGame = function () {
     for(let i = 1 ; playingUsers.length < 5; i++) {
         const aiUserEntry = {
             username: 'Computer ' + i,
-            useridf: this.roomID + '_AI' + i,
+            useridf: '%AI' + i,
+            ai: true,
             emit: function (type, msg) {
                 this.lastCommand = msg;
                 this.socket.emit(type, msg);

@@ -103,7 +103,7 @@ module.exports = function (MightyRoom) {
             const friendCard = card.createCard(msg.shape, msg.num);
             cmdout.emitFriendSelection(this, 'card', friendCard);
             this.friendType = 'card';
-            this.friendCard = card;
+            this.friendCard = friendCard;
         }
 
         else if(msg.ftype == 'player') {
