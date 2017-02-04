@@ -7,6 +7,7 @@
 const Materialize = window.Materialize;
 const io = window.io;
 
+const cmdcmp = require('../../server/cmdcmp/cmdcmp');
 const cmdproc = require('./procCmd');
 const cardImage = require('./cardImage');
 
@@ -35,7 +36,7 @@ function initSocket() {
 
     socket.on('cmd', function (msg) {
         "use strict";
-        // console.log('cmd', msg);
+        msg = cmdcmp.decompressCommand(msg);
         cmdproc.translateCmdMessage(msg);
     });
 
@@ -55,7 +56,7 @@ exports.sendCmd = function (type, object) {
 
     const copy = Object.assign({}, object || {});
     copy.type = type;
-    socket.emit('cmd', copy);
+    socket.emit('cmd', cmdcmp.compressCommand(copy));
     return true;
 };
 

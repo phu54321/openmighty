@@ -8,6 +8,7 @@ const _ = require('underscore');
 const async = require('async');
 const cmdproc = require("./io/cmdproc");
 const cmdout = require('./io/cmdout');
+const cmdcmp = require('./cmdcmp/cmdcmp');
 const rSock = require('./rsocket');
 
 module.exports = function(io) {
@@ -114,6 +115,8 @@ function onRoomJoin(socket) {
 
     // Process commands
     socket.on('cmd', function (msg) {
+        if(!msg) return socket.emit('err', '비어있는 명령입니다.');
+        msg = cmdcmp.decompressCommand(msg);
         if(!msg || !msg.type) {
             return socket.emit('err', '잘못된 명령입니다.');
         }

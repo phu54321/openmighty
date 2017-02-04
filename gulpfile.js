@@ -7,6 +7,7 @@ const gulp = require('gulp');
 const nodemon = require('gulp-nodemon');
 const browserSync = require('browser-sync');
 const webpack = require('webpack-stream');
+const runSequence = require('run-sequence');
 
 // Sprite sheet
 gulp.task('babel', function () {
@@ -52,11 +53,14 @@ gulp.task('reload', function () {
     browserSync.reload();
 });
 
+gulp.task('reloadBabel', ['babel'], () => {
+    browserSync.reload();
+});
 
 // Watch Files For Changes
 gulp.task('watch', ['babel', 'sass'], function () {
     gulp.watch('src/scss/**/*.scss', ['sass']);
-    gulp.watch('src/clientjs/**/*.js', ['babel', 'reload']);
+    gulp.watch('src/clientjs/**/*.js', ['reloadBabel']);
     gulp.watch('src/**/*.pug', ['reload']);
 });
 
@@ -80,7 +84,7 @@ gulp.task('nodemon', ['watch'], function (cb) {
 
     let started = false;
     return nodemon({
-        script: 'bin/www'
+        script: 'bin/www',
     }).on('start', function () {
         // to avoid nodemon being started multiple times
         if (!started) {

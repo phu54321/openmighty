@@ -40,8 +40,7 @@ module.exports = function (cmdTranslatorMap) {
             else if(card.num == 10) dealMissScore += 0.5;
             else if(card.num >= 11) dealMissScore += 1;
         });
-        if(dealMissScore <= 1) return true;
-        return false;
+        return dealMissScore <= 1;
     }
 
 
