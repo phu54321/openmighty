@@ -8,7 +8,7 @@ const _ = require('underscore');
 const cmdout = require('./../io/cmdout');
 
 const AISocket = require('./../io/randomBot');
-
+const GameLog = require('./gamelog');
 
 function MightyRoom(roomID, owner) {
     "use strict";
@@ -36,7 +36,6 @@ MightyRoom.prototype.emit = function (msgType, msg) {
         }
     });
 
-
     // gameUser에게도 emit. ex) AI
     _.map(this.gameUsers, (user) => {
         if(!sentUsers.has(user)) {
@@ -44,6 +43,11 @@ MightyRoom.prototype.emit = function (msgType, msg) {
             sentUsers.add(user);
         }
     });
+
+    // 로그에도 emit
+    if(msgType == 'cmd' && this.gamelog) {
+        this.gamelog.log(msg);
+    }
 };
 
 
@@ -67,6 +71,7 @@ MightyRoom.prototype.onStartGame = function () {
     if(this.playing) return "이미 플레이중입니다.";
 
     this.playing = true;
+    this.gamelog = new GameLog();
 
     // timeout을 30초로 설정
     this.users.forEach((user) => {
@@ -115,7 +120,7 @@ MightyRoom.prototype.onAIStopRequest = function (userEntry) {
 require('./initgame')(MightyRoom);
 require('./bidding')(MightyRoom);
 require('./roomsys')(MightyRoom);
-require('./fselect')(MightyRoom);
+require('./friendsel')(MightyRoom);
 require('./maingame')(MightyRoom);
 
 

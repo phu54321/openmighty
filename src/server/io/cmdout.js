@@ -151,6 +151,7 @@ exports.emitGameCardPlayRequest = function (room) {
         shaperq: room.shapeRequest || undefined,
         jcall: room.jokerCalled ? true : undefined
     });
+    console.log('cprq', room);
 };
 
 
