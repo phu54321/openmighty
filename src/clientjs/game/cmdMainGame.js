@@ -51,6 +51,7 @@ exports = module.exports = function (cmdTranslatorMap) {
         mightyCard.parents('.deck-card').addClass('deck-card-selectable');
 
         // 첫 턴 선일 경우
+        console.log(game.trick, game.deck);
         if(game.trick == 1 && game.president == game.selfIndex) {
             // 주공은 모든 패가 기루다가 아닌 이상 기루다를 첫 턴에 낼 수 없다.
             let i;

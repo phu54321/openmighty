@@ -115,7 +115,7 @@ module.exports = function (MightyRoom) {
         if(
             this.friend === null &&
             this.friendType == 'card' &&
-            this.friendCard == playingCard
+            this.friendCard.equals(playingCard)
         ) {
             this.friend = this.currentTurn;
         }
@@ -238,7 +238,7 @@ module.exports = function (MightyRoom) {
             this.friendType == 'first' &&
             this.friend === null &&
             this.trickWinner != this.president &&
-            this.currentTrick <= 4
+            this.currentTrick <= 1
         ) {
             this.friend = this.trickWinner;
         }

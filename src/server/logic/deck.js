@@ -42,7 +42,7 @@ class Deck extends Array {
     }
 
     hasCard(card) {
-        return !_.every(this, (c) => (c != card));
+        return !_.every(this, (c) => (!c.equals(card)));
     }
 
     hasShape(shape) {
@@ -53,7 +53,19 @@ class Deck extends Array {
         return _.sum(_.map(this, (c) => c.getDealMissScore()));
     }
 
-
+    splitShapes() {
+        const ret = {
+            spade: [],
+            clover: [],
+            heart: [],
+            diamond: [],
+            joker: []
+        };
+        this.forEach(card => {
+            ret[card.shape].push(card);
+        });
+        return ret;
+    }
 }
 
 module.exports = Deck;

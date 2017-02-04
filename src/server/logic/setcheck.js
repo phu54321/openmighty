@@ -7,15 +7,6 @@
 const _ = require('lodash');
 const card = require('./card');
 
-const postGroupBy = function (out) {
-    "use strict";
-    card.cardShapes.forEach((shape) => {
-        if(!out[shape]) out[shape] = [];
-    });
-    return out;
-};
-
-
 
 /**
  * 게임 셋을 할 수 있는 사람이 있는지 파악
@@ -39,14 +30,14 @@ module.exports = function (room) {
     // console.log('calculating set');
 
     const isLastTurn = (room.currentTrick == 9);  // setcheck 다음에 trick이 10으로 증가되서 여기선 9와 비교
-    const discardedMap = postGroupBy(_.groupBy(room.discardedCards, (c) => c.shape));  // 문양당 버려진 카드
+    const discardedMap = room.discardedCards.splitShapes();
     const isMightyDown = room.discardedCards.hasCard(room.mighty);  // 마이티가 버려졌나
     const isJokerDown = (discardedMap.joker.length == 1);  // 조커가 버려졌나.
     // console.log(discardedMap, room.mighty, isMightyDown, isJokerDown);
 
     for(let i = 0 ; i < 5 ; i++) {
         const user = room.gameUsers[i];
-        const userDeckMap = postGroupBy(_.groupBy(user.deck, (c) => c.shape));
+        const userDeckMap = user.deck.splitShapes();
         // console.log('checking user', i, stringifyDeck(user.deck));
 
         const hasMighty = user.deck.hasCard(room.mighty);

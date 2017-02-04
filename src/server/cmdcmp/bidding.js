@@ -11,7 +11,7 @@ const utils = require('./utils');
 cmdcmp.registerCompressor({
     type: 'binfo',
     shead: 'B',
-    keys: ['Ipserident', 'shape', 'num']
+    keys: ['Ipresident', 'shape', 'num']
 });
 
 // {"type":"pbinfo","bidder":3,"bidShape":"pass"}
