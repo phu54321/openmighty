@@ -27,6 +27,7 @@ exports.compressCommand = function (cmd) {
  */
 exports.decompressCommand = function (cmd) {
     if(typeof(cmd) != 'string') return cmd;
+    console.log(cmd);
     const dcmpFunc = decompressMap[cmd[0]];
     return dcmpFunc ? (dcmpFunc(cmd) || cmd) : cmd;
 };
@@ -49,5 +50,5 @@ exports.registerCompressor = function (obj) {
 };
 
 // Add compressor here
-require('./rjoin');
+require('./room');
 

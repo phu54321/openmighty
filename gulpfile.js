@@ -60,7 +60,7 @@ gulp.task('reloadBabel', ['babel'], () => {
 // Watch Files For Changes
 gulp.task('watch', ['babel', 'sass'], function () {
     gulp.watch('src/scss/**/*.scss', ['sass']);
-    gulp.watch('src/clientjs/**/*.js', ['reloadBabel']);
+    gulp.watch('src/**/*.js', ['reloadBabel']);
     gulp.watch('src/**/*.pug', ['reload']);
 });
 
