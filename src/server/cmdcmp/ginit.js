@@ -50,7 +50,7 @@ cmdcmp.registerCompressor({
         const deck = slist.slice(1).map(card.decodeCard);
         return {
             type: 'deck',
-            users: deck
+            deck: deck
         };
     }
 });

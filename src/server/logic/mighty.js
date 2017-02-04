@@ -5,9 +5,10 @@
 "use strict";
 
 const _ = require('underscore');
-const cmdout = require('./../io/cmdout');
+const cmdout = require('../io/cmdout');
+const cmdcmp = require('../cmdcmp/cmdcmp');
 
-const AISocket = require('./../io/randomBot');
+const AISocket = require('../io/randomBot');
 const GameLog = require('./gamelog');
 
 function MightyRoom(roomID, owner) {
@@ -25,10 +26,10 @@ function MightyRoom(roomID, owner) {
  * @param msg
  */
 MightyRoom.prototype.emit = function (msgType, msg) {
-    "use strict";
-    const sentUsers = new Set();
+    msg = cmdcmp.compressCommand(msg);
 
     // 모든 사람 유저에게 emit.
+    const sentUsers = new Set();
     _.map(this.users, (user) => {
         if(!sentUsers.has(user)) {
             user.emit(msgType, msg);

@@ -14,7 +14,7 @@ const decompressMap = {};
  * @returns {*}
  */
 exports.compressCommand = function (cmd) {
-    if(cmd instanceof String) return cmd;  // Already compressed
+    if(typeof(cmd) == 'string') return cmd;  // Already compressed
     const cmpFunc = compressMap[cmd.type];
     return cmpFunc ? cmpFunc(cmd) : cmd;
 };
@@ -27,7 +27,6 @@ exports.compressCommand = function (cmd) {
  */
 exports.decompressCommand = function (cmd) {
     if(typeof(cmd) != 'string') return cmd;
-    console.log(cmd);
     const dcmpFunc = decompressMap[cmd[0]];
     return dcmpFunc ? (dcmpFunc(cmd) || cmd) : cmd;
 };
@@ -51,4 +50,4 @@ exports.registerCompressor = function (obj) {
 
 // Add compressor here
 require('./room');
-
+require('./ginit');
