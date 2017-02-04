@@ -6,7 +6,7 @@
 "use strict";
 
 const cmdcmp = require('./cmdcmp');
-const card = require('./card');
+const utils = require('./utils');
 
 cmdcmp.registerCompressor({
     type: 'gusers',
@@ -47,7 +47,7 @@ cmdcmp.registerCompressor({
     },
     dcmpf: (s) => {
         const slist = s.split('\0');
-        const deck = slist.slice(1).map(card.decodeCard);
+        const deck = slist.slice(1).map(utils.decodeCard);
         return {
             type: 'deck',
             deck: deck

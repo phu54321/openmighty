@@ -10,7 +10,7 @@ class GameLog {
         this.logs.push(msg);
     }
     print() {
-        console.log('gamelog', this.logs);
+        console.log('gamelog', JSON.stringify(this.logs));
     }
 }
 

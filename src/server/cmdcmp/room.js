@@ -5,23 +5,13 @@
 "use strict";
 
 const cmdcmp = require('./cmdcmp');
-
+const utils = require('./utils');
 
 cmdcmp.registerCompressor({
     type: 'rjoin',
     shead: 'j',
-    cmpf: (obj) => {
-        return 'j' + obj.username + '\0' + obj.useridf;
-    },
-    dcmpf: (s) => {
-        const matches = s.match(/^j(\w+)\0(\w+)$/);
-        if(!matches) return null;
-        return {
-            type: 'rjoin',
-            username: matches[1],
-            useridf: matches[2]
-        };
-    }
+    cmpf: utils.createJsonCompressor('j', ['username', 'useridf']),
+    dcmpf: utils.createJsonDecompressor('rjoin', ['username', 'useridf'])
 });
 
 
