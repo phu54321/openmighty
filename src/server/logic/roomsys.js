@@ -5,7 +5,7 @@
 "use strict";
 
 const cmdcmp = require('../cmdcmp/cmdcmp');
-const AISocket = require('../io/randomBot');
+const AISocket = require('../io/aiBot');
 const users = require('../../models/users');
 const _ = require('underscore');
 

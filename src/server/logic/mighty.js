@@ -8,7 +8,7 @@ const _ = require('underscore');
 const cmdout = require('../io/cmdout');
 const cmdcmp = require('../cmdcmp/cmdcmp');
 
-const AISocket = require('../io/randomBot');
+const AISocket = require('../io/aiBot');
 const GameLog = require('./gamelog');
 
 function MightyRoom(roomID, owner) {

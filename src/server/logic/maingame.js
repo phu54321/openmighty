@@ -355,7 +355,7 @@ module.exports = function (MightyRoom) {
             }, cb),
         ], (err) => {
             cmdout.emitGameEnd(this, oppObtainedCardCount, scoreTable, setUser);
-            if (!err) cmdout.emitGamePlayers(this);
+            if (!err) cmdout.emitRoomUsers(this);
             this.endGame();
             if (err) throw err;
         });

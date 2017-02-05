@@ -5,12 +5,12 @@
 "use strict";
 
 const _ = require('underscore');
-const AISocket = require('./randomBot');
+const AISocket = require('./aiBot');
 
 // Room related
 
 exports.emitRoomUsers = function (room, user) {
-    const users = _.map(
+    const usersInfo = _.map(
         room.users,
         (user) => {
             return {
@@ -19,13 +19,20 @@ exports.emitRoomUsers = function (room, user) {
                 rating: user.rating
             };
         });
-    user.emit('cmd', {
-        type: 'rusers',
-        owner: room.getOwnerIndex(),
-        youridf: user.useridf,
-        users: users
+
+    let users;
+    if(user) users = [user];
+    else users = room.users;
+    users.forEach(user => {
+        user.emit('cmd', {
+            type: 'rusers',
+            owner: room.getOwnerIndex(),
+            youridf: user.useridf,
+            users: usersInfo
+        });
     });
 };
+
 
 exports.emitRoomJoin = function (room, newUser) {
     _.map(room.users, (user) => {
