@@ -103,6 +103,7 @@ AISocket.prototype.proc_gusers = function (msg) {
 
     // 각 플레이어가 어떤 문양이 없는지를 본다.
     this.noShapeInfo = [{}, {}, {}, {}, {}];
+    this.trustOpponentHavingJoker = 0;
 };
 
 
@@ -131,6 +132,7 @@ AISocket.prototype.proc_bidrq = function () {
 AISocket.prototype.proc_fs = function (msg) {
     if(msg.ftype == 'card') {
         this.isFriend = this.deck.hasCard(this.game.friendCard);
+        console.log(this.isFriend, this.deck.toString(), this.game.friendCard.toString());
         if(this.isFriend) {
             global.logger.debug(`AI ${this.userEntry.useridf} is friend`);
         }
@@ -355,22 +357,27 @@ AISocket.prototype.proc_cprq = function(msg) {
         }
     }
 
-    // 2. 문양 요청시 - 그 문양이 있으면 내야합니다.
-    if(msg.shaperq) {
-        // 조커 콜 처리 - 더 고려할게 없다.
-        if(msg.jcall) {
-            const jokerIndex = deck.indexOf(game.joker);
-            if (jokerIndex != -1) {
-                return playIndex(deck.indexOf(game.joker));
-            }
+    // 2. 조커 콜 처리 - 더 고려할게 없다.
+    if(msg.jcall) {
+        const jokerIndex = deck.indexOf(game.joker);
+        if (jokerIndex != -1) {
+            // 조커랑 마이티가 둘 다 있으면 조콜에서도 마이티를 낸다.
+            // 조커는 언젠가는 써야하잖아.
+            const mightyIndex = deck.indexOf(game.mighty);
+            if(mightyIndex != -1) return playIndex(mightyIndex);
+            else return playIndex(jokerIndex);
         }
+    }
 
+    // 3. 문양 요청시 - 그 문양이 있으면 내야합니다.
+    if(msg.shaperq) {
         // cf) (currentTurn - startTurn + 5) % 5 : currentTurn이 startTurn 기준 몇번째 턴인가
         let hasPresidentPlayed = (
             (game.currentTurn - game.startTurn + 5) % 5 >
             (game.president - game.startTurn + 5) % 5
         );  // 주공이 카드를 이미 냈는가?
 
+        const jokerIndex = deck.indexOf(game.joker);
         const [sStart, sEnd] = getShapeRange(deck, msg.shaperq);
 
         // 문양이 존재 -> 내야한다.
@@ -447,6 +454,8 @@ AISocket.prototype.proc_cprq = function(msg) {
 
             // 야당이라면 전략이 달라진다.
             else {
+                const remainingTurns = (this.startTurn - this.currentTurn + 5) % 5 - 1;
+
                 // 내가 주공/프렌드를 밟을 수 있으면 밟는다.
                 if(
                     game.trickWinner === game.president ||
@@ -470,13 +479,67 @@ AISocket.prototype.proc_cprq = function(msg) {
                     }
                     return playIndex(minimumScoreCard);  // 야당/안밝혀진 프렌에겐 점수를 싣는다.
                 }
-                // 아니면 제일 낮은거.
+
+                // 조커가 있는데 점수가 2개 이상 쌓이면 조커를 낸다.
+                if(this.currentTurn != 1 && this.currentTurn != 10 && jokerIndex != -1) {
+                    /*
+                        1 0 * ? ? -> 1 2 -> no
+                        1 * ? ? ? -> 1 3 -> yes
+                        1 1 * ? ? -> 2 2 -> yes
+                        1 0 1 * ? -> 2 1 -> yes
+                     */
+                    const expectedScoreCount = (
+                        game.playedCards.filter(c => c.isScoreCard()).length + // 이미 나온 점카들
+                        0.4 * Math.max(remainingTurns, 0) // 앞으로 나올 점카 갯수 예상치
+                    );
+                    if(expectedScoreCount >= 2) {
+                        // 마이티가 나왔으면
+                        if(!game.playedCards.hasCard(game.mighty)) {
+                            return playIndex(jokerIndex);
+                        }
+                    }
+                }
+
+                // 마프고 조커가 안 빠졌고 (조커가 야당에게 있겠지? 란 기대로)
+                // 내가 2번째 턴이고 첫턴이 점카고 조커가 안 빠졌으면 이 턴에 실어주는걸 고려해봐야한다.
+                // 이 짓은 최대 2번만 한다. 그 안에 조커가 안나오면 조커가 주공에 있다 가정한다.
+                if(
+                    this.trustOpponentHavingJoker < 2 &&
+                    remainingTurns == 3 &&
+                    game.mighty.equals(game.friendCard) &&
+                    game.playedCards[0].isScoreCard() &&
+                    Math.random() < 0.7 &&  // 70% 확률로 싣는다.
+                    !game.discardedCards.hasShape('joker')
+                ) {
+                    let minimumScoreCard = sStart;
+                    while(minimumScoreCard < sEnd) {
+                        if(!deck[minimumScoreCard + 1].isScoreCard()) break;
+                        minimumScoreCard++;
+                    }
+
+                    // 지금 돌고있는게 기루다면 J/10만 싣는다.
+                    if(msg.shaperq == game.bidShape) {
+                        const cardNum = deck[minimumScoreCard].num;
+                        if(cardNum == 10 || cardNum == 11) {
+                            this.trustOpponentHavingJoker++;
+                            return playIndex(minimumScoreCard);
+                        }
+                    }
+
+                    // 아니면 그냥 제일 낮은 점카를 싣는다.
+                    else {
+                        this.trustOpponentHavingJoker++;
+                        return playIndex(minimumScoreCard);
+                    }
+                }
+
+                // 그냥 제일 낮은 카드를 싣는다.
                 return playIndex(sEnd);
             }
         }
     }
 
-    // 그 외 -> 아무거나 낸다.
+    // 그 외 -> 나도 모르겠다. 아무거나 낸다.
     this.cmd({
         type: 'cp',
         cardIdx: _.random(0, deck.length - 1)

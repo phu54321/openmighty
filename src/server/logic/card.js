@@ -18,6 +18,7 @@ class Card {
     }
 
     equals(rhs) {
+        if(rhs === null || typeof(rhs) != "object") return false;
         return rhs.shape == this.shape && rhs.num == this.num;
     }
 
