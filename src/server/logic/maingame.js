@@ -106,8 +106,6 @@ module.exports = function (MightyRoom) {
         // 카드 처리
         userEntry.deck.splice(cardIdx, 1);
         this.playedCards.push(playingCard);
-        cmdout.emitGamePlayerDeck(this, this.currentTurn);
-        cmdout.emitGamePlayerCardPlay(this, this.currentTurn, playingCard, isJokerCall);
 
         // maxCard & maxPlayer를 업데이트
         const cardStrength = this.calculateCardStrength(playingCard);
@@ -137,6 +135,12 @@ module.exports = function (MightyRoom) {
         else if(this.startTurn == this.currentTurn) {
             this.shapeRequest = playingCard.shape;
         }
+
+        // 카드 관련 처리
+        // cf) AISocket에서 this.shapeRequest를 카운팅에 활용하기 때문에
+        // shapeRequest 업데이트 후 emitGamePlayerCardPlay를 불러야한다.
+        cmdout.emitGamePlayerDeck(this, this.currentTurn);
+        cmdout.emitGamePlayerCardPlay(this, this.currentTurn, playingCard, isJokerCall);
 
         // 턴 업데이트
         this.currentTurn = (this.currentTurn + 1) % 5;

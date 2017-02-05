@@ -12,6 +12,7 @@ const card = require('../logic/card');
 const cmdcmp = require('../cmdcmp/cmdcmp');
 
 
+
 function AISocket(room, userEntry) {
     "use strict";
 
@@ -33,13 +34,15 @@ function AISocket(room, userEntry) {
 AISocket.prototype.cmd = function (msg) {
     "use strict";
 
-    const cmdProcessor = cmdproc[msg.type];
-    if(!cmdProcessor) {
-        // console.log('[' + this.userEntry.useridf + '] Unknown command : ' + msg.type);
-        return false;
-    }
-    // console.log('[' + this.userEntry.useridf + ' Out]', msg);
-    return cmdProcessor(this, this.game, this.userEntry, msg);
+    setTimeout(() => {
+        const cmdProcessor = cmdproc[msg.type];
+        if (!cmdProcessor) {
+            // console.log('[' + this.userEntry.useridf + '] Unknown command : ' + msg.type);
+            return false;
+        }
+        // console.log('[' + this.userEntry.useridf + ' Out]', msg);
+        return cmdProcessor(this, this.game, this.userEntry, msg);
+    }, 400);
 };
 
 
@@ -66,14 +69,13 @@ AISocket.prototype.emit = function (type, msg) {
  * @param msg
  */
 AISocket.prototype.onCommand = function (msg) {
-    setTimeout(() => {
-        const badCommand = ['d3rq', 'bc1rq', 'fsrq'];
-        const mthName = 'proc_' + msg.type;
-        if (this[mthName]) return this[mthName](msg);
-        else if(badCommand.indexOf(msg.type) != -1) {
-            this.cmd({ type: 'abort' });
-        }
-    }, 800);
+    const badCommand = ['d3rq', 'bc1rq', 'fsrq'];
+    const mthName = 'proc_' + msg.type;
+    if (this[mthName]) return this[mthName](msg);
+    else if(badCommand.indexOf(msg.type) != -1) {
+        // 바로 게임을 멈춥니다.
+        process.nextTick(() => this.cmd({ type: 'abort' }));
+    }
 };
 
 module.exports = AISocket;
@@ -92,13 +94,13 @@ AISocket.prototype.proc_gusers = function (msg) {
     const users = msg.users;
     for(let i = 0 ; i < users.length ; i++) {
         if(users[i].useridf == this.userEntry.useridf) {
-            this.selfID = i;
+            this.selfIndex = i;
             break;
         }
     }
 
     // 각 플레이어가 어떤 문양이 없는지를 본다.
-    this.noShapeInfo = [];
+    this.noShapeInfo = [{}, {}, {}, {}, {}];
 };
 
 
@@ -128,11 +130,11 @@ AISocket.prototype.proc_fs = function (msg) {
     if(msg.ftype == 'card') {
         this.isFriend = this.deck.hasCard(this.game.friendCard);
         if(this.isFriend) {
-            global.logger.info(`AI ${this.userEntry.useridf} is friend`);
+            global.logger.debug(`AI ${this.userEntry.useridf} is friend`);
         }
     }
     else if(msg.ftype == 'player') {
-        this.isFriend = (this.game.friend == this.selfID);
+        this.isFriend = (this.game.friend == this.selfIndex);
     }
     else this.isFriend = false;
 };
@@ -175,18 +177,19 @@ AISocket.prototype.proc_cprq = function(msg) {
     // 프렌드는 일반적인 초보 수준을 목표로 짰다.
     const deck = this.deck;
 
-    // 조커 콜 처리 - 더 고려할게 없다.
-    if(msg.jcall) {
-        const jokerIndex = deck.indexOf(this.game.joker);
-        if (jokerIndex != -1) {
-            return playIndex(deck.indexOf(this.game.joker));
-        }
-    }
 
-    // TODO : 턴 시작할때 알고리즘!
+    // TODO: 내가 시작 턴이라면
 
     // 2. 문양 요청시 - 그 문양이 있으면 내야합니다.
     if(msg.shaperq) {
+        // 조커 콜 처리 - 더 고려할게 없다.
+        if(msg.jcall) {
+            const jokerIndex = deck.indexOf(this.game.joker);
+            if (jokerIndex != -1) {
+                return playIndex(deck.indexOf(this.game.joker));
+            }
+        }
+
         // 덱에서 해당 문양의 범위를 찾는다.
         let sStart = null, sEnd = null;
         for(let i = 0 ; i < deck.length ; i++) {
@@ -306,10 +309,26 @@ AISocket.prototype.proc_cprq = function(msg) {
 
 
 /**
+ * 그동안 플레이어가 낸 카드를 바탕으로, 사람들에게 없는 카드를 알아본다.
+ * @param msg
+ */
+AISocket.prototype.proc_pcp = function (msg) {
+    const currentShapeRequest = this.game.shapeRequest;
+    if(msg.card.shape == 'joker') return;  // 조커는 처리하지 않습니다.
+    if(msg.card.shape != currentShapeRequest) {
+        this.noShapeInfo[msg.player][currentShapeRequest] = true;
+        if(this.isFriend) {
+            global.logger.debug(`player #${msg.player} don't have ${currentShapeRequest}`);
+        }
+    }
+};
+
+
+/**
  * 한번의 트릭이 마쳤을 때 처리. 초구 프렌드 처리를 한다.
  */
 AISocket.prototype.proc_tend = function (msg) {
     if(this.game.currentTrick == 1 && this.game.friendType == 'first') {
-        this.isFriend = (msg.winner == this.selfID);
+        this.isFriend = (msg.winner == this.selfIndex);
     }
 };

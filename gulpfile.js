@@ -65,7 +65,7 @@ gulp.task('watch', ['babel', 'sass'], function () {
 });
 
 
-const BROWSER_SYNC_RELOAD_DELAY = 2000;
+const BROWSER_SYNC_RELOAD_DELAY = 4000;
 
 // Nodemon
 gulp.task('nodemon', ['watch'], function (cb) {

@@ -101,9 +101,9 @@ module.exports = function (MightyRoom) {
         // 프렌드를 선정한다.
         if(msg.ftype == 'card') {
             const friendCard = card.createCard(msg.shape, msg.num);
-            cmdout.emitFriendSelection(this, 'card', friendCard);
             this.friendType = 'card';
             this.friendCard = friendCard;
+            cmdout.emitFriendSelection(this, 'card', friendCard);
         }
 
         else if(msg.ftype == 'player') {

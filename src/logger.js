@@ -9,8 +9,10 @@ const logger = new (winston.Logger)({
         new (winston.transports.Console)({
             timestamp: true,
             colorize: true,
+            level: 'debug'
         })
     ]
 });
 
 global.logger = logger;
+logger.debug('Debug test');
