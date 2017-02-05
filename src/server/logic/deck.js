@@ -48,14 +48,14 @@ class Deck extends Array {
     }
 
     hasCard(card) {
-        return this.getCardIndex(card) != -1;
+        return this.indexOf(card) != -1;
     }
 
     hasShape(shape) {
         return !_.every(this, (c) => (c.shape != shape));
     }
 
-    getCardIndex(card) {
+    indexOf(card) {
         return this.findIndex((c) => c.equals(card));
     }
 

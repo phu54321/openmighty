@@ -151,6 +151,24 @@ AISocket.prototype.proc_cprq = function(msg) {
         });
     };
 
+    const canTakeLeadWith = (index) => {
+        const cardStrength = this.game.calculateCardStrength(this.deck[index]);
+        return (cardStrength > this.game.maxCardStrength);
+    };
+
+    const getCardRankInShape = (card) => {
+        const cardNum = card.num;
+        const higherCardCount = 14 - cardNum;
+        if(higherCardCount) {
+            // 현재까지 버려진 카드 + 내 덱에서 주공 현재 카드보다 쎈 카드를 구한다.
+            const discardedPWC = this.game.discardedCards.filter(
+                (c) => (c.shape == msg.shaperq && c.num > cardNum)
+            ).length;
+            return higherCardCount - discardedPWC;
+        }
+        else return 0;
+    };
+
     ///////////////////////////////////////////////////////////
 
 
@@ -159,14 +177,17 @@ AISocket.prototype.proc_cprq = function(msg) {
 
     // 조커 콜 처리 - 더 고려할게 없다.
     if(msg.jcall) {
-        const jokerIndex = deck.getCardIndex(this.game.joker);
+        const jokerIndex = deck.indexOf(this.game.joker);
         if (jokerIndex != -1) {
-            return playIndex(deck.getCardIndex(this.game.joker));
+            return playIndex(deck.indexOf(this.game.joker));
         }
     }
 
-    // 1. 문양 요청시 - 그 문양을 내야한다.
+    // TODO : 턴 시작할때 알고리즘!
+
+    // 2. 문양 요청시 - 그 문양이 있으면 내야합니다.
     if(msg.shaperq) {
+        // 덱에서 해당 문양의 범위를 찾는다.
         let sStart = null, sEnd = null;
         for(let i = 0 ; i < deck.length ; i++) {
             if(deck[i].shape == msg.shaperq) {
@@ -177,64 +198,98 @@ AISocket.prototype.proc_cprq = function(msg) {
 
         // 문양이 존재 -> 내야한다.
         if(sStart !== null) {
-            const firstCard = this.game.playedCards[0];
+            // 여당이라면
             if(this.isFriend) {
-                // 주공이 해당 문양에서 선을 잡을 수 있다면 주공이 선을 잡을 수 있도록 해준다.
+                // 주공이 해당 문양에서 선을 잡을 수 있다면 주공에게 선을 넘겨준다.
                 let canPresidentWin = false;
-                if(this.game.trickWinner === this.game.president) {  // 현재 주공이 선이다
-                    // 주공이 앞으로도 선인가? 잘 따져보자.
 
-                    // 1. 주공이 간을 쳤다 -> 아마 주공이 선 먹겠지
-                    if(this.game.president != this.game.startTurn) canPresidentWin = true;
-                    // 2. 조커는 짱카 가정
-                    else if(firstCard.shape == 'joker') canPresidentWin = true;
-                    // 3. 주공이 해당 문양에서 짱카를 냈는가?
+                // cf) (currentTurn - startTurn + 5) % 5 : currentTurn이 startTurn 기준 몇번째 턴인가
+                let hasPresidentPlayed = (
+                    (this.game.currentTurn - this.game.startTurn + 5) % 5 >
+                    (this.game.president - this.game.startTurn + 5) % 5
+                );  // 주공이 카드를 이미 냈는가?
+
+                // 현재 주공이 잠재적인 선이다.
+                if(this.game.trickWinner === this.game.president) {
+                    const presidentCard = this.game.playedCards[
+                        (this.game.trickWinner - this.game.startTurn + 5) % 5
+                    ];  // 주공이 낸 카드!
+
+                    // 주공이 선플레이어가 아니고 간을 쳤다면 주공이 이기겠지 뭐
+                    if(
+                        this.game.president != this.game.startTurn &&
+                        msg.shaperq !== this.game.bidShape &&
+                        presidentCard.shape == this.game.bidShape
+                    ) {
+                        canPresidentWin = true;
+                    }
+
+                    // 그 외 : 주공이 낸게 주공 카드 문양중에 짱칸지를 봐야한다.
                     else {
-                        const firstCardNum = firstCard.num;
-                        const potentialWinnerCount = 14 - firstCardNum;
-                        if(potentialWinnerCount) {
-                            // 현재까지 버려진 카드 + 내 덱에서 주공 현재 카드보다 쎈 카드를 구한다.
-                            const discardedPWC = this.game.discardedCards.filter(
-                                (c) => (c.shape == msg.shaperq && c.num > firstCardNum)
-                            ).length;
-                            const myDeckPWC = this.deck.filter(
-                                (c) => (c.shape == msg.shaperq && c.num > firstCardNum)
-                            ).length;
+                        // 조커는 짱카 가정
+                        if (presidentCard.shape == 'joker') canPresidentWin = true;
 
-                            // 주공이 짱카같으면 true
-                            if(potentialWinnerCount == discardedPWC + myDeckPWC) {
+                        // 주공이 해당 문양에서 짱카를 냈는가? (내 덱 제외)
+                        else {
+                            const presidentCardRank = getCardRankInShape(presidentCard);
+                            const myDeckPWC = this.deck.filter(
+                                (c) => (c.shape == msg.shaperq && c.num > presidentCard.num)
+                            ).length;  // 내 덱 카드중 주공 카드를 밟는 갯수
+
+                            if (presidentCardRank == myDeckPWC) {
+                                // 주공이 내 덱 제외 짱카다.
                                 canPresidentWin = true;
                             }
                         }
                     }
                 }
 
-                // 주공이 플레이하기 전
-                // cf) (currentTurn - startTurn + 5) % 5 : currentTurn이 startTurn 기준 몇번째 턴인가
-                else if(
-                    (this.game.currentTurn - this.game.startTurn + 5) % 5 <
-                    (this.game.president - this.game.startTurn + 5) % 5
-                ) {
-                    // TODO : 주공이 간을 칠 수 있는지를 봅니다.
-                    canPresidentWin = true;  // 주공을 일단 믿는다.
+                // 주공이 플레이하기 전이면
+                else if(!hasPresidentPlayed) {
+                    canPresidentWin = true;  // 주공을 일단 믿자.
                 }
 
-                if(canPresidentWin) return playIndex(sEnd);
+                // 주공이 이길것같으면 제일 낮은 카드를 낸다.
+                if(canPresidentWin) {
+                    return playIndex(sEnd);
+                }
                 else {
-                    // 내가 제일 높은걸 내서 야당에게 힘을 실어주는가?
-                    const bestCardStrength = this.game.calculateCardStrength(this.deck[sStart]);
-                    if(bestCardStrength > this.game.maxCardStrength) return playIndex(sStart);
+                    // 마이티가 있으면 밟아준다.
+                    if(this.deck.hasCard(this.game.mighty)) {
+                        return playIndex(this.deck.indexOf(this.game.mighty));
+                    }
+                    // 조커가 있어도 밟아준다.
+                    else if(
+                        this.currentTurn != 1 && this.currentTurn != 10 &&
+                        this.deck.hasCard(this.game.joker)
+                    ) {
+                        return playIndex(this.deck.indexOf(this.game.joker));
+                    }
+
+                    // 내가 선을 먹을 수 있다면 제일 쎈걸로
+                    // (더 쎈걸로 밟힐수도 있으니까 어중간한게 쎈거 말고 그냥 제일 쎈걸로 낸다)
+                    if(canTakeLeadWith(sStart)) return playIndex(sStart);
+                    // 아님 야당에게 힘 실어주지 말고 제일 낮은거 내자.
                     else return playIndex(sEnd);
                 }
             }
-            else {  // 야당이면 닥치고 낮은 문양부터
+
+            // 야당이라면 전략이 달라진다.
+            else {
                 // 내가 주공/프렌드를 밟을 수 있으면 밟는다.
                 if(
                     this.game.trickWinner === this.game.president ||
                     this.game.trickWinner === this.game.friend
                 ) {
-                    const bestCardStrength = this.game.calculateCardStrength(this.deck[sStart]);
-                    if(bestCardStrength > this.game.maxCardStrength) return playIndex(sStart);
+                    // 여당을 간신히 이길정도의 카드를 낸다.
+                    if(canTakeLeadWith(sStart)) {
+                        let minimumWinnerIndex = sStart;
+                        while(minimumWinnerIndex < sEnd) {
+                            if(!canTakeLeadWith(minimumWinnerIndex + 1)) break;
+                            minimumWinnerIndex++;
+                        }
+                        return playIndex(minimumWinnerIndex);
+                    }
                 }
                 // 아니면 제일 낮은거.
                 return playIndex(sEnd);
