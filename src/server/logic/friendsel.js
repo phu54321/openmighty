@@ -88,9 +88,6 @@ module.exports = function (MightyRoom) {
 
         // 카드를 제거하고 덱을 다시 쓴다.
         const pUser = this.gameUsers[this.president];
-        this.discardedCards.push(pUser.deck.splice(cardIdxs[2], 1)[0]);
-        this.discardedCards.push(pUser.deck.splice(cardIdxs[1], 1)[0]);
-        this.discardedCards.push(pUser.deck.splice(cardIdxs[0], 1)[0]);
         cmdout.emitGamePlayerDeck(this, this.president);
 
         // 공약을 수정한다.
