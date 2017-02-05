@@ -15,11 +15,12 @@ const cmdcmp = require('../cmdcmp/cmdcmp');
 function AISocket(room, userEntry) {
     "use strict";
 
-    this.room = room;
+    this.game = room;
     this.userEntry = userEntry;
     this.gameUsers = [];
     this.deck = null;
     this.isFriend = null;
+    this.noShapeInfo = [];
 }
 
 
@@ -38,7 +39,7 @@ AISocket.prototype.cmd = function (msg) {
         return false;
     }
     // console.log('[' + this.userEntry.useridf + ' Out]', msg);
-    return cmdProcessor(this, this.room, this.userEntry, msg);
+    return cmdProcessor(this, this.game, this.userEntry, msg);
 };
 
 
@@ -83,10 +84,11 @@ module.exports = AISocket;
 
 
 /**
- * gusers(게임 유저) 메세지를 처리. 내가 몇번째인지 본다.
+ * gusers(게임 유저) 메세지를 처리. 내가 몇번째인지 보고 기타 게임 처리
  * @param msg
  */
 AISocket.prototype.proc_gusers = function (msg) {
+    // 내가 몇번째 플레이어인지 본다.
     const users = msg.users;
     for(let i = 0 ; i < users.length ; i++) {
         if(users[i].useridf == this.userEntry.useridf) {
@@ -94,6 +96,9 @@ AISocket.prototype.proc_gusers = function (msg) {
             break;
         }
     }
+
+    // 각 플레이어가 어떤 문양이 없는지를 본다.
+    this.noShapeInfo = [];
 };
 
 
@@ -121,13 +126,13 @@ AISocket.prototype.proc_bidrq = function () {
  */
 AISocket.prototype.proc_fs = function (msg) {
     if(msg.ftype == 'card') {
-        this.isFriend = this.deck.hasCard(this.room.friendCard);
+        this.isFriend = this.deck.hasCard(this.game.friendCard);
         if(this.isFriend) {
             global.logger.info(`AI ${this.userEntry.useridf} is friend`);
         }
     }
     else if(msg.ftype == 'player') {
-        this.isFriend = (this.room.friend == this.selfID);
+        this.isFriend = (this.game.friend == this.selfID);
     }
     else this.isFriend = false;
 };
@@ -138,13 +143,29 @@ AISocket.prototype.proc_fs = function (msg) {
  * @param msg
  */
 AISocket.prototype.proc_cprq = function(msg) {
-    // 프렌드는 일반적인 초~중수 수준을 목표로 짰다.
+    // 유틸리티 함수
+    const playIndex = (index) => {
+        this.cmd({
+            type: 'cp',
+            cardIdx: index
+        });
+    };
+
+    ///////////////////////////////////////////////////////////
+
+
+    // 프렌드는 일반적인 초보 수준을 목표로 짰다.
     const deck = this.deck;
 
-    // 조커 콜 처리
-    if(msg.jcall && deck.hasShape('joker')) msg.shaperq = 'joker';
+    // 조커 콜 처리 - 더 고려할게 없다.
+    if(msg.jcall) {
+        const jokerIndex = deck.getCardIndex(this.game.joker);
+        if (jokerIndex != -1) {
+            return playIndex(deck.getCardIndex(this.game.joker));
+        }
+    }
 
-    // 문양 요청시 - 그 문양을 내야한다.
+    // 1. 문양 요청시 - 그 문양을 내야한다.
     if(msg.shaperq) {
         let sStart = null, sEnd = null;
         for(let i = 0 ; i < deck.length ; i++) {
@@ -156,15 +177,72 @@ AISocket.prototype.proc_cprq = function(msg) {
 
         // 문양이 존재 -> 내야한다.
         if(sStart !== null) {
-            this.cmd({
-                type: 'cp',
-                cardIdx: _.random(sStart, sEnd)
-            });
-            return;
+            const firstCard = this.game.playedCards[0];
+            if(this.isFriend) {
+                // 주공이 해당 문양에서 선을 잡을 수 있다면 주공이 선을 잡을 수 있도록 해준다.
+                let canPresidentWin = false;
+                if(this.game.trickWinner === this.game.president) {  // 현재 주공이 선이다
+                    // 주공이 앞으로도 선인가? 잘 따져보자.
+
+                    // 1. 주공이 간을 쳤다 -> 아마 주공이 선 먹겠지
+                    if(this.game.president != this.game.startTurn) canPresidentWin = true;
+                    // 2. 조커는 짱카 가정
+                    else if(firstCard.shape == 'joker') canPresidentWin = true;
+                    // 3. 주공이 해당 문양에서 짱카를 냈는가?
+                    else {
+                        const firstCardNum = firstCard.num;
+                        const potentialWinnerCount = 14 - firstCardNum;
+                        if(potentialWinnerCount) {
+                            // 현재까지 버려진 카드 + 내 덱에서 주공 현재 카드보다 쎈 카드를 구한다.
+                            const discardedPWC = this.game.discardedCards.filter(
+                                (c) => (c.shape == msg.shaperq && c.num > firstCardNum)
+                            ).length;
+                            const myDeckPWC = this.deck.filter(
+                                (c) => (c.shape == msg.shaperq && c.num > firstCardNum)
+                            ).length;
+
+                            // 주공이 짱카같으면 true
+                            if(potentialWinnerCount == discardedPWC + myDeckPWC) {
+                                canPresidentWin = true;
+                            }
+                        }
+                    }
+                }
+
+                // 주공이 플레이하기 전
+                // cf) (currentTurn - startTurn + 5) % 5 : currentTurn이 startTurn 기준 몇번째 턴인가
+                else if(
+                    (this.game.currentTurn - this.game.startTurn + 5) % 5 <
+                    (this.game.president - this.game.startTurn + 5) % 5
+                ) {
+                    // TODO : 주공이 간을 칠 수 있는지를 봅니다.
+                    canPresidentWin = true;  // 주공을 일단 믿는다.
+                }
+
+                if(canPresidentWin) return playIndex(sEnd);
+                else {
+                    // 내가 제일 높은걸 내서 야당에게 힘을 실어주는가?
+                    const bestCardStrength = this.game.calculateCardStrength(this.deck[sStart]);
+                    if(bestCardStrength > this.game.maxCardStrength) return playIndex(sStart);
+                    else return playIndex(sEnd);
+                }
+            }
+            else {  // 야당이면 닥치고 낮은 문양부터
+                // 내가 주공/프렌드를 밟을 수 있으면 밟는다.
+                if(
+                    this.game.trickWinner === this.game.president ||
+                    this.game.trickWinner === this.game.friend
+                ) {
+                    const bestCardStrength = this.game.calculateCardStrength(this.deck[sStart]);
+                    if(bestCardStrength > this.game.maxCardStrength) return playIndex(sStart);
+                }
+                // 아니면 제일 낮은거.
+                return playIndex(sEnd);
+            }
         }
     }
 
-    // 그 외 -> 아무거나 낸다
+    // 그 외 -> 아무거나 낸다.
     this.cmd({
         type: 'cp',
         cardIdx: _.random(0, deck.length - 1)
@@ -176,7 +254,7 @@ AISocket.prototype.proc_cprq = function(msg) {
  * 한번의 트릭이 마쳤을 때 처리. 초구 프렌드 처리를 한다.
  */
 AISocket.prototype.proc_tend = function (msg) {
-    if(this.room.currentTrick == 1 && this.room.friendType == 'first') {
+    if(this.game.currentTrick == 1 && this.game.friendType == 'first') {
         this.isFriend = (msg.winner == this.selfID);
     }
 };
