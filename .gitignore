@@ -70,3 +70,4 @@ jspm_packages
 *.pyo
 /knexfile.js
 /signature/
+errorgames

@@ -73,6 +73,8 @@ MightyRoom.prototype.onStartGame = function () {
 
     this.playing = true;
     this.gamelog = new GameLog();
+    global.logger.info(`Starting game from room #${this.roomID}`);
+
 
     // timeout을 30초로 설정
     this.users.forEach((user) => {

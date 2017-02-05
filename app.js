@@ -11,6 +11,8 @@ const path = require('path');
 const logger = require('morgan');
 app.use(logger('dev'));
 
+require('./src/logger');
+
 
 // Init Pug template engine
 app.set('views', path.join(__dirname, 'src/views'));

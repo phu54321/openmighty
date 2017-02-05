@@ -339,6 +339,9 @@ module.exports = function (MightyRoom) {
 
         this.scores = scoreTable;
 
+        // Scores
+        global.logger.info(`End game #${this.roomID}`);
+
         // Apply ratings
         async.series([
             (cb) => gamelog.addGameLog(this, cb),

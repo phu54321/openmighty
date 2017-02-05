@@ -32,6 +32,7 @@ router.post('/logout', function (req, res) {
     if (!req.user) {  // Not logged in -> Failed
         return res.json({error: '로그인 상태가 아닙니다.'});
     }
+    global.logger.info(`User ${req.user.username} (#${req.user.id}) has logged out`);
     req.logout();
     return res.json({error: 0});
 });

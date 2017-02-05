@@ -155,10 +155,11 @@ passport.use(new LocalStrategy(
     },
     function (username, password, done) {
         'use strict';
-        authenticate(username, password, function (err, userid) {
+        authenticate(username, password, function (err, userEntry) {
             if (err) return done(err);
-            if (userid === null) return done(null, false, {message: '로그인에 실패했습니다.'});
-            return done(null, userid);
+            if (userEntry === null) return done(null, false, {message: '로그인에 실패했습니다.'});
+            global.logger.info(`User ${userEntry.username} (#${userEntry.id}) has logged in`);
+            return done(null, userEntry);
         });
     }
 ));
