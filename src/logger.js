@@ -2,6 +2,15 @@
  * Created by whyask37 on 2017. 2. 5..
  */
 
-const logger = require("winston-color");
+const winston = require('winston');
+require('date-utils');
+const logger = new (winston.Logger)({
+    transports: [
+        new (winston.transports.Console)({
+            timestamp: true,
+            colorize: true,
+        })
+    ]
+});
 
 global.logger = logger;

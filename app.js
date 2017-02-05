@@ -9,7 +9,7 @@ const path = require('path');
 /////////////// 1. Basic server setting
 // Add logger
 const logger = require('morgan');
-app.use(logger('dev'));
+app.use(logger('common'));
 
 require('./src/logger');
 
