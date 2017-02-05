@@ -133,7 +133,7 @@ AISocket.prototype.proc_fs = function (msg) {
     if(msg.ftype == 'card') {
         this.isFriend = this.deck.hasCard(this.game.friendCard);
         if(this.isFriend) {
-            global.logger.debug(`AI ${this.userEntry.useridf} is friend`);
+            // global.logger.debug(`AI ${this.userEntry.useridf} is friend`);
         }
     }
     else if(msg.ftype == 'player') {
@@ -742,7 +742,7 @@ AISocket.prototype.proc_pcp = function (msg) {
     if(msg.card.shape != currentShapeRequest) {
         this.noShapeInfo[msg.player][currentShapeRequest] = true;
         if(this.isFriend) {
-            global.logger.debug(`player #${msg.player} don't have ${currentShapeRequest}`);
+            // global.logger.debug(`player #${msg.player} don't have ${currentShapeRequest}`);
         }
     }
 };
