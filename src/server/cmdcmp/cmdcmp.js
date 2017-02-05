@@ -12,23 +12,27 @@ const utils = require('./utils');
 
 function defaultCompressor(obj) {
     // For array
-    if(Array.isArray(obj)) {
-        if(obj.length === 0) return [];
+    if (Array.isArray(obj)) {
+        if (obj.length === 0) return [];
         // Array holding array
-        else if(obj[0].cardEnvID !== undefined) {
+        else if (obj[0].cardEnvID !== undefined) {
             return ['*'].concat(obj.map(c => c.cardEnvID));
         }
         else return obj.map(defaultCompressor);
     }
 
+    // !!! null is object
+    else if (obj === null) return null;
+
     // For object
-    else if(typeof(obj) == 'object') {
+    else if (typeof(obj) == 'object') {
         const compressed = {};
 
         Object.keys(obj).forEach(key => {
             // Compress card only
-            if(obj[key] === undefined) {}
-            else if(obj[key] === null) {
+            if (obj[key] === undefined) {
+            }
+            else if (obj[key] === null) {
                 compressed[key] = null;
             }
             else if (obj[key].cardEnvID !== undefined) {
@@ -43,6 +47,7 @@ function defaultCompressor(obj) {
     }
 
     // Else -> pass as-is
+    else if (typeof(obj) == 'number' && isNaN(obj)) return undefined;  // Fucking NAN bug
     else return obj;
 }
 
@@ -55,6 +60,9 @@ function defaultDecompressor(obj) {
         }
         else return obj.map(defaultDecompressor);
     }
+
+    // !!! null is object
+    else if(obj === null) return null;
 
     else if(typeof(obj) == 'object') {
         const decompressed = {};
@@ -72,6 +80,7 @@ function defaultDecompressor(obj) {
     }
 
     // Else -> return as-is
+    else if (typeof(obj) == 'number' && isNaN(obj)) return undefined;  // Fucking NAN bug
     else return obj;
 }
 

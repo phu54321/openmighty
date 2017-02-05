@@ -77,7 +77,7 @@ module.exports = function (MightyRoom) {
 
         // 인덱스 처리
         if(typeof msg.cardIdx != "number") return "잘못된 카드입니다.";
-        const cardIdx = parseInt(msg.cardIdx);
+        const cardIdx = msg.cardIdx | 0;
         if(cardIdx < 0 || cardIdx >= userEntry.deck.length) return "잘못된 카드입니다.";
 
         const playingCard = userEntry.deck[cardIdx];
