@@ -228,6 +228,7 @@ AISocket.prototype.proc_cprq = function(msg) {
         const playable = [];
         this.deck.forEach((card, index) => {
             if(card.isScoreCard()) return;
+            else if(card.shape == 'joker') return;
             playable.push(index);
         });
         if(playable.length > 0) return playIndex(_.sample(playable));
@@ -530,7 +531,7 @@ AISocket.prototype.proc_cprq = function(msg) {
 
                 // 조커가 있어도 밟아준다.
                 if (
-                    game.currentTurn != 1 && game.currentTurn != 10 &&
+                    game.currentTrick != 1 && game.currentTrick != 10 &&
                     deck.hasCard(game.joker)
                 ) {
                     // console.log('c3');
@@ -613,7 +614,7 @@ AISocket.prototype.proc_cprq = function(msg) {
             // console.log('d01');
 
             // 조커가 있는데 점수가 2개 이상 쌓일 수 있을것같으면 조커를 낸다.
-            if (this.currentTurn != 1 && this.currentTurn != 10 && jokerIndex != -1) {
+            if (this.currentTrick != 1 && this.currentTrick != 10 && jokerIndex != -1) {
                 // console.log('d2');
                 /*
                  1 0 * ? ? -> 1 2 -> no
