@@ -40,7 +40,8 @@ exports.emitRoomJoin = function (room, newUser) {
         user.emit('cmd', {
             type: 'rjoin',
             username: newUser.username,
-            useridf: newUser.useridf
+            useridf: newUser.useridf,
+            rating: newUser.rating,
         });
     });
 };
