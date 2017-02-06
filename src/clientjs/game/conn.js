@@ -37,6 +37,7 @@ function initSocket() {
     socket.on('cmd', function (msg) {
         "use strict";
         const dcmp = cmdcmp.decompressCommand(msg);
+        console.log(dcmp);
         cmdproc.translateCmdMessage(dcmp);
     });
 
@@ -56,6 +57,7 @@ exports.sendCmd = function (type, object) {
 
     const copy = Object.assign({}, object || {});
     copy.type = type;
+    console.log(copy);
     socket.emit('cmd', cmdcmp.compressCommand(copy));
     return true;
 };

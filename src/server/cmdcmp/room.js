@@ -10,7 +10,7 @@ const utils = require('./utils');
 cmdcmp.registerCompressor({
     type: 'rjoin',
     shead: 'j',
-    keys: ['username', 'useridf', 'rating']
+    keys: ['username', 'useridf', 'Irating']
 });
 
 

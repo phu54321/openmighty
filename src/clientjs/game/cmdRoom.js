@@ -15,7 +15,8 @@ module.exports = function (cmdTranslatorMap) {
         Materialize.toast(msg.username + '님이 입장하셨습니다.', 2000);
         room.users.push({
             username: msg.username,
-            useridf: msg.useridf
+            useridf: msg.useridf,
+            rating: msg.rating
         });
         room.viewRoom();
     };
