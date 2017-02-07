@@ -385,7 +385,7 @@ AISocket.prototype.proc_cprq = function(msg) {
 
             // 마이티가 안 뽑혔다면 마공
             const mightyShape = game.mighty.shape;
-            if(deck.hasShape(mightyShape) && !x1x1game.discardedCards.hasCard(game.mighty)) {
+            if(deck.hasShape(mightyShape) && !game.discardedCards.hasCard(game.mighty)) {
                 const msEnd = getShapeRange(deck, mightyShape)[1];
                 return playIndex(msEnd);  // 어차피 마공인데 제일 작은걸로 딜 넣는다.
             }

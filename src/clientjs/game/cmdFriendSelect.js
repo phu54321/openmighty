@@ -44,6 +44,8 @@ module.exports = function (cmdTranslatorMap) {
      * @returns {boolean}
      */
     function encodeFriend(bidShape, friendType, msg) {
+        if(bidShape === null) return false;
+
         const cardMap = genCardMap(bidShape);
         if(cardMap[friendType]) {
             const friendCard = cardMap[friendType];
@@ -56,7 +58,7 @@ module.exports = function (cmdTranslatorMap) {
             msg.ftype = 'first';
             return true;
         }
-        else if(friendType.substr(0, 6) == 'player') {
+        else if(friendType.startsWith('player')) {
             msg.ftype = 'player';
             msg.friend = parseInt(friendType.substr(7)) - 1;
             return true;
@@ -136,7 +138,9 @@ module.exports = function (cmdTranslatorMap) {
             ['option[value="pass"]', ['val', bidShape]],
         ]);
 
-        $friendSelector.submit(function() {
+        $friendSelector.submit(function(e) {
+            e.preventDefault();
+
             const msg = {};
             const $fSelectForm = $('#friendSelectForm');
 
