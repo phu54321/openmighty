@@ -385,7 +385,7 @@ AISocket.prototype.proc_cprq = function(msg) {
 
             // 마이티가 안 뽑혔다면 마공
             const mightyShape = game.mighty.shape;
-            if(deck.hasShape(mightyShape) && !game.discardedCards.hasCard(game.mighty)) {
+            if(deck.hasShape(mightyShape) && !x1x1game.discardedCards.hasCard(game.mighty)) {
                 const msEnd = getShapeRange(deck, mightyShape)[1];
                 return playIndex(msEnd);  // 어차피 마공인데 제일 작은걸로 딜 넣는다.
             }
@@ -518,7 +518,7 @@ AISocket.prototype.proc_cprq = function(msg) {
             else {
                 // console.log('b4');
                 // 내가 기루다 짱카가 있으면 걔로 밟는다.
-                if (sStart !== null && msg.shaperq == game.bidShape && canTakeLeadWith(sStart)) {
+                if (sStart !== null && msg.shaperq == game.bidShape && getCardRankInShape(deck[sStart]) === 0) {
                     // console.log('c1');
                     return playIndex(sStart);
                 }
