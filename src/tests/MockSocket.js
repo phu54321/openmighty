@@ -38,20 +38,22 @@ MockSocket.prototype.on = function (event, eventHandler) {
  */
 MockSocket.prototype.emit = function (event, data) {
     assert(!this.disconnected);
-    // console.log('[MockSocket Out]', event, data);
 
-    if(this.msgOutHandler[event]) this.msgOutHandler[event].apply(this, [data]);
+
+    if(this.msgOutHandler[event]) {
+        process.nextTick(() => this.msgOutHandler[event](data));
+    }
 };
+
 
 /**
  * Called when server gets some message
  */
 MockSocket.prototype.inMsg = function (event, data) {
-    // console.log('[MockSocket In]', event, data);
     assert(!this.disconnected);
 
-    if(this.msgInHandler[event]) this.msgInHandler[event].apply(this, [data]);
-    if(event == 'disconnect') {
+    if (this.msgInHandler[event]) this.msgInHandler[event](data);
+    if (event == 'disconnect') {
         this.disconnected = true;
     }
 };

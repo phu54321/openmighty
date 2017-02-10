@@ -79,12 +79,6 @@ function onConnect(socket) {
 
         socket.room = room;
         socket.userEntry = userEntry;
-
-        const users = _.map(room.users, (user) => user.username);
-        socket.emit('info', '현재 입장인원 : ' + users.join(', '));
-        cmdout.emitRoomJoin(room, userEntry);
-        cmdout.emitRoomUsers(room, userEntry);
-
         onRoomJoin(socket);
     }
 }
@@ -132,6 +126,11 @@ function onRoomJoin(socket) {
         return cmdProcessor(socket, room, userEntry, msg);
     });
 
+    // 입장인원 관련
+    const users = _.map(room.users, (user) => user.username);
+    socket.emit('info', '현재 입장인원 : ' + users.join(', '));
+    cmdout.emitRoomJoin(room, userEntry);
+    cmdout.emitRoomUsers(room, userEntry);
 }
 
 
