@@ -23,7 +23,9 @@ function AISocket(room, userEntry) {
     this.gameUsers = [];
     this.deck = null;
     this.isFriend = null;
-    this.noShapeInfo = [];
+
+    this.noShapeInfo = [{}, {}, {}, {}, {}];
+    this.trustOpponentHavingJoker = 0;
 }
 
 
@@ -100,10 +102,6 @@ AISocket.prototype.proc_gusers = function (msg) {
             break;
         }
     }
-
-    // 각 플레이어가 어떤 문양이 없는지를 본다.
-    this.noShapeInfo = [{}, {}, {}, {}, {}];
-    this.trustOpponentHavingJoker = 0;
 };
 
 
