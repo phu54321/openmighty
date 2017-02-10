@@ -2,7 +2,7 @@
  * Created by whyask37 on 2017. 2. 10..
  */
 
-const MockSocket = require('./mocksocket');
+const MockSocket = require('./MockSocket');
 const assert = require('assert');
 
 describe('MockSocket', function() {
@@ -29,19 +29,6 @@ describe('MockSocket', function() {
             });
             socket.inMsg('async', 'test');
         });
-        it('should handle multiple handlers', function (done) {
-            const socket = new MockSocket();
-            let flag = false;
-            socket.on('async', (data) => {
-                assert(!flag && data == 'test');
-                flag = true;
-            });
-            socket.on('async', (data) => {
-                assert(flag && data == 'test');
-                done();
-            });
-            socket.inMsg('async', 'test');
-        })
     });
 });
 

@@ -5,7 +5,7 @@
 "use strict";
 
 const assert = require('assert');
-const MockSocket = require('./mocksocket');
+const MockSocket = require('./MockSocket');
 
 ////
 

@@ -11,7 +11,7 @@ const cmdout = require('./io/cmdout');
 const cmdcmp = require('./cmdcmp/cmdcmp');
 const rSock = require('./rsocket');
 
-module.exports = function(io) {
+exports = module.exports = function(io) {
     "use strict";
 
     io.use(validateSession);
