@@ -7,6 +7,14 @@ const MightyGame = require('./logic/mighty');
 
 let roomMap = {};
 
+/**
+ * For TESTING - Clean room map
+ */
+exports.UNITTEST_CleanRoomMap = function() {
+    "use strict";
+    roomMap = {};
+};
+
 
 /**
  * Get room from room ID
@@ -29,7 +37,7 @@ function gcRoom(roomID) {
     "use strict";
     const room = getRoom(roomID);
     if(room && room.hasNoUser()) {
-        global.logger.info('Room ' + roomID + ' empty : removing');
+        global.logger.info(`[Room ${roomID}] Empty : removing`);
         delete roomMap[roomID];
     }
 }
