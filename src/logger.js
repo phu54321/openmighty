@@ -7,9 +7,7 @@ require('date-utils');
 const logger = new (winston.Logger)({
     transports: [
         new (winston.transports.Console)({
-            timestamp: function(){
-                return moment().format("YYYY-MM-DD HH:mm:ss.SSS");
-            },
+            timestamp: true,
             colorize: true,
             level: 'debug'
         })
