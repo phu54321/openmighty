@@ -9,7 +9,7 @@ const Materialize = window.Materialize;
 const template = require('./template');
 const game = require('./game');
 const room = require('./room');
-const conn = require('./conn');
+const sendcmd = require('./sendCmd');
 
 module.exports = function (cmdTranslatorMap) {
     /**
@@ -117,15 +117,10 @@ module.exports = function (cmdTranslatorMap) {
             .attr('min', bidCount)
             .val(bidCount);
         $bidForm.submit(function() {
-            "use strict";
-
             const $bidForm = $('#bidForm');
             const bidShape = $bidForm.find('*[name="bidShape"]').val();
             const bidCount = $bidForm.find('*[name="bidCount"]').val();
-            conn.sendCmd('bid', {
-                shape: bidShape,
-                num: parseInt(bidCount)
-            });
+            sendcmd.sendBidding(bidShape, bidCount);
             return false;
         });
     };
@@ -160,13 +155,10 @@ module.exports = function (cmdTranslatorMap) {
             [null, ['submit', function() {
                 const $bidChangeForm = $('#bidChangeForm');
                 let bidShape = $bidChangeForm.find('*[name="bidShape"]').val();
-                const bidCount = $bidChangeForm.find('*[name="bidCount"]').val();
+                const bidCount = $bidChangeForm.find('*[name="bidCount"]').val() | 0;
                 if (bidShape == game.bidShape && bidCount == game.bidCount) bidShape = 'pass';
 
-                conn.sendCmd('bc1', {
-                    shape: bidShape,
-                    num: parseInt(bidCount)
-                });
+                sendcmd.sendBidChange1(bidShape, bidCount);
                 return false;
             }]]
         ]).focus();

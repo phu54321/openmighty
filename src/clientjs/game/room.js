@@ -11,7 +11,7 @@ const room = {
     owner: 0,
     users: []
 };
-const conn = require('./conn');
+const sendcmd = require('./sendCmd');
 const template = require('./template');
 
 
@@ -75,7 +75,7 @@ function addStartButton() {
     const $gameCardContainer = $('.player-self').find('.game-card-container');
     template($gameCardContainer, 'button').focus();
     $gameCardContainer.find('button').click(function(e) {
-        conn.sendCmd('start');
+        sendcmd.sendStartGame();
         $('.player-has').empty();
         e.preventDefault();
     });

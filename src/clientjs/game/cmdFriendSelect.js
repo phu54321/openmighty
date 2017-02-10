@@ -10,7 +10,7 @@ const _ = window._;
 const template = require('./template');
 const room = require('./room');
 const game = require('./game');
-const conn = require('./conn');
+const sendcmd = require('./sendCmd');
 const mainGame = require('./cmdMainGame');
 
 module.exports = function (cmdTranslatorMap) {
@@ -175,7 +175,8 @@ module.exports = function (cmdTranslatorMap) {
                 return false;
             }
 
-            conn.sendCmd('fs', msg);
+            sendcmd.sendFriendSelectAndDiscard3(msg);
+
             return false;
         });
     };

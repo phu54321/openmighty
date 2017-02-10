@@ -9,7 +9,7 @@ const Materialize = window.Materialize;
 const template = require('./template');
 const game = require('./game');
 const room = require('./room');
-const conn = require('./conn');
+const sendcmd = require('./sendCmd');
 
 function issueTrickStart() {
     unbindClick();
@@ -134,13 +134,10 @@ exports = module.exports = function (cmdTranslatorMap) {
             ) {
                 const $jokerCallModal = $('#jokerCallModal');
                 $jokerCallModal.find('button[name=no]').click(() => {
-                    conn.sendCmd('cp', {
-                        cardIdx: $selected.index('.deck-card')
-                    });
+                    sendcmd.sendCardPlay($selected.index('.deck-card'));
                 });
                 $jokerCallModal.find('button[name=yes]').click(() => {
-                    conn.sendCmd('cp', {
-                        cardIdx: $selected.index('.deck-card'),
+                    sendcmd.sendCardPlay($selected.index('.deck-card'), {
                         jcall: true
                     });
                 });
@@ -161,9 +158,8 @@ exports = module.exports = function (cmdTranslatorMap) {
                 $jokerModal.find('button').click(() => {
                     let callShape = $callShape.val();
                     if(callShape == 'none') callShape = undefined;
-                    conn.sendCmd('cp', {
-                        cardIdx: $selected.index('.deck-card'),
-                        srq: callShape
+                    sendcmd.sendCardPlay($selected.index('.deck-card'), {
+                        callShape: callShape
                     });
                 });
                 $jokerModal.modal('open');
@@ -171,9 +167,7 @@ exports = module.exports = function (cmdTranslatorMap) {
 
             else {
                 // 일반 카드
-                conn.sendCmd('cp', {
-                    cardIdx: $selected.index('.deck-card')
-                });
+                sendcmd.sendCardPlay($selected.index('.deck-card'));
             }
         });
     };
