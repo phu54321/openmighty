@@ -43,7 +43,7 @@ function initSocket() {
 
     socket.on('reconnect', function () {
         "use strict";
-        // alert('다시 접속됬습니다.');
+        // alert('재접속되었습니다.');
     });
 
     socket.on('disconnect', function () {
@@ -52,14 +52,12 @@ function initSocket() {
     });
 }
 
-exports.sendCmd = function (type, object) {
+exports.emit = function (type, msg) {
     "use strict";
-
-    const copy = Object.assign({}, object || {});
-    copy.type = type;
-    console.log(copy);
-    socket.emit('cmd', cmdcmp.compressCommand(copy));
-    return true;
+    if(socket) socket.emit(type, msg);
+    else {
+        console.log('Socket not yet initialized : ', type, msg);
+    }
 };
 
 window.sendCmd = exports.sendCmd;

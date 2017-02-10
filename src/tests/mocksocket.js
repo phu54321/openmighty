@@ -5,9 +5,14 @@
 const assert = require('assert');
 require('../logger');
 
-function MockSocket() {
+function MockSocket(userID, roomID, accessID) {
     this.evHandler = {};
     this.disconnected = false;
+    this.username = 'test_' + accessID
+    this.useridf = accessID;
+    this.roomID = 'room' + ("0000" + roomID).substr(-4);
+    this.accessID = accessID;
+
 }
 
 MockSocket.prototype.on = function (event, eventHandler) {

@@ -89,6 +89,8 @@ function onConnect(socket) {
     }
 }
 
+exports.onConnect = onConnect;
+
 /**
  * Process after room joining
  * @param socket

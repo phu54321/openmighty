@@ -14,12 +14,7 @@ const MockSocket = require('./mocksocket');
 const rsock = require('../server/rsocket');
 
 function createMock(accessID) {
-    const socket = new MockSocket();
-    socket.username = 'testuser';
-    socket.useridf = 'useridf';
-    socket.roomID = 'room0001';
-    socket.accessID = 'accessID' + accessID;
-    return socket;
+    return new MockSocket(0, 1, accessID);
 }
 
 describe('RSocket', function() {

@@ -15,4 +15,4 @@ const logger = new (winston.Logger)({
 });
 
 global.logger = logger;
-logger.debug('Debug test');
+logger.info('Logging initialized');
