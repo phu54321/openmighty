@@ -6,6 +6,8 @@
 
 
 const assert = require('assert');
+const cmdcmp = require('../server/cmdcmp/cmdcmp');
+
 require('../logger');
 
 /**
@@ -38,6 +40,9 @@ MockSocket.prototype.on = function (event, eventHandler) {
  */
 MockSocket.prototype.emit = function (event, data) {
     assert(!this.disconnected);
+
+    if(event == 'cmd') data = cmdcmp.decompressCommand(data);
+    else if(event == 'err') global.logger.debug(data);
 
 
     if(this.msgOutHandler[event]) {

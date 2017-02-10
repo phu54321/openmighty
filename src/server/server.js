@@ -117,7 +117,7 @@ function onRoomJoin(socket) {
             return socket.emit('err', '잘못된 명령입니다.');
         }
 
-        global.logger.debug('[cmd ' + socket.useridf + ']', msg);
+        global.logger.debug(`[cmd ${socket.username} (${socket.useridf})] ${JSON.stringify(msg)}`);
 
         const cmdProcessor = cmdproc[msg.type];
         if(!cmdProcessor) {

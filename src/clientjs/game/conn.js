@@ -37,7 +37,6 @@ function initSocket() {
     socket.on('cmd', function (msg) {
         "use strict";
         const dcmp = cmdcmp.decompressCommand(msg);
-        console.log(dcmp);
         cmdproc.translateCmdMessage(dcmp);
     });
 
@@ -63,4 +62,4 @@ exports.emit = function (type, msg) {
 window.sendCmd = exports.sendCmd;
 
 const sendCmd = require('./sendCmd');
-sendCmd.setEmitFunc(exports.emit);
+sendC

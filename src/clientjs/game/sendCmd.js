@@ -5,7 +5,6 @@
 "use strict";
 
 const cmdcmp = require('../../server/cmdcmp/cmdcmp');
-const conn = require('./conn');
 
 let emitFunc;
 
@@ -17,7 +16,6 @@ exports.setEmitFunc = function (f) {
 function sendCmd(type, object) {
     const copy = Object.assign({}, object || {});
     copy.type = type;
-    console.log(copy);
     emitFunc('cmd', cmdcmp.compressCommand(copy));
     return true;
 }
