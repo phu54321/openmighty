@@ -1,9 +1,9 @@
 .topStrip {
   @extend .z-depth-1;
-  @extend .red;
   @extend .white-text;
   position: absolute;
   display: block;
+  background-color: #6cc148;
   top: 0;
   left: 0;
   right: 0;

@@ -47,7 +47,8 @@
         .player-slot-container {
             display: flex;
             .player-slot {
-                @extend .card;
+                // @extend .card;
+                border: 1px solid #bbb;
                 width: 18%;
                 margin-left: 1%;
                 margin-right: 1%;
@@ -178,8 +179,8 @@
             width: 50%;
 
             @extend %debug;
-            @extend .z-depth-1;
-            @extend .yellow.lighten-2;
+            // @extend .z-depth-1;
+            // @extend .yellow.lighten-2;
             align-self: flex-end;
             margin-top: auto;
             bottom: 0;
