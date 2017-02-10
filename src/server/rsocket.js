@@ -37,7 +37,7 @@ function RSocket(socket) {
  * Manual disconnect
  */
 RSocket.prototype.disconnect = function () {
-    // console.log('Disconnecting socket', this.socket.accessID, this.socket.id);
+    global.logger.verbose('Disconnecting socket', this.socket.accessID, this.socket.id);
     this.socket.disconnect();
     delete socketTable[this.accessID];
     this.disconnected = true;
@@ -95,7 +95,7 @@ RSocket.prototype.onDisconnect = function (socket, data) {
 
 RSocket.prototype.reconnectWithSocket = function (rawSocket) {
     this.socket = rawSocket;
-    // console.log('Reconnecting socket', this.socket.accessID, this.socket.id);
+    global.logger.verbose('Reconnecting socket', this.socket.accessID, this.socket.id);
     if(this.waitTimer) {
         clearTimeout(this.waitTimer);
         this.waitTimer = null;
@@ -110,8 +110,7 @@ RSocket.prototype.reconnectWithSocket = function (rawSocket) {
 
 
 exports.checkNewConnection = function (rawSocket) {
-    // console.log('New connection :', rawSocket.accessID);
-    // console.log(_.keys(socketTable));
+    global.logger.verbose('New connection :', rawSocket.accessID);
     const oldSocket = socketTable[rawSocket.accessID];
     if(oldSocket) {
         if(oldSocket.reconnectWithSocket(rawSocket)) return null;

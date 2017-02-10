@@ -27,18 +27,14 @@ module.exports = function (room) {
     //              내가 가지 모든 카드가 마이티/조커/기루다 중 하나여야함. 아니므로 실패
     //  4. 여기까지 왔으면 셋
 
-    // console.log('calculating set');
-
     const isLastTurn = (room.currentTrick == 9);  // setcheck 다음에 trick이 10으로 증가되서 여기선 9와 비교
     const discardedMap = room.discardedCards.splitShapes();
     const isMightyDown = room.discardedCards.hasCard(room.mighty);  // 마이티가 버려졌나
     const isJokerDown = (discardedMap.joker.length == 1);  // 조커가 버려졌나.
-    // console.log(discardedMap, room.mighty, isMightyDown, isJokerDown);
 
     for(let i = 0 ; i < 5 ; i++) {
         const user = room.gameUsers[i];
         const userDeckMap = user.deck.splitShapes();
-        // console.log('checking user', i, stringifyDeck(user.deck));
 
         const hasMighty = user.deck.hasCard(room.mighty);
         const hasJoker = user.deck.hasCard(room.joker);
@@ -53,7 +49,6 @@ module.exports = function (room) {
         if(room.bidShape != 'none') {
             userGirudaCount = userDeckMap[room.bidShape].length;
             if(userGirudaCount + discardedMap[room.bidShape].length != 13) {
-                // console.log(' - less giruda');
                 continue;
             }
         }

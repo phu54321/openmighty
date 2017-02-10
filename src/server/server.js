@@ -57,7 +57,7 @@ function validateSession(socket, next) {
 function onConnect(socket) {
     "use strict";
 
-    console.log('[Room ' + socket.roomID + '] user connected : ' + socket.useridf);
+    global.logger.info('[Room ' + socket.roomID + '] user connected : ' + socket.username + '(' + socket.useridf + ')');
     socket.emit('info', 'Welcome to openMighty server');
 
     const roomID = socket.roomID;
@@ -107,7 +107,7 @@ function onRoomJoin(socket) {
 
     // Process disconnection
     socket.on('disconnect', function(){
-        console.log('user disconnected : ' + socket.useridf);
+        global.logger.info('user disconnected : ' + socket.username + '(' + socket.useridf + ')');
         room.removeUser(socket.useridf, (err) => {});
         cmdout.emitRoomLeft(room, socket.useridf);
         roomsys.gcRoom(socket.roomID);
@@ -121,7 +121,7 @@ function onRoomJoin(socket) {
             return socket.emit('err', '잘못된 명령입니다.');
         }
 
-        // console.log('[cmd ' + socket.useridf + ']', msg);
+        global.logger.debug('[cmd ' + socket.useridf + ']', msg);
 
         const cmdProcessor = cmdproc[msg.type];
         if(!cmdProcessor) {
