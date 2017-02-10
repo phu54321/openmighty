@@ -121,6 +121,45 @@ describe('#Server', function() {
                     server.onConnect(socket2);
                 }
             ], done);
-        })
+        });
+
+        it('should disallow joining to playing room', function (done) {
+            let socket1;
+            async.series([
+                // Connect socket 1
+                (cb) => {
+                    socket1 = new MockSocket(1, 0, 0);
+                    socket1.onEmit('cmd', function (msg) {
+                        if (msg.type == 'rusers') {
+                            sendcmd.setEmitFunc(socket1.inMsg.bind(socket1));
+                            cb();
+                        }
+                    });
+                    server.onConnect(socket1);
+                },
+
+                // Issue game start
+                (cb) => {
+                    socket1.onEmit('cmd', function (msg) {
+                        if (msg.type == 'gusers') {
+                            cb();
+                        }
+                    });
+                    sendcmd.sendStartGame();
+                },
+
+                // Connect socket 2. This should fail
+                (cb) => {
+                    const socket2 = new MockSocket(2, 1, 2);
+                    socket2.onEmit('cmd', function (msg) {
+                        if (msg.type == 'rusers') {
+                            sendcmd.setEmitFunc(socket2.inMsg.bind(socket2));
+                            cb();
+                        }
+                    });
+                    server.onConnect(socket2);
+                }
+            ], done);
+        });
     });
 });
