@@ -68,12 +68,48 @@ GameLog.prototype.addGameLog = function (msg, cb) {
         .asCallback(cb);
 };
 
-GameLog.prototype.endGamelog = function (cb) {
+
+/**
+ * GameLog를 종결하고 DB에 해당 게임이 종료됬음을 알린다.
+ *
+ * this.completed를 addUserGameLogs에서 체크하기 때문에 여기서는 이중으로
+ * completeGameLog가 불릴 가능성이 있음에도 불구하고 completed 유무를 의도적으fh
+ * 체크하지 않는다.
+ *
+ * @param cb
+ */
+GameLog.prototype.completeGameLog = function (cb) {
+    if(!this.completed) {
+        this.completed = true;
+        delete this.logText;
+    }
+
+    // Add completed flag to gamelog
+    db('gamelog')
+        .where({id: this.gameID})
+        .update({completed: true})
+        .asCallback(cb);
+};
+
+
+/**
+ * 플레이가 끝까지 진행됬을 경우 유저들의 로그를 남긴다.
+ *
+ * 엄밀히 말하면 이 함수만으로 gameLog 처리가 끝나지는 않지만, 이미 유저로그가
+ * 반영된 이후로 게임로그를 계속 쌓을 일이 없기 때문에 추가 버그 방지를 위해
+ * 이 함수에서도 this.completed를 설정한다. 이 함수 호출 이후 completeGameLog
+ * 함수를 호출해야 실제로 게임 로깅이 종결되게 된다.
+ *
+ * @param cb
+ * @returns {*}
+ */
+GameLog.prototype.addUserGameLogs = function (cb) {
     if(this.completed) {
         return cb(new Error(`Tried to end completed game #${this.gameID}.`));
     }
 
     this.completed = true;  // Barrier!
+    delete this.logText;
 
     const game = this.game;
     const gameID = this.gameID;
@@ -97,11 +133,6 @@ GameLog.prototype.endGamelog = function (cb) {
             });
         }
     });
-
-    // Add completed flag to gamelog
-    promises.push(db('gamelog')
-        .where({id: this.gameID})
-        .update({completed: true}));
 
     // Execute all promises!
     Promise.all(promises)

@@ -348,7 +348,7 @@ module.exports = function (MightyRoom) {
 
         // Apply ratings
         async.series([
-            (cb) => this.gamelog.endGamelog(cb),
+            (cb) => this.gamelog.addUserGameLogs(cb),
             (cb) => async.eachSeries(this.users, (user, next) => {
                 // Update user's rating
                 users.getUserRating(user.useridf, (err, rating) => {
