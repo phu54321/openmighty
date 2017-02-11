@@ -3,6 +3,8 @@
  */
 
 const winston = require('winston');
+const winstonError = require('winston-error');
+
 require('date-utils');
 const logger = new (winston.Logger)({
     transports: [
@@ -13,6 +15,8 @@ const logger = new (winston.Logger)({
         })
     ]
 });
+
+winstonError(logger);
 
 global.logger = logger;
 logger.info('Logging initialized');

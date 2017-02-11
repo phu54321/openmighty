@@ -9,7 +9,7 @@ const cmdout = require('../io/cmdout');
 const cmdcmp = require('../cmdcmp/cmdcmp');
 
 const AISocket = require('../io/aiBot');
-const GameLog = require('./gamelog');
+const gamelog = require('../../models/gamelog');
 
 function MightyRoom(roomID, owner) {
     "use strict";
@@ -72,18 +72,8 @@ MightyRoom.prototype.onStartGame = function () {
     if(this.playing) return "이미 플레이중입니다.";
 
     this.playing = true;
-    this.gamelog = new GameLog();
-    global.logger.info(`Starting game from room #${this.roomID}`);
 
-
-    // timeout을 30초로 설정
-    this.users.forEach((user) => {
-        user.socket.waitTime = 30;
-        user.ai = false;
-    });
-
-    // Initialize game-related variables.
-    // Add AI user if nessecary
+    // gameLog에 필요한 gameUsers만 일단
     let playingUsers = this.users.slice(0);
     for(let i = 1 ; playingUsers.length < 5; i++) {
         const aiUserEntry = {
@@ -99,10 +89,30 @@ MightyRoom.prototype.onStartGame = function () {
         playingUsers.push(aiUserEntry);
     }
     this.gameUsers = _.shuffle(playingUsers);
-    this.emit('info', '게임을 시작합니다.');
-    cmdout.emitGamePlayers(this);
 
-    this.initGame();
+    gamelog.createGamelog(this, (err, gamelog) => {
+        if(err) {
+            global.logger.error(err);
+            this.emit('err', "게임을 시작할 수 없습니다.");
+            delete this.gameUsers;
+            return;
+        }
+
+        this.gamelog = gamelog;
+
+        global.logger.info(`Starting game from room #${this.roomID}`);
+
+        // timeout을 30초로 설정
+        this.users.forEach((user) => {
+            user.socket.waitTime = 30;
+            user.ai = false;
+        });
+
+        this.emit('info', '게임을 시작합니다.');
+        cmdout.emitGamePlayers(this);
+
+        this.initGame();
+    });
     return null;
 };
 
