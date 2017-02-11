@@ -8,8 +8,9 @@ const path = require('path');
 
 /////////////// 1. Basic server setting
 // Add logger
-const logger = require('morgan');
-app.use(logger('common'));
+const logger = require('./src/logger');
+const morgan = require('morgan');
+app.use(morgan('common', { "stream": logger.stream }));
 
 require('./src/logger');
 
