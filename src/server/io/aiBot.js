@@ -27,7 +27,7 @@ function AISocket(room, userEntry, playSpeed) {
     this.noShapeInfo = [{}, {}, {}, {}, {}];
     this.trustOpponentHavingJoker = 0;
 
-    this.playSpeed = playSpeed || 400;
+    this.playSpeed = playSpeed || 800;
 }
 
 
