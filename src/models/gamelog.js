@@ -43,7 +43,7 @@ exports.createGamelog = function (game, cb) {
     db('gamelog').insert({
         gameType: 'mighty5',
         players: game.gameUsers.map(user => user.useridf).join(','),
-        gameLog: 'V' + GAMELOG_VERSION
+        gameLog: `[V${GAMELOG_VERSION}]`
     })
         .then(function (gameID) {
             cb(null, new GameLog(game, gameID));
@@ -64,7 +64,7 @@ GameLog.prototype.addGameLog = function (msg, cb) {
 
     db('gamelog')
         .where({id: this.gameID})
-        .update({gameLog: this.logText})
+        .update({gameLog: `[${this.logText}]`})
         .asCallback(cb);
 };
 
