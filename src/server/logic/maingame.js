@@ -310,29 +310,35 @@ module.exports = function (MightyRoom) {
         const leadingTeamCardCount = 20 - oppObtainedCardCount;
         let leadingTeamScore;
 
+        // 주공팀 승리
         if(leadingTeamCardCount >= this.bidCount) {
             leadingTeamScore = leadingTeamCardCount + this.bidCount - 26;
+
+            // 런 공약을 안했더라도 주공이 기본적으로 런을 목표로 하도록 예고 런 뿐만 아니라
+            // 어쩌다 된 런에도 2배 점수를 적용하기로 했습니다.
+            if(leadingTeamCardCount == 20) {  // 런
+                if(this.bidShape == 'none') leadingTeamScore *= 3;  // 노기루다 런은 *2*2가 아니라 *1.5만 한다.
+                else leadingTeamScore *= 2;
+            }
+            else if(this.bidShape == 'none') leadingTeamScore *= 2;  // 노기루다
         }
+
+        // 야당팀 승리
         else {
             leadingTeamScore = this.bidCount - leadingTeamCardCount;
             if(oppObtainedCardCount >= 11) leadingTeamScore *= 2;  // 백런
             leadingTeamScore = -leadingTeamScore;
         }
 
-        // 마이티 공약을 여러개 보면서 런 공약을 안했더라도 주공이 기본적으로 런을 목표로 하도록
-        // 보통 룰대로 예고 런 뿐만 아니라 어쩌다 된 런에도 2배 점수를 적용하기로 했습니다.
-        if(leadingTeamScore == 20) {  // 런
-            if(this.bidShape == 'none') leadingTeamScore *= 3;  // 노기루다 런은 *2*2가 아니라 *1.5만 한다.
-            else leadingTeamScore *= 2;
-        }
-        else if(this.bidShape == 'none') leadingTeamScore *= 2;  // 노기루다
-
+        // 노프렌드인 경우 - 주공이 4배
         if(this.friend === null) {
             for(let i = 0 ; i < 5 ; i++) {
                 if(i == this.president) scoreTable[i] = leadingTeamScore * 4;
                 else scoreTable[i] = -leadingTeamScore;
             }
         }
+
+        // 프렌드 존재 : 주공대 프렌이 2:1
         else {
             for(let i = 0 ; i < 5 ; i++) {
                 if(i == this.president) scoreTable[i] = leadingTeamScore * 2;
