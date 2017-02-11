@@ -14,7 +14,7 @@ db.initScheme('users', function(table) {
     table.string('username').unique();
     table.string('email').unique();
     table.string('pwhash');
-    table.boolean('activated').index();
+    table.boolean('activated').defaultsTo(false).index();
     table.timestamps(true, true);
 });
 

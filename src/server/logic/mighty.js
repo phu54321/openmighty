@@ -49,7 +49,7 @@ MightyRoom.prototype.emit = function (msgType, msg) {
     if(msgType == 'cmd' && this.gamelog) {
         this.gamelog.addGameLog(msg, (err) => {
             if(err) {
-                global.logger.error(`Error on adding log to gamelog #${this.game.log.gameID}`, err);
+                global.logger.error(`Error on adding log to gamelog #${this.gamelog.gameID}`, err);
             }
         });
     }
