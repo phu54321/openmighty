@@ -62,4 +62,5 @@ exports.emit = function (type, msg) {
 window.sendCmd = exports.sendCmd;
 
 const sendCmd = require('./sendCmd');
-sendC
+sendCmd.setEmitFunc(exports.emit);
+
