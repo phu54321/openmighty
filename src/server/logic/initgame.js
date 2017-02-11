@@ -47,6 +47,7 @@ module.exports = function (MightyRoom) {
     };
 
     MightyRoom.prototype.endGame = function () {
+        global.logger.info(`End game #${this.roomID}`);
         this.playing = false;
         this.users.forEach((user) => {
             user.socket.waitTime = 0;

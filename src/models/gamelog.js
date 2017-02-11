@@ -25,17 +25,6 @@ db.initScheme('usergame', function (table) {
     table.timestamps(true, true);
 });
 
-///////
-
-const GAMELOG_VERSION = 3;
-
-function GameLog(game, gameID) {
-    this.game = game;
-    this.gameID = gameID;
-    this.completed = false;
-    this.logText = 'V' + GAMELOG_VERSION;
-}
-
 /**
  * Create new gamelog session
  */
@@ -53,19 +42,66 @@ exports.createGamelog = function (game, cb) {
 };
 
 
+
 ///////
 
+const GAMELOG_VERSION = 3;
+
+function GameLog(game, gameID) {
+    this.game = game;
+    this.gameID = gameID;
+    this.completed = false;
+    this.logText = 'V' + GAMELOG_VERSION;
+
+    this.dbTasks = [];
+    this.isIdle = true;
+}
+
+let taskID = 0;
+
+GameLog.prototype.addTask = function (taskf, cb) {
+    this.dbTasks.push([taskID, taskf, cb]);
+    taskID += 1;
+    if(this.isIdle) this.runTask();
+};
+
+GameLog.prototype.runTask = function () {
+    const [taskID, taskf, cb] = this.dbTasks.splice(0, 1)[0];
+    this.isIdle = false;
+    taskf(() => {
+        if(this.dbTasks.length === 0) this.isIdle = true;
+        else process.nextTick(this.runTask.bind(this));
+        if(cb) cb(...arguments);
+        else {
+            const err = arguments[0];
+            if(err) {
+                global.logger.error('General runTask error', err);
+            }
+        }
+    });
+};
+
+
+///////
+
+/**
+ * 게임 로그를 넣습니다.
+ * @param msg
+ * @param cb
+ * @returns {*}
+ */
 GameLog.prototype.addGameLog = function (msg, cb) {
-    if(this.completed) {
-        return cb(new Error(`Tried to append log to completed game #${this.gameID}.`));
-    }
+    this.addTask((cb) => {
+        if (this.completed) {
+            return cb(new Error(`Tried to append log to completed game #${this.gameID}.`));
+        }
 
-    this.logText += ',' + JSON.stringify(msg);
-
-    db('gamelog')
-        .where({id: this.gameID})
-        .update({gameLog: `[${this.logText}]`})
-        .asCallback(cb);
+        this.logText += ',' + JSON.stringify(msg);
+        return db('gamelog')
+            .where({id: this.gameID})
+            .update({gameLog: `[${this.logText}]`})
+            .asCallback(cb);
+    }, cb);
 };
 
 
@@ -79,16 +115,19 @@ GameLog.prototype.addGameLog = function (msg, cb) {
  * @param cb
  */
 GameLog.prototype.completeGameLog = function (cb) {
-    if(!this.completed) {
-        this.completed = true;
-        delete this.logText;
-    }
+    this.addTask((cb) => {
+        if (!this.completed) {
+            this.completed = true;
+            delete this.logText;
+        }
 
-    // Add completed flag to gamelog
-    db('gamelog')
-        .where({id: this.gameID})
-        .update({completed: true})
-        .asCallback(cb);
+        // Add completed flag to gamelog
+
+        db('gamelog')
+            .where({id: this.gameID})
+            .update({completed: true})
+            .asCallback(cb);
+    }, cb);
 };
 
 
@@ -104,39 +143,41 @@ GameLog.prototype.completeGameLog = function (cb) {
  * @returns {*}
  */
 GameLog.prototype.addUserGameLogs = function (cb) {
-    if(this.completed) {
-        return cb(new Error(`Tried to end completed game #${this.gameID}.`));
-    }
-
-    this.completed = true;  // Barrier!
-    delete this.logText;
-
-    const game = this.game;
-    const gameID = this.gameID;
-
-    // Update user scores.
-    const promises = game.gameUsers.map((user, userIdx) => {
-        let score = game.scores[userIdx];
-        if(typeof(user.useridf) == 'string') {
-            return db('usergame').insert({
-                userid: -1,
-                gameid: gameID,
-                score: score
-            });
+    this.addTask((cb) => {
+        if (this.completed) {
+            return cb(new Error(`Tried to end completed game #${this.gameID}.`));
         }
-        else {
-            if(user.ai) score = -40;  // Room leaving penalty
-            return db('usergame').insert({
-                userid: user.useridf,
-                gameid: gameID,
-                score: score
-            });
-        }
-    });
 
-    // Execute all promises!
-    Promise.all(promises)
-        .then(() => {
-            return cb(null);
-        }, (err) => cb(err));
+        this.completed = true;  // Barrier!
+        delete this.logText;
+
+        const game = this.game;
+        const gameID = this.gameID;
+
+        // Update user scores.
+        const promises = game.gameUsers.map((user, userIdx) => {
+            let score = game.scores[userIdx];
+            if (typeof(user.useridf) == 'string') {
+                return db('usergame').insert({
+                    userid: -1,
+                    gameid: gameID,
+                    score: score
+                });
+            }
+            else {
+                if (user.ai) score = -40;  // Room leaving penalty
+                return db('usergame').insert({
+                    userid: user.useridf,
+                    gameid: gameID,
+                    score: score
+                });
+            }
+        });
+
+        // Execute all promises!
+        Promise.all(promises)
+            .then(() => {
+                return cb(null);
+            }, (err) => cb(err));
+    }, cb);
 };

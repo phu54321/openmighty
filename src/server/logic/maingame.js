@@ -344,7 +344,7 @@ module.exports = function (MightyRoom) {
         this.scores = scoreTable;
 
         // Scores
-        global.logger.info(`End game #${this.roomID}`);
+        cmdout.emitGameEnd(this, oppObtainedCardCount, scoreTable, setUser);
 
         // Apply ratings
         async.series([
@@ -358,7 +358,6 @@ module.exports = function (MightyRoom) {
                 });
             }, cb),
         ], (err) => {
-            cmdout.emitGameEnd(this, oppObtainedCardCount, scoreTable, setUser);
             if (!err) cmdout.emitRoomUsers(this);
             this.endGame();
             if (err) throw err;
