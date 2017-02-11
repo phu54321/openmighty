@@ -17,7 +17,8 @@ const logger = new (winston.Logger)({
                 const hh = currentTime.getHours() < 10 ? "0" + currentTime.getHours() : currentTime.getHours();
                 const min = currentTime.getMinutes() < 10 ? "0" + currentTime.getMinutes() : currentTime.getMinutes();
                 const ss = currentTime.getSeconds() < 10 ? "0" + currentTime.getSeconds() : currentTime.getSeconds();
-                return `${yyyy}-${mm}-${dd} ${hh}:${mm}:${ss}`;
+                const ms = ("000" + currentTime.getMilliseconds()).substr(-3);
+                return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}.${ms}KST`;
             },
             colorize: true,
             level: 'debug'
