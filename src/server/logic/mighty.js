@@ -47,7 +47,11 @@ MightyRoom.prototype.emit = function (msgType, msg) {
 
     // 로그에도 emit
     if(msgType == 'cmd' && this.gamelog) {
-        this.gamelog.log(msg);
+        this.gamelog.addGameLog(msg, (err) => {
+            if(err) {
+                global.logger.error(`Error on adding log to gamelog #${this.game.log.gameID}`, err);
+            }
+        });
     }
 };
 
@@ -92,7 +96,7 @@ MightyRoom.prototype.onStartGame = function () {
 
     gamelog.createGamelog(this, (err, gamelog) => {
         if(err) {
-            global.logger.error(err);
+            global.logger.error('Error on createGameLog : ', err);
             this.emit('err', "게임을 시작할 수 없습니다.");
             delete this.gameUsers;
             return;

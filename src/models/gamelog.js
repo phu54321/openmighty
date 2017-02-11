@@ -55,7 +55,7 @@ exports.createGamelog = function (game, cb) {
 
 ///////
 
-GameLog.prototype.log = function (msg, cb) {
+GameLog.prototype.addGameLog = function (msg, cb) {
     if(this.completed) {
         return cb(new Error(`Tried to append log to completed game #${this.gameID}.`));
     }
