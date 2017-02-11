@@ -27,7 +27,7 @@ cmdcmp.registerCompressor({
             users.push({
                 username: slist[i],
                 useridf: slist[i + 1],
-                rating: slist[i + 2] | 0
+                rating: Number(slist[i + 2])
             });
         }
         return {

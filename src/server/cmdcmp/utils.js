@@ -21,6 +21,10 @@ const typeEncodeTable = {
         enc: (c) => c.cardEnvID,
         dec: (c) => decodeCard(c)
     },
+    'F': {
+        enc: (c) => c,
+        dec: (c) => Number(c)
+    },
     'I': {
         enc: (c) => c,
         dec: (c) => c | 0

@@ -153,12 +153,11 @@ describe('#Server', function() {
                     const socket2 = new MockSocket(2, 1, 2);
                     socket2.onEmit('cmd', function (msg) {
                         if (msg.type == 'rusers') {
-                            sendcmd.setEmitFunc(socket2.inMsg.bind(socket2));
                             cb();
                         }
                     });
                     server.onConnect(socket2);
-                }
+                },
             ], done);
         });
     });

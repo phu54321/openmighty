@@ -10,7 +10,7 @@ const utils = require('./utils');
 cmdcmp.registerCompressor({
     type: 'rjoin',
     shead: 'j',
-    keys: ['username', 'useridf', 'Irating']
+    keys: ['username', 'useridf', 'Frating']
 });
 
 
@@ -34,7 +34,7 @@ cmdcmp.registerCompressor({
             users.push({
                 username: slist[i],
                 useridf: slist[i + 1],
-                rating: slist[i + 2] | 0,
+                rating: Number(slist[i + 2]),
             });
         }
         return {

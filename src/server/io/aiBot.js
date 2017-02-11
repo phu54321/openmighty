@@ -15,7 +15,7 @@ const cmdcmp = require('../cmdcmp/cmdcmp');
 
 
 
-function AISocket(room, userEntry) {
+function AISocket(room, userEntry, playSpeed) {
     "use strict";
 
     this.game = room;
@@ -26,6 +26,8 @@ function AISocket(room, userEntry) {
 
     this.noShapeInfo = [{}, {}, {}, {}, {}];
     this.trustOpponentHavingJoker = 0;
+
+    this.playSpeed = playSpeed || 400;
 }
 
 
@@ -46,7 +48,7 @@ AISocket.prototype.cmd = function (msg) {
         }
         // console.log('[' + this.userEntry.useridf + ' Out]', msg);
         return cmdProcessor(this, this.game, this.userEntry, msg);
-    }, 400);
+    }, this.playSpeed);
 };
 
 
