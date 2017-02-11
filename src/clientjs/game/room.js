@@ -83,15 +83,9 @@ function addStartButton() {
 
 window.onbeforeunload = function (e) {
     if(room.playing) {
-        const e = e || window.event;
+        e = e || window.event;
         const msg = '게임 중에 퇴장하면 중간에 다시 들어오실 수 없습니다. 나가시겠습니까?';
-
-        // For IE and Firefox
-        if (e) {
-            e.returnValue = msg;
-        }
-
-        // For Safari / chrome
+        if (e) e.returnValue = msg;
         return msg;
     }
 };
