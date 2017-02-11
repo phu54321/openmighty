@@ -120,10 +120,18 @@ AISocket.prototype.proc_deck = function (msg) {
  * bidrq(공약 요청) 메세지를 처리. 일단은 무조건 패스하도록 했다.
  */
 AISocket.prototype.proc_bidrq = function () {
-    this.cmd({
-        type: 'bid',
-        shape: 'pass'
-    });
+    if(this.deck.getDealMissScore() <= 1) {
+        this.cmd({
+            type: 'bid',
+            shape: 'dealmiss'
+        });
+    }
+    else {
+        this.cmd({
+            type: 'bid',
+            shape: 'pass'
+        });
+    }
 };
 
 /**
