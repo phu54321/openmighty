@@ -33,7 +33,7 @@ module.exports = function (MightyRoom) {
      * 게임을 초기화합니다.
      */
     MightyRoom.prototype.initGame = function () {
-        global.logger.info(`Starting game from room ${this.roomID}`);
+        global.logger.info(`Starting game ${this.gamelog.gameID} from room ${this.roomID}`);
         // Distribute deck
         const deck = createDeck();
         this.gamelog.addGameLog(deck.toString());
@@ -47,7 +47,7 @@ module.exports = function (MightyRoom) {
     };
 
     MightyRoom.prototype.endGame = function () {
-        global.logger.info(`End game #${this.roomID}`);
+        global.logger.info(`End game ${this.gamelog.gameID} from room #${this.roomID}`);
         this.playing = false;
         this.users.forEach((user) => {
             user.socket.waitTime = 0;

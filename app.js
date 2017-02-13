@@ -1,7 +1,10 @@
 "use strict";
 
 const express = require('express');
+const helmet = require('helmet');
 const app = express();
+app.use(helmet());
+
 
 const path = require('path');
 
@@ -10,6 +13,11 @@ const path = require('path');
 // Add logger
 const logger = require('./src/logger');
 const morgan = require('morgan');
+// Since we're using reverse proxy, we should use x-forwarded-for instead if plain remote address.
+morgan.token('remote-addr', function (req, res) {
+    let ffHeaderValue = req.headers['x-forwarded-for'];
+    return ffHeaderValue || req.connection.remoteAddress;
+});
 app.use(morgan('common', { "stream": logger.stream }));
 
 require('./src/logger');
@@ -70,6 +78,7 @@ app.use(compression());
 ////////////////////////////////////////////////////////////////////////////
 
 /////////////// 2. Resources
+
 
 
 // Static things
