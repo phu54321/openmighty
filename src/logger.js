@@ -10,9 +10,8 @@ const logger = new (winston.Logger)({
     transports: [
         new (winston.transports.Console)({
             timestamp: () => {
-                let currentTime = new Date();
-                // UTC -> KST
-                currentTime.setTime(currentTime.getTime() + 9 * 60 * 60 * 1000);
+                const currentTime = new Date();
+
                 const yyyy = currentTime.getFullYear();
                 const mm = currentTime.getMonth() < 9 ? "0" + (currentTime.getMonth() + 1) : (currentTime.getMonth() + 1); // getMonth() is zero-based
                 const dd  = currentTime.getDate() < 10 ? "0" + currentTime.getDate() : currentTime.getDate();
