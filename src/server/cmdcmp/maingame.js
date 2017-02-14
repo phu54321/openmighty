@@ -16,5 +16,5 @@ cmdcmp.registerCompressor({
 cmdcmp.registerCompressor({
     type: 'tend',
     shead: 'T',
-    keys: ['winner']
+    keys: ['Iwinner']
 });

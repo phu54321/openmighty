@@ -6,9 +6,8 @@
 .game {
     @extend %debug;
     position: absolute;
-    overflow: hidden;
     display: flex;
-    top: 3em;
+    top: 3.2em;
     left: 0;
     right: 0;
     bottom: 0;

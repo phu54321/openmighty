@@ -18,5 +18,5 @@ cmdcmp.registerCompressor({
 cmdcmp.registerCompressor({
     type: 'pbinfo',
     shead: 'p',
-    keys: ['bidder', 'bidShape', 'IbidCount']
+    keys: ['Ibidder', 'bidShape', 'IbidCount']
 });
