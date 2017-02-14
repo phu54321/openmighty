@@ -5,7 +5,8 @@
 "use strict";
 
 const express = require('express');
-const users = require('../routes/users');
+const users = require('./users');
+const gamelog = require('../models/gamelog');
 const crypto = require('crypto');
 
 let router = express.Router();
@@ -24,6 +25,12 @@ router.get('/:room', users.checkLogon, (req, res) => {
 
 // Room
 router.get('/log/:gameID', users.checkLogon, (req, res) => {
+    const gameID = req.params.gameID | 0;
+
+    gamelog.getGamelog(gameID, (err, entry) => {
+        console.log(err, entry);
+    });
+
     res.render('gamelog', {
         gameID: req.params.gameID
     });

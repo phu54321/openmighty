@@ -6,6 +6,8 @@
 
 const db = require('./db');
 const async = require('async');
+const cmdcmp = require('../server/cmdcmp/cmdcmp');
+
 
 // SCHEMA
 db.initScheme('gamelog', function(table) {
@@ -99,7 +101,10 @@ GameLog.prototype.addGameLog = function (msg, cb) {
         this.logText += ',' + JSON.stringify(msg);
         return db('gamelog')
             .where({id: this.gameID})
-            .update({gameLog: `[${this.logText}]`})
+            .update({
+                gameLog: `[${this.logText}]`,
+                updated_at: new Date()
+            })
             .asCallback(cb);
     }, cb);
 };
@@ -125,7 +130,10 @@ GameLog.prototype.completeGameLog = function (cb) {
 
         db('gamelog')
             .where({id: this.gameID})
-            .update({completed: true})
+            .update({
+                completed: true,
+                updated_at: new Date()
+            })
             .asCallback(cb);
     }, cb);
 };
@@ -180,4 +188,64 @@ GameLog.prototype.addUserGameLogs = function (cb) {
                 return cb(null);
             }, (err) => cb(err));
     }, cb);
+};
+
+
+/**
+ * Get gamelog from game id
+ * @param gameID
+ * @param cb
+ */
+exports.getGamelog = function (gameID, cb) {
+    global.logger.debug(`Getting game log #${gameID}`);
+
+    db('gamelog').select('*')
+        .where({id: gameID})
+        .limit(1)
+        .then(function (entries) {
+            const entry = entries[0];
+            if(!entry) return cb(null, null);  // 없는 게임
+            if(!entry.completed) {
+                global.logger.debug(`Tried to get incomplete game ${gameID}`);
+                return cb(null, null);  // 아직 끝나지 않은 게임
+            }
+
+            // Process entries
+            let gameLogString = entry.gameLog;
+            if(gameLogString.startsWith('[V3,')) {
+                gameLogString = '["V3", ' + gameLogString.substr(4);
+            }
+
+            try {
+                entry.gameLog = JSON.parse(gameLogString)
+                    .map(entry => cmdcmp.decompressCommand(entry));
+                const versionString = entry.gameLog[0];
+
+                // Check version string
+                if(
+                    typeof(versionString) != 'string' ||
+                    !versionString.startsWith('V')
+                ) {
+                    global.logger.debug(`Game ${gameID} has bad vstring ${versionString}`);
+                    return cb(null, null);
+                }
+
+                // Check version
+                const version = (entry.gameLog[0].substr(1) | 0);
+                if(version < 3) {
+                    global.logger.debug(`Game ${gameID} has bad version ${version}`);
+                    return cb(null, null);
+                }
+
+                entry.gameLog.splice(0, 1);
+
+                // Migrate versions if nessecary
+                return cb(null, entry);
+            }
+            catch(e) {
+                return cb(e);
+            }
+        }, function(err) {
+            cb(err);
+        });
 };
