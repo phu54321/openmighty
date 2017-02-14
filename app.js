@@ -104,6 +104,7 @@ app.use(
 // Routes
 app.use('/', require('./src/routes/index'));
 app.use('/users', require('./src/routes/users'));
+app.use('/', require('./src/routes/game'));
 
 
 // 404 Error
