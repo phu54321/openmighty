@@ -51,7 +51,7 @@ function GameLog(game, gameID) {
     this.game = game;
     this.gameID = gameID;
     this.completed = false;
-    this.logText = 'V' + GAMELOG_VERSION;
+    this.logText = `"V${GAMELOG_VERSION}"`;
 
     this.dbTasks = [];
     this.isIdle = true;
