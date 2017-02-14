@@ -6,6 +6,7 @@
 .game {
     @extend %debug;
     position: absolute;
+    overflow: hidden;
     display: flex;
     top: 3em;
     left: 0;
