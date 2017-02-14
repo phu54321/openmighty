@@ -31,7 +31,7 @@ const typeEncodeTable = {
     },
     'B': {
         enc: (c) => c | 0,
-        dec: Boolean
+        dec: (c) => Boolean(c | 0)
     }
 };
 
