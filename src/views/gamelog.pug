@@ -1,20 +1,21 @@
 extends layout
 
 block content
-    .scrollable-container
+    .gamelog
         .row
             h1 게임 로그 - #{gameID}
-        .row
-            pre #{gameLog}
-            // padding
-            .s1
 
-            // main
-            .s2
-            .s2
-            .s2
-            .s2
-            .s2
+        .row.gamelog-gusers
+            .col.s1 게임 인원
+            each user in gusers
+                .col.s2.gamelog-user
+                    strong #{user.username}
+                    span.rating (R#{user.rating.toFixed(1)})
 
-            // padding
-            .s1
+        .row.logrow
+            .gamelog-pbinfo
+                each pbidding in pbiddings
+                    .gamelog-pbid
+                        each pbid in pbidding
+                            div(class='card-#{pbid.bidShape}') #{pbid.bidCount}
+
