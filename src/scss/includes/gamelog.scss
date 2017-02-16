@@ -29,6 +29,9 @@
 
 
 .gamelog-gusers {
+    background: #666;
+    color: #fff;
+
     .gamelog-user {
         .username {
             font-weight: bold;
@@ -92,9 +95,16 @@
     background: #d5edff;
 }
 
-.gamelog-result {
+.gamelog-set {
     background: #eeeeee;
 }
+
+
+.gamelog-score {
+    background: #666;
+    color: #fff;
+}
+
 
 .gamelog-occ {
     &:before { content: '(' }
