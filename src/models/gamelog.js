@@ -215,7 +215,7 @@ exports.getGamelog = function (gameID, cb) {
 
             // Process entries
             let gameLogString = entry.gameLog;
-            if(gameLogString.startsWith('[V3f,')) {
+            if(gameLogString.startsWith('[V3,')) {
                 gameLogString = '["V3", ' + gameLogString.substr(4);
             }
 
