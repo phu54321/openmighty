@@ -44,20 +44,28 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
             return res.render('error', {message: "로그를 불러올 수 없습니다."});
         }
 
+        // Various variables
         let gusers = [];
+
         const pbiddings = [[], [], [], [], []];  // 각 플레이어가 했던 공약들
         const biddings = [];  // 공약 수정 등을 이유로 여러번 공약이 바뀔 수 있으므로 배열로 관리
-        let currentTrick = {cards: []};
-        const tricks = [currentTrick];
         let president = null;
         let friend;
+
+        let currentTrick = {cards: []};
+        const tricks = [currentTrick];
+
         let result;
+
         let abortReason;
+
+        let obtainedCardCounts;
 
         // Simple log parser
         entry.gameLog.forEach(log => {
             if(log.type == 'gusers') {
                 gusers = log.users;
+                obtainedCardCounts = new Array(log.users.length).fill(0);
             }
             else if(log.type == 'pbinfo') {
                 pbiddings[log.bidder].push({
@@ -81,6 +89,11 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
             else if(log.type == 'tend') {
                 currentTrick.winner = log.winner;
 
+                // Update occ
+                const scoreCardCount = currentTrick.cards.filter(c => c.num >= 10).length;
+                obtainedCardCounts[log.winner] += scoreCardCount;
+                currentTrick.occ = obtainedCardCounts.slice();
+
                 // Start new trick
                 currentTrick = {
                     cards: [],
@@ -100,6 +113,8 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
             global.logger.warn("currentTrick.cards.length != 0 on game #" + gameID);
         }
         else tricks.splice(tricks.length - 1, 1);
+
+        console.log(obtainedCardCounts);
 
         res.render('gamelog', {
             gameID: req.params.gameID,

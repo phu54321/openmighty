@@ -18,9 +18,9 @@
             padding: 10px 1.2em;
         }
         .col:first-child {
-            padding: 10px 0;
+            padding: 9px 0;
             font-weight: bolder;
-            border-right: 1px solid #eee;
+            // border-right: 1px solid #eee;
         }
     }
 }
@@ -51,7 +51,7 @@
 
 .gamelog-card-joker   {
     &:before { content: '★ Joker'; }
-    background: -webkit-linear-gradient(top, #a7a7a7, #000);
+    background: -webkit-linear-gradient(top, #fff, #000);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -74,4 +74,11 @@
 
 .gamelog-pcp-score {
     background: #d5edff;
+}
+
+.gamelog-occ {
+    &:before { content: '(' }
+    color: #FF6F00;
+    font-size: .9em;
+    &:after { content: ')' }
 }

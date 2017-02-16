@@ -26,7 +26,7 @@ block content
             .row.gamelog-bidding
                 .col.s2 최종공약
                 .col.s10
-                    | 플레이어 "#{gusers[president].username}" 님이 &nbsp;
+                    | #{gusers[president].username} 님이 &nbsp;
                     span(class='gamelog-card-' + bidding.bidShape) #{bidding.bidCount}
                     | &nbsp;을 공약했습니다
 
@@ -54,6 +54,8 @@ block content
                 each card, player in trick.cards
                     .col.s2.gamelog-pcp(class=(trick.winner == player ? "gamelog-pcp-winner " : "") + (card.num >= 10 ? "gamelog-pcp-score " : ""))
                         span(class='gamelog-card-' + card.shape) #{getCardNumString(card.num)}
+                        if trick.occ && trick.occ[player]
+                            span.right.gamelog-occ= trick.occ[player]
 
         if result
             .gamelog-result
@@ -62,7 +64,7 @@ block content
                     .row
                         .col.s2 셋
                         .col.s10
-                            div [셋] 유저 #{gusers[result.setUser].username} 가 다음 덱으로 셋을 했습니다.
+                            div [셋]  #{gusers[result.setUser].username} (#{result.setUser + 1}) 님이 다음 덱으로 셋을 했습니다.
                             .gamelog-setdeck
                                 each card in result.setDeck
                                     span(class='gamelog-card-' + card.shape) #{getCardNumString(card.num)}
