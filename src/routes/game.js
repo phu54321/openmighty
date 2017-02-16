@@ -40,7 +40,7 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
     gamelog.getGamelog(gameID, (err, entry) => {
         if(err) return next(err);
 
-        if(entry == null) {
+        if(entry === null) {
             return res.render('error', {message: "로그를 불러올 수 없습니다."});
         }
 
@@ -50,8 +50,9 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
         let currentTrick = {cards: []};
         const tricks = [currentTrick];
         let president = null;
-        const friend = {};
-        const result = {};
+        let friend;
+        let result;
+        let abortReason;
 
         // Simple log parser
         entry.gameLog.forEach(log => {
@@ -72,8 +73,7 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
                 });
             }
             else if(log.type == 'fs') {
-                friend.ftype = log.ftype;
-                friend.args = log.args;
+                friend = log;
             }
             else if(log.type == 'pcp') {
                 currentTrick.cards[log.player] = log.card;
@@ -86,41 +86,19 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
                 tricks.push(currentTrick);
             }
             else if(log.type == 'gend') {
-                result.scores = log.scores;
-                result.oppcc = log.oppcc;
-                result.setUser = log.setUser;
-                result.setDeck = log.setDeck;
-                /*
-                {
-                    "type": "gend",
-                    "scores": [
-                        -1,
-                        -1,
-                        -1,
-                        2,
-                        1
-                    ],
-                    "oppcc": 6,
-                    "setUser": 3,
-                    "setDeck": [
-                        {
-                            "shape": "diamond",
-                            "num": 8,
-                            "cardEnvID": 45
-                        }
-                    ]
-                }
-                */
+                result = log;
+            }
+            else if(log.type == 'gabort') {
+                abortReason = log.msg;
             }
         });
 
-        console.log(
-            gusers,
-            pbiddings,
-            biddings,
-            friend,
-            tricks
-        );
+        // BUGFIX - tricks가 하나도 없을 경우 tricks에 일단 넣어둔 currentTrick을 없앤다.
+        if(
+            tricks.length == 1 &&
+            currentTrick.cards.length === 0
+        ) tricks.splice(0, 1);
+
         res.render('gamelog', {
             gameID: req.params.gameID,
             getCardNumString: getCardNumString,
@@ -133,7 +111,9 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
             lastBidding: biddings[biddings.length - 1],
             friend: friend,
             tricks: tricks,
-            result: result
+            result: result,
+
+            abortReason: abortReason
         });
     });
 });
