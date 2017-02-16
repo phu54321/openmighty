@@ -269,7 +269,6 @@ module.exports = function (MightyRoom) {
             return;
         }
 
-        cmdout.emitGameTrickEnd(this, this.trickWinner);
         this.startNewTrick();
     };
 

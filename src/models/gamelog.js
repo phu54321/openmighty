@@ -12,6 +12,7 @@ const cmdcmp = require('../server/cmdcmp/cmdcmp');
 // SCHEMA
 db.initScheme('gamelog', function(table) {
     table.increments('id').primary();
+    table.integer('version');
     table.boolean('completed').defaultTo(false);
     table.string('gameType').index();
     table.string('players');
@@ -33,8 +34,9 @@ db.initScheme('usergame', function (table) {
 exports.createGamelog = function (game, cb) {
     db('gamelog').insert({
         gameType: 'mighty5',
+        version: GAMELOG_VERSION,
         players: game.gameUsers.map(user => user.useridf).join(','),
-        gameLog: `["V${GAMELOG_VERSION}"]`
+        gameLog: `[]`
     })
         .then(function (gameID) {
             cb(null, new GameLog(game, gameID));
@@ -53,7 +55,7 @@ function GameLog(game, gameID) {
     this.game = game;
     this.gameID = gameID;
     this.completed = false;
-    this.logText = `"V${GAMELOG_VERSION}"`;
+    this.logText = "";
 
     this.dbTasks = [];
     this.isIdle = true;
@@ -98,7 +100,8 @@ GameLog.prototype.addGameLog = function (msg, cb) {
             return cb(new Error(`Tried to append log to completed game #${this.gameID}.`));
         }
 
-        this.logText += ',' + JSON.stringify(msg);
+        if(this.logText !== "") this.logText += ',';
+        this.logText += JSON.stringify(msg);
         return db('gamelog')
             .where({id: this.gameID})
             .update({
@@ -212,32 +215,35 @@ exports.getGamelog = function (gameID, cb) {
 
             // Process entries
             let gameLogString = entry.gameLog;
-            if(gameLogString.startsWith('[V3,')) {
+            if(gameLogString.startsWith('[V3f,')) {
                 gameLogString = '["V3", ' + gameLogString.substr(4);
             }
 
             try {
                 entry.gameLog = JSON.parse(gameLogString)
                     .map(entry => cmdcmp.decompressCommand(entry));
-                const versionString = entry.gameLog[0];
 
-                // Check version string
-                if(
-                    typeof(versionString) != 'string' ||
-                    !versionString.startsWith('V')
-                ) {
-                    global.logger.debug(`Game ${gameID} has bad vstring ${versionString}`);
-                    return cb(null, null);
+                // For legacy strings
+                let version = entry.version;
+                if(version === null) {
+                    const versionString = entry.gameLog[0];
+
+                    // Check version string
+                    if (
+                        typeof(versionString) != 'string' || !versionString.startsWith('V')
+                    ) {
+                        global.logger.debug(`Game ${gameID} has bad vstring ${versionString}`);
+                        return cb(null, null);
+                    }
+
+                    // Check version
+                    version = (entry.gameLog[0].substr(1) | 0);
+                    if (version < 3) {
+                        global.logger.debug(`Game ${gameID} has bad version ${version}`);
+                        return cb(null, null);
+                    }
+                    entry.gameLog.splice(0, 1);
                 }
-
-                // Check version
-                const version = (entry.gameLog[0].substr(1) | 0);
-                if(version < 3) {
-                    global.logger.debug(`Game ${gameID} has bad version ${version}`);
-                    return cb(null, null);
-                }
-
-                entry.gameLog.splice(0, 1);
 
                 // Migrate versions if nessecary
                 return cb(null, entry);

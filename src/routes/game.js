@@ -80,6 +80,8 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
             }
             else if(log.type == 'tend') {
                 currentTrick.winner = log.winner;
+
+                // Start new trick
                 currentTrick = {
                     cards: [],
                 };
@@ -93,11 +95,11 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
             }
         });
 
-        // BUGFIX - tricks가 하나도 없을 경우 tricks에 일단 넣어둔 currentTrick을 없앤다.
-        if(
-            tricks.length == 1 &&
-            currentTrick.cards.length === 0
-        ) tricks.splice(0, 1);
+        // 마지막 currentTrick는 분명히 비었을거니 없앤다.
+        if(currentTrick.cards.length !== 0) {
+            global.logger.warn("currentTrick.cards.length != 0 on game #" + gameID);
+        }
+        else tricks.splice(tricks.length - 1, 1);
 
         res.render('gamelog', {
             gameID: req.params.gameID,
