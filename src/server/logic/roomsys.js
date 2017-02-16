@@ -69,9 +69,9 @@ module.exports = function (MightyRoom) {
                 useridf: useridf,
                 rating: rating,
                 emit: function (type, obj) {
+                    if(type == 'cmd') this.lastCommand = obj;
                     if(type == 'cmd') obj = cmdcmp.compressCommand(obj);
                     this.socket.emit(type, obj);
-                    if(type == 'cmd') this.lastCommand = obj;
                 }
             };
             this.users.push(userEntry);
