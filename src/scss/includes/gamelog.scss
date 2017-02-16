@@ -33,11 +33,9 @@
     color: #fff;
 
     .gamelog-user {
-        .username {
-            font-weight: bold;
-        }
+        overflow-x: hidden;
         .rating {
-            margin-left: 1em;
+            margin-left: .4em;
             color: #FF6F00;
         }
     }

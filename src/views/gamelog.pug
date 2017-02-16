@@ -10,7 +10,7 @@ block content
             .col.s2 인원
             each user, index in gusers
                 .col.s2.gamelog-user
-                    strong #{user.username}
+                    span.username #{user.username}
                     span.rating (R#{user.rating.toFixed(1)})
 
         // 플레이어 공약 정보
