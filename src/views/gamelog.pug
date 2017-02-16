@@ -3,19 +3,78 @@ extends layout
 block content
     .gamelog
         .row
-            h1 게임 로그 - #{gameID}
+            h1 게임 ##{gameID}
 
+        // 게임 인원
         .row.gamelog-gusers
-            .col.s1 게임 인원
+            .col.s2 인원
             each user in gusers
                 .col.s2.gamelog-user
                     strong #{user.username}
                     span.rating (R#{user.rating.toFixed(1)})
 
-        .row.logrow
-            .gamelog-pbinfo
-                each pbidding in pbiddings
-                    .gamelog-pbid
-                        each pbid in pbidding
-                            div(class='card-#{pbid.bidShape}') #{pbid.bidCount}
+        // 플레이어 공약 정보
+        .row.gamelog-pbiddings
+            .col.s2 공약
+            each pbidding in pbiddings
+                .col.s2.gamelog-pbid
+                    each pbid in pbidding
+                        div(class='gamelog-card-' + pbid.bidShape) #{pbid.bidCount}
 
+        // 공약 정보
+        each bidding in biddings
+            .row.gamelog-bidding
+                .col.s2 최종공약
+                .col.s10
+                    | 플레이어 "#{gusers[president].username}" 님이 &nbsp;
+                    span(class='gamelog-card-' + bidding.bidShape) #{bidding.bidCount}
+                    | &nbsp;을 공약했습니다
+
+        // 플레이 정보
+        .row.gamelog-friend
+            .col.s2 프렌드
+            .col.s10
+                | 프렌드 : &nbsp;
+                if friend.ftype == 'card'
+                    span(class='gamelog-card-' + friend.args.shape) #{getCardNumString(friend.args.num)}
+                else if friend.ftype == 'first'
+                    | 선구 프렌드
+                else if friend.ftype == 'player'
+                    | 지정 프렌드 - #{gusers[friend.args].username}
+                else if friend.ftype == 'none'
+                    | 없음
+                else
+                    | 알 수 없는 프렌드 (버그제보를 해주세요
+
+        // 플레이 인포
+        each trick, index in tricks
+            .row.gamelog-trick
+                .col.s2 트릭##{index+1}
+                each card, player in trick.cards
+                    .col.s2.gamelog-pcp(class=(trick.winner == player ? "gamelog-pcp-winner " : "") + (card.num >= 10 ? "gamelog-pcp-score " : ""))
+                        span(class='gamelog-card-' + card.shape) #{getCardNumString(card.num)}
+
+        .gamelog-result
+            // 셋 여부
+            if result.setUser !== undefined
+                .row
+                    .col.s2 셋
+                    .col.s10
+                        div [셋] 유저 #{gusers[result.setUser].username} 가 다음 덱으로 셋을 했습니다.
+                        .gamelog-setdeck
+                            each card in result.setDeck
+                                span(class='gamelog-card-' + card.shape) #{getCardNumString(card.num)}
+            .row
+                .col.s2 결과
+                .col.s10
+                    if (20 - result.oppcc) >= lastBidding.bidCount
+                        | [여당 승리] 여당이 공약 #{lastBidding.bidCount} 이상인 #{20 - result.oppcc}개를 달성해 승리하였습니다!
+                    else
+                        | [야당 승리] 야당이 공약저지선 #{21 - lastBidding.bidCount} 이상인 #{result.oppcc}개를 달성해 승리하였습니다!
+            .row
+                .col.s2 점수
+                each score in result.scores
+                    .col.s2.gamelog-score= score
+
+        // Debugging
+        pre= JSON.stringify(gamelog, null, 4)

@@ -42,16 +42,12 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
 
         let gusers = [];
         const pbiddings = [[], [], [], [], []];  // 각 플레이어가 했던 공약들
-        const bidding = [];  // 공약 수정 등을 이유로 여러번 공약이 바뀔 수 있으므로 배열로 관리
-        const tricks = [];
-        let currentTrick = [];
+        const biddings = [];  // 공약 수정 등을 이유로 여러번 공약이 바뀔 수 있으므로 배열로 관리
+        let currentTrick = {cards: []};
+        const tricks = [currentTrick];
         let president = null;
         const friend = {};
-
-        // 뷰랑 모델을 분리하기가 어려워서 여기서는 그냥 template를 통해 html을 동적 생성합니다.
-        // TODO: 뷰로 관련 로직을 옮긴다.
-
-        const outputHtmls = [];
+        const result = {};
 
         // Simple log parser
         entry.gameLog.forEach(log => {
@@ -66,42 +62,74 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
             }
             else if(log.type == 'binfo') {
                 president = log.president;
-                bidding.push({
+                biddings.push({
                     bidShape: log.shape,
                     bidCount: log.num
                 });
             }
             else if(log.type == 'fs') {
-                friend.ftype = log.fype;
+                friend.ftype = log.ftype;
                 friend.args = log.args;
             }
             else if(log.type == 'pcp') {
-                currentTrick[log.player] = log.card;
+                currentTrick.cards[log.player] = log.card;
             }
             else if(log.type == 'tend') {
-                tricks.push({
-                    cards: currentTrick,
-                    winner: log.winner
-                });
-                currentTrick = [];
+                currentTrick.winner = log.winner;
+                currentTrick = {
+                    cards: [],
+                };
+                tricks.push(currentTrick);
+            }
+            else if(log.type == 'gend') {
+                result.scores = log.scores;
+                result.oppcc = log.oppcc;
+                result.setUser = log.setUser;
+                result.setDeck = log.setDeck;
+                /*
+                {
+                    "type": "gend",
+                    "scores": [
+                        -1,
+                        -1,
+                        -1,
+                        2,
+                        1
+                    ],
+                    "oppcc": 6,
+                    "setUser": 3,
+                    "setDeck": [
+                        {
+                            "shape": "diamond",
+                            "num": 8,
+                            "cardEnvID": 45
+                        }
+                    ]
+                }
+                */
             }
         });
 
         console.log(
             gusers,
             pbiddings,
-            bidding,
+            biddings,
             friend,
             tricks
         );
         res.render('gamelog', {
             gameID: req.params.gameID,
-            gameLog: JSON.stringify(entry.gameLog, null, 4),
+            getCardNumString: getCardNumString,
+            gamelog: entry.gameLog,
+
             gusers: gusers,
             pbiddings: pbiddings,
-            bidding: bidding,
+            president: president,
+            biddings: biddings,
+            lastBidding: biddings[biddings.length - 1],
             friend: friend,
-            tricks: tricks
+            tricks: tricks,
+            result: result
         });
     });
 });

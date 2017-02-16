@@ -11,8 +11,17 @@
     overflow: scroll;
     -webkit-overflow-scrolling: touch;
 
-    .row .col:first-child {
-        font-weight: bolder;
+    .row {
+        margin-bottom: 0;
+        margin-top: 0;
+        .col {
+            padding: 10px 1.2em;
+        }
+        .col:first-child {
+            padding: 10px 0;
+            font-weight: bolder;
+            border-right: 1px solid #eee;
+        }
     }
 }
 
@@ -27,4 +36,42 @@
             color: #FF6F00;
         }
     }
+}
+
+
+.gamelog-card-pass {
+    color: #999;
+    visibility: hidden;
+    &:before {
+        visibility: visible;
+        content: "Pass";
+    }
+}
+
+
+.gamelog-card-joker   {
+    &:before { content: '★ Joker'; }
+    background: -webkit-linear-gradient(top, #a7a7a7, #000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.gamelog-card-spade    { color: black; &:before { content: "♠ Spade"; }}
+.gamelog-card-clover   { color: black; &:before { content: "♣ Clover"; }}
+.gamelog-card-heart    { color: red;   &:before { content: "♥ Heart"; }}
+.gamelog-card-diamond  { color: red;   &:before { content: "♦ Diamond"; }}
+
+@media #{$medium-and-down} {
+    .gamelog-card-joker:before { content: '★JK'; }
+    .gamelog-card-spade    { color: black; &:before { content: "♠ "; }}
+    .gamelog-card-clover   { color: black; &:before { content: "♣ "; }}
+    .gamelog-card-heart    { color: red;   &:before { content: "♥ "; }}
+    .gamelog-card-diamond  { color: red;   &:before { content: "♦ "; }}
+}
+
+.gamelog-pcp-winner {
+    background: #ffdae1 !important;
+}
+
+.gamelog-pcp-score {
+    background: #d5edff;
 }

@@ -233,6 +233,8 @@ module.exports = function (MightyRoom) {
      * 한번의 트릭이 끝났을 경우.
      */
     MightyRoom.prototype.onTrickEnd = function () {
+        cmdout.emitGameTrickEnd(this, this.trickWinner);
+
         // 낸 카드를 업데이트하고, 각 플레이어가 얻은 점수 카드를 업데이트한다.
         const winnerObtainedCards = this.obtainedCards[this.trickWinner];
         this.playedCards.forEach((card) => {
