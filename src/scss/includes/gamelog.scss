@@ -14,15 +14,17 @@
     .row {
         margin-bottom: 0;
         margin-top: 0;
+        line-height: 1.4em;
         .col {
-            padding: 10px 1.2em;
+            padding: 5px 1.2em;
         }
         .col:first-child {
-            padding: 9px 0;
+            padding: 5px .5em;
             font-weight: bolder;
             // border-right: 1px solid #eee;
         }
     }
+    padding-bottom: 5em;
 }
 
 
@@ -59,6 +61,7 @@
 .gamelog-card-clover   { color: black; &:before { content: "♣ Clover"; }}
 .gamelog-card-heart    { color: red;   &:before { content: "♥ Heart"; }}
 .gamelog-card-diamond  { color: red;   &:before { content: "♦ Diamond"; }}
+.gamelog-card-none     { color: blue;   &:before { content: "? None"; }}
 
 @media #{$medium-and-down} {
     .gamelog-card-joker:before { content: '★JK'; }
@@ -66,6 +69,19 @@
     .gamelog-card-clover   { color: black; &:before { content: "♣ "; }}
     .gamelog-card-heart    { color: red;   &:before { content: "♥ "; }}
     .gamelog-card-diamond  { color: red;   &:before { content: "♦ "; }}
+    .gamelog-card-none     { color: blue;   &:before { content: "? "; }}
+}
+
+.gamelog-friend {
+    background: #fffde7;
+}
+
+.gamelog-president {
+    background: #fff3e0;
+}
+
+.gamelog-bidding {
+    background: #eeeeee;
 }
 
 .gamelog-pcp-winner {
@@ -74,6 +90,10 @@
 
 .gamelog-pcp-score {
     background: #d5edff;
+}
+
+.gamelog-result {
+    background: #eeeeee;
 }
 
 .gamelog-occ {

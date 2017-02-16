@@ -46,11 +46,13 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
 
         // Various variables
         let gusers = [];
+        let initialDeck = [];
 
         const pbiddings = [[], [], [], [], []];  // 각 플레이어가 했던 공약들
         const biddings = [];  // 공약 수정 등을 이유로 여러번 공약이 바뀔 수 있으므로 배열로 관리
         let president = null;
-        let friend;
+        let friendType = undefined;
+        let friend = null;
 
         let currentTrick = {cards: []};
         const tricks = [currentTrick];
@@ -63,6 +65,9 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
 
         // Simple log parser
         entry.gameLog.forEach(log => {
+            if(typeof(log) == "string") {
+                initialDeck = log.split(",");
+            }
             if(log.type == 'gusers') {
                 gusers = log.users;
                 obtainedCardCounts = new Array(log.users.length).fill(0);
@@ -81,7 +86,18 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
                 });
             }
             else if(log.type == 'fs') {
-                friend = log;
+                friendType = log;
+
+                // 프렌드가 누군지 판별
+                if(friendType.ftype == 'card') {
+                    const friendCardString = friendType.args.shape[0] + friendType.args.num;
+                    friend = (initialDeck.indexOf(friendCardString) / 10) | 0;
+                    if(friend == president || friend == 5) friend = null;  // 자기가 가진 카드를 프렌으로 선정
+                }
+
+                else if(friendType.ftype == 'player') friend = friendType.args;
+                else if(friendType.ftype == 'none') friend = null;
+                // 선구 프렌드는 tend에서 처리
             }
             else if(log.type == 'pcp') {
                 currentTrick.cards[log.player] = log.card;
@@ -93,6 +109,12 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
                 const scoreCardCount = currentTrick.cards.filter(c => c.num >= 10).length;
                 obtainedCardCounts[log.winner] += scoreCardCount;
                 currentTrick.occ = obtainedCardCounts.slice();
+
+                // 선구 프렌드
+                if(friendType.ftype == 'first' && tricks.length == 1) {
+                    friend = log.winner;
+                    if(friend == president) friend = null;
+                }
 
                 // Start new trick
                 currentTrick = {
@@ -114,19 +136,20 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
         }
         else tricks.splice(tricks.length - 1, 1);
 
-        console.log(obtainedCardCounts);
-
         res.render('gamelog', {
             gameID: req.params.gameID,
             getCardNumString: getCardNumString,
             gamelog: entry.gameLog,
 
             gusers: gusers,
+
             pbiddings: pbiddings,
             president: president,
             biddings: biddings,
             lastBidding: biddings[biddings.length - 1],
+            friendType: friendType,
             friend: friend,
+
             tricks: tricks,
             result: result,
 

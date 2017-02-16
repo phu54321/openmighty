@@ -8,16 +8,16 @@ block content
         // 게임 인원
         .row.gamelog-gusers
             .col.s2 인원
-            each user in gusers
-                .col.s2.gamelog-user
+            each user, index in gusers
+                .col.s2.gamelog-user(class=(index == president ? "gamelog-president" : ""))
                     strong #{user.username}
                     span.rating (R#{user.rating.toFixed(1)})
 
         // 플레이어 공약 정보
         .row.gamelog-pbiddings
             .col.s2 공약
-            each pbidding in pbiddings
-                .col.s2.gamelog-pbid
+            each pbidding, index in pbiddings
+                .col.s2.gamelog-pbid(class=(index == president ? "gamelog-president" : ""))
                     each pbid in pbidding
                         div(class='gamelog-card-' + pbid.bidShape) #{pbid.bidCount}
 
@@ -31,18 +31,18 @@ block content
                     | &nbsp;을 공약했습니다
 
         // 플레이 정보
-        if friend
+        if friendType
             .row.gamelog-friend
                 .col.s2 프렌드
                 .col.s10
                     | 프렌드 : &nbsp;
-                    if friend.ftype == 'card'
-                        span(class='gamelog-card-' + friend.args.shape) #{getCardNumString(friend.args.num)}
-                    else if friend.ftype == 'first'
+                    if friendType.ftype == 'card'
+                        span(class='gamelog-card-' + friendType.args.shape) #{getCardNumString(friendType.args.num)}
+                    else if friendType.ftype == 'first'
                         | 선구 프렌드
-                    else if friend.ftype == 'player'
-                        | 지정 프렌드 - #{gusers[friend.args].username}
-                    else if friend.ftype == 'none'
+                    else if friendType.ftype == 'player'
+                        | 지정 프렌드 - #{gusers[friendType.args].username}
+                    else if friendType.ftype == 'none'
                         | 없음
                     else
                         | 알 수 없는 프렌드 (버그제보를 해주세요)
@@ -52,7 +52,7 @@ block content
             .row.gamelog-trick
                 .col.s2 트릭##{index+1}
                 each card, player in trick.cards
-                    .col.s2.gamelog-pcp(class=(trick.winner == player ? "gamelog-pcp-winner " : "") + (card.num >= 10 ? "gamelog-pcp-score " : ""))
+                    .col.s2.gamelog-pcp(class=(trick.winner == player ? "gamelog-pcp-winner " : "") + (card.num >= 10 ? "gamelog-pcp-score " : "") + (friend === player ? "gamelog-friend " : "") + (president === player ? "gamelog-president " : ""))
                         span(class='gamelog-card-' + card.shape) #{getCardNumString(card.num)}
                         if trick.occ && trick.occ[player]
                             span.right.gamelog-occ= trick.occ[player]
