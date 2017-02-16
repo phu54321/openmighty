@@ -40,6 +40,10 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
     gamelog.getGamelog(gameID, (err, entry) => {
         if(err) return next(err);
 
+        if(entry == null) {
+            return res.render('error', {message: "로그를 불러올 수 없습니다."});
+        }
+
         let gusers = [];
         const pbiddings = [[], [], [], [], []];  // 각 플레이어가 했던 공약들
         const biddings = [];  // 공약 수정 등을 이유로 여러번 공약이 바뀔 수 있으므로 배열로 관리
