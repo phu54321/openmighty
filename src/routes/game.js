@@ -138,6 +138,9 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
 
         res.render('gamelog', {
             gameID: req.params.gameID,
+            startedAt: entry.created_at,
+            endedAt: entry.updated_at,
+
             getCardNumString: getCardNumString,
             gamelog: entry.gameLog,
 

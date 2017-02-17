@@ -202,7 +202,8 @@ GameLog.prototype.addUserGameLogs = function (cb) {
 exports.getGamelog = function (gameID, cb) {
     global.logger.debug(`Getting game log #${gameID}`);
 
-    db('gamelog').select('*')
+    db('gamelog')
+        .select('*')
         .where({id: gameID})
         .limit(1)
         .then(function (entries) {

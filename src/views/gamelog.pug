@@ -4,6 +4,11 @@ block content
     .gamelog
         .row
             h1 게임 ##{gameID}
+            .row
+                .right 시작 : #{formatTime(startedAt, false)}
+            .row
+                .right 종료 : #{formatTime(endedAt, false)}
+        .row &nbsp;
 
         // 게임 인원
         .row.gamelog-gusers
