@@ -36,7 +36,10 @@ module.exports = function (MightyRoom) {
         global.logger.info(`Starting game ${this.gamelog.gameID} from room ${this.roomID}`);
         // Distribute deck
         const deck = createDeck();
-        this.gamelog.addGameLog(deck.toString());
+        this.gamelog.addGameLog({
+            type: 'ideck',
+            deck: deck.toString()
+        });
         for (let player = 0; player < 5; player++) {
             const playerDeck = deck.slice(player * 10, (player + 1) * 10);
             this.gameUsers[player].deck = playerDeck.sort();

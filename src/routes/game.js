@@ -65,8 +65,8 @@ router.get('/log/:gameID', users.checkLogon, (req, res, next) => {
 
         // Simple log parser
         entry.gameLog.forEach(log => {
-            if(typeof(log) == "string") {
-                initialDeck = log.split(",");
+            if(log.type == 'ideck') {
+                initialDeck = log.deck.split(",");
             }
             if(log.type == 'gusers') {
                 gusers = log.users;

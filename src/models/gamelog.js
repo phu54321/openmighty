@@ -221,12 +221,24 @@ exports.getGamelog = function (gameID, cb) {
 
             try {
                 entry.gameLog = JSON.parse(gameLogString)
-                    .map(entry => cmdcmp.decompressCommand(entry));
+                    .map(entry => {
+                        // Backward-compatibility layer! Initial deck now uses 'ideck' token.
+                        // HOTFIX - If deck starts with joker, then deck string can be translated
+                        // to 'rjoin' token. To avoid that, we process deck string specially.
+                        if(typeof(entry) == "string" && entry.length == 178) {
+                            return {
+                                type: 'ideck',
+                                deck: entry
+                            };
+                        }
+                        else return cmdcmp.decompressCommand(entry);
+                    });
 
                 // For legacy strings
                 let version = entry.version;
-                if(version === null) {
+                if(!version) {
                     const versionString = entry.gameLog[0];
+                    console.log(entry.gameLog);
 
                     // Check version string
                     if (
