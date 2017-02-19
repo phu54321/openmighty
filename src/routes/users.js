@@ -2,11 +2,13 @@
 
 const passport = require('passport');
 const express = require('express');
-const router = express.Router();
 const crypto = require('crypto');
 const users = require('../models/users');
 const async = require('async');
 
+
+const router = express.Router();
+module.exports = router;
 
 /// Login
 router.post('/login', function (req, res, next) {
@@ -39,10 +41,10 @@ router.post('/logout', function (req, res) {
 
 
 /// Register
-
 router.get('/join', function (req, res) {
     res.render('join');
 });
+
 
 router.post('/join', function (req, res) {
     const
@@ -75,4 +77,6 @@ router.checkLogon = function (req, res, next) {
 };
 
 
-module.exports = router;
+///////////////////////
+
+// Profile page

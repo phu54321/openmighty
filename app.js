@@ -111,6 +111,7 @@ app.use(function (req, res, next) {
 app.use('/', require('./src/routes/index'));
 app.use('/users', require('./src/routes/users'));
 app.use('/', require('./src/routes/game'));
+app.use('/', require('./src/routes/gamelog'));
 
 
 // 404 Error

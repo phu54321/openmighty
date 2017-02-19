@@ -1,112 +1,86 @@
 .gamelog {
-    position: absolute;
-
-    max-width: 1280px;
-    width: 90%;
-    left: 50%;
-    transform: translate(-50%, 0);
-
-    top: 3.2em;
-    bottom: 0;
-    overflow: scroll;
-    -webkit-overflow-scrolling: touch;
-
+    // Row contains many things. style rows
     .row {
+        // Narrower row
         margin-bottom: 0;
         margin-top: 0;
         line-height: 1.4em;
+
         .col {
             padding: 5px 1.2em;
-        }
-        .col:first-child {
-            padding: 5px .5em;
-            font-weight: bolder;
-            // border-right: 1px solid #eee;
-        }
-    }
-    padding-bottom: 5em;
-}
-
-
-.gamelog-gusers {
-    background: #666;
-    color: #fff;
-
-    .gamelog-user {
-        overflow-x: hidden;
-        .rating {
-            margin-left: .4em;
-            color: #FF6F00;
+            &:first-child {
+                padding: 5px .5em;
+                font-weight: bolder;
+            }
         }
     }
-}
 
-
-.gamelog-card-pass {
-    color: #999;
-    visibility: hidden;
-    &:before {
-        visibility: visible;
-        content: "Pass";
+    // Command rows
+    .gusers {
+        background: #666;
+        color: #fff;
+        .user { text-overflow: ellipsis; }
     }
-}
+
+    .bidding { background: #eee; }
+    .set { background: #eee; }
+    .score { background: #666; color: #fff; }
 
 
-.gamelog-card-joker   {
-    &:before { content: '★ Joker'; }
-    background: -webkit-linear-gradient(top, #fff, #000);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.gamelog-card-spade    { color: black; &:before { content: "♠ Spade"; }}
-.gamelog-card-clover   { color: black; &:before { content: "♣ Clover"; }}
-.gamelog-card-heart    { color: red;   &:before { content: "♥ Heart"; }}
-.gamelog-card-diamond  { color: red;   &:before { content: "♦ Diamond"; }}
-.gamelog-card-none     { color: blue;   &:before { content: "? None"; }}
+    // Styles for card/biddings
+    .card-pass {
+        color: #999;
+        visibility: hidden;
+        &:before {
+            visibility: visible;
+            content: "Pass";
+        }
+    }
 
-@media #{$medium-and-down} {
-    .gamelog-card-joker:before { content: '★JK'; }
-    .gamelog-card-spade    { color: black; &:before { content: "♠ "; }}
-    .gamelog-card-clover   { color: black; &:before { content: "♣ "; }}
-    .gamelog-card-heart    { color: red;   &:before { content: "♥ "; }}
-    .gamelog-card-diamond  { color: red;   &:before { content: "♦ "; }}
-    .gamelog-card-none     { color: blue;   &:before { content: "? "; }}
-}
+    .card-joker   {
+        &:before { content: '★ Joker'; }
+        background: -webkit-linear-gradient(top, #fff, #000);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .card-spade    { color: black; &:before { content: "♠ Spade"; }}
+    .card-clover   { color: black; &:before { content: "♣ Clover"; }}
+    .card-heart    { color: red;   &:before { content: "♥ Heart"; }}
+    .card-diamond  { color: red;   &:before { content: "♦ Diamond"; }}
+    .card-none     { color: blue;   &:before { content: "? None"; }}
 
-.gamelog-friend {
-    background: #fffde7;
-}
+    @media #{$medium-and-down} {
+        .card-joker:before { content: '★ JK'; }
+        .card-spade    { color: black; &:before { content: "♠ "; }}
+        .card-clover   { color: black; &:before { content: "♣ "; }}
+        .card-heart    { color: red;   &:before { content: "♥ "; }}
+        .card-diamond  { color: red;   &:before { content: "♦ "; }}
+        .card-none     { color: blue;   &:before { content: "? "; }}
+    }
 
-.gamelog-president {
-    background: #fff3e0;
-}
+    // Leading party css
+    .friend {
+        background: #fffde7;
+    }
 
-.gamelog-bidding {
-    background: #eeeeee;
-}
+    .president {
+        background: #fff3e0;
+    }
 
-.gamelog-pcp-winner {
-    background: #ffdae1 !important;
-}
+    // PCP
+    .pcp-winner {
+        background: #ffdae1 !important;
+    }
 
-.gamelog-pcp-score {
-    background: #d5edff;
-}
+    .pcp-score {
+        background: #d5edff;
+    }
 
-.gamelog-set {
-    background: #eeeeee;
-}
+    .occ {
+        &:before { content: '(' }
+        color: #FF6F00;
+        font-size: .9em;
+        &:after { content: ')' }
+    }
 
-
-.gamelog-score {
-    background: #666;
-    color: #fff;
-}
-
-
-.gamelog-occ {
-    &:before { content: '(' }
-    color: #FF6F00;
-    font-size: .9em;
-    &:after { content: ')' }
 }
