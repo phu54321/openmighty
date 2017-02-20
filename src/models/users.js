@@ -112,7 +112,7 @@ exports.authenticate = authenticate;
  * @param username
  * @param callback(err, entry)
  */
-exports.findUserByUsername = function (username, callback) {
+exports.getUserByUsername = function (username, callback) {
     db('users')
         .select(userFields)
         .where({username: username})
@@ -129,7 +129,7 @@ exports.findUserByUsername = function (username, callback) {
  * @param id
  * @param cb
  */
-exports.findUserByID = function (id, cb) {
+exports.getUserByID = function (id, cb) {
     db('users')
         .select(userFields)
         .where({id: id})

@@ -23,7 +23,7 @@ function getCardNumString(num) {
 }
 
 // Gamelog generator
-router.post('/gamelog/:gameID', users.checkLogon, (req, res, next) => {
+router.get('/gamelog/:gameID', users.checkLogon, (req, res, next) => {
     const gameID = req.params.gameID | 0;
 
     gamelog.getGamelog(gameID, (err, entry) => {
