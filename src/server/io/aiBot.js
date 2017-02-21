@@ -255,8 +255,10 @@ AISocket.prototype.proc_cprq = function(msg) {
      * 카드가 해당 문양에서 몇위의 순위 정도인지
      */
     const getCardRankInShape = (card) => {
+        if(card.equals(game.mighty)) return 0;
+        const isMightyShape = (card.shapee == game.mighty.shape) ? 1 : 0;
         const cardNum = card.num;
-        const higherCardCount = 14 - cardNum;
+        const higherCardCount = 14 - cardNum - isMightyShape;
         if(higherCardCount) {
             // 현재까지 버려진 카드 + 내 덱에서 주공 현재 카드보다 쎈 카드를 구한다.
             const discardedPWC = game.discardedCards.filter(
@@ -509,71 +511,76 @@ AISocket.prototype.proc_cprq = function(msg) {
                 }
             }
 
-            // 주공이 플레이하기 전이면
-            else if (!hasPresidentPlayed) {
-                // console.log('b2');
-                canPresidentWin = true;  // 주공을 일단 믿자.
-            }
-
             // 주공이 이길것같으면 제일 낮은 카드를 낸다.
             if (canPresidentWin) {
                 // console.log('b3');
-                if(sEnd !== null) return playIndex(sEnd);
+                if (sEnd !== null) return playIndex(sEnd);
                 // 그냥 주공에게 어떻게든 턴을 넘겨줘야 하니까 기루다/마이티/조커 빼고 암거나 낸다.
                 else return playNonMJG();
             }
 
-            else {
-                // console.log('b4');
-                // 내가 기루다 짱카가 있으면 걔로 밟는다.
-                if (sStart !== null && msg.shaperq == game.bidShape && getCardRankInShape(deck[sStart]) === 0) {
-                    // console.log('c1');
-                    return playIndex(sStart);
-                }
+            // 주공이 뒤에 턴을 잡는다. 주공이 물카 털 기회를 줍시다.
+            if (!hasPresidentPlayed) {
+                // 문양으로 선을 먹을 수 있으면 제일 높은 문양을 낸다.
+                if (sStart !== null && canTakeLeadWith(sStart)) return playIndex(sStart);
 
-                // 마이티가 있으면 밟아준다.
-                if (deck.hasCard(game.mighty)) {
-                    // console.log('c2');
-                    return playIndex(deck.indexOf(game.mighty));
-                }
-
-                // 조커가 있어도 밟아준다.
-                if (
-                    game.currentTrick != 1 && game.currentTrick != 10 &&
-                    deck.hasCard(game.joker)
-                ) {
-                    // console.log('c3');
-                    return playIndex(deck.indexOf(game.joker));
-                }
-
-                if(sStart !== null) {
-                    // console.log('c4');
-                    // 내가 선을 먹을 수 있다면 제일 쎈걸로
-                    // (더 쎈걸로 밟힐수도 있으니까 어중간한게 쎈거 말고 그냥 제일 쎈걸로 낸다)
-                    if (canTakeLeadWith(sStart)) return playIndex(sStart);
-                    // 아님 야당에게 힘 실어주지 말고 제일 낮은거 내자.
-                    else return playIndex(sEnd);
-                }
-
-                else {
-                    // console.log('c5');
-                    // 주공이 간을 칠 수 있으면 주공을 믿는다.
-                    if(
-                        !this.noShapeInfo[game.president][game.bidShape] &&
-                        this.noShapeInfo[game.president][msg.shaperq]
-                    )  return playNonMJG();  // 기루다 빼고 낸다
-
-                    // console.log('c5_1');
-
-                    // 아니면 간을 쳐야한다.
+                // 간을 칠 수 있고 기루다 플레이를 할 수 있으면 제일 높은 간을 친다.
+                if (sStart === null && deck.hasShape(game.bidShape)) {
                     const gStart = getShapeRange(deck, game.bidShape)[0];
-                    if(gStart !== null) return playIndex(gStart);
-
-                    // console.log('c5_2');
-
-                    // 할 수 있는것도 없다. 점수나 싣지 말자.
-                    return playNonScore();
+                    return playIndex(gStart);
                 }
+            }
+
+            // console.log('b4');
+            // 기루다를 내야 하고 내가 더 높은 기루다를 낼 수 있으면 기루다를 낸다.
+            if (sStart !== null && msg.shaperq == game.bidShape && canTakeLeadWith(sStart)) {
+                // console.log('c1');
+                return playIndex(sStart);
+            }
+
+            // 마이티가 있으면 밟아준다.
+            if (deck.hasCard(game.mighty)) {
+                // console.log('c2');
+                return playIndex(deck.indexOf(game.mighty));
+            }
+
+            // 그냥 선을 먹을 수 있으면 선을 낸다.
+            if (sStart !== null) {
+                // console.log('c4');
+                // 내가 선을 먹을 수 있다면 제일 쎈걸로
+                // (더 쎈걸로 밟힐수도 있으니까 어중간한게 쎈거 말고 그냥 제일 쎈걸로 낸다)
+                if (getCardRankInShape(deck[sStart]) === 0) return playIndex(sStart);
+                // 아님 야당에게 힘 실어주지 말고 제일 낮은거 내자.
+                else return playIndex(sEnd);
+            }
+
+            // 조커가 있어도 밟아준다.
+            if (
+                game.currentTrick != 1 && game.currentTrick != 10 &&
+                deck.hasCard(game.joker)
+            ) {
+                // console.log('c3');
+                return playIndex(deck.indexOf(game.joker));
+            }
+
+            else {
+                // console.log('c5');
+                // 주공이 간을 칠 수 있으면 주공을 믿는다.
+                if (
+                    !this.noShapeInfo[game.president][game.bidShape] &&
+                    this.noShapeInfo[game.president][msg.shaperq]
+                )  return playNonMJG();  // 기루다 빼고 낸다
+
+                // console.log('c5_1');
+
+                // 아니면 간을 쳐야한다.
+                const gStart = getShapeRange(deck, game.bidShape)[0];
+                if (gStart !== null) return playIndex(gStart);
+
+                // console.log('c5_2');
+
+                // 할 수 있는것도 없다. 점수나 싣지 말자.
+                return playNonScore();
             }
         }
 
