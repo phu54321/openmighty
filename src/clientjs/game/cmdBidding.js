@@ -36,7 +36,6 @@ module.exports = function (cmdTranslatorMap) {
         const deck = game.deck;
         let dealMissScore = 0;
         deck.forEach((card) => {
-            dealMissScore += card.getDealMissScore()
             if(card.shape == 'spade' && card.num == 14);
             else if(card.shape == 'joker' && card.num === 0) dealMissScore -= 1;
             else if(card.num == 10) dealMissScore += 0.5;
