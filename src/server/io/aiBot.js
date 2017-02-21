@@ -12,7 +12,7 @@ const _ = require('underscore');
 const Deck = require('../logic/deck');
 const card = require('../logic/card');
 const cmdcmp = require('../cmdcmp/cmdcmp');
-
+const bidding = require('../logic/bidding');
 
 
 function AISocket(room, userEntry, playSpeed) {
@@ -116,10 +116,96 @@ AISocket.prototype.proc_deck = function (msg) {
 };
 
 
+AISocket.prototype.getExpectedWinningTurns = function () {
+    if(this.bidCandidate !== undefined) return this.bidCandidate;
+
+    // 공약을 테스트해본다.
+    const deckByShapes = this.deck.splitShapes();
+    const hasJoker = (deckByShapes.joker.length > 0);
+
+    // 예상 기루다.
+    let maxWinExpect = 0;
+    let maxWinExpectShape = null;
+
+    card.cardShapes.forEach(bidShape => {
+        if(bidShape == 'joker') return;
+
+        const mightyShape = (bidShape == 'spade' ? 'diamond' : 'spade');
+        const hasMighty = this.deck.hasCard(card.createCard(mightyShape, 14));
+
+        // 기루다는 조커 포함 최소 4장 이상 있어야 한다.
+        const girudaCount = (hasJoker ? 1 : 0) + deckByShapes[bidShape].length;
+        if (girudaCount < 4) return;
+
+        // A가 없을 때 : 물카(마프) -> 1턴을 돌릴 수 있다. A나 K는
+        let winExpect = girudaCount;
+        if(!hasJoker && deckByShapes[bidShape][0].num != 14) {
+            winExpect--;  // 에이스가 없으면 한 턴은 뺏김
+        }
+
+        // 마이티는 여당에 있으니까 한턴은 먹고 들어간다.
+        winExpect++;
+
+        // 초구가 있는가?
+        const initialCardCount = card.cardShapes
+            .map((shape, index) => {
+                if(shape == 'joker' || shape == bidShape) return -1;
+
+                const topCard = (shape == mightyShape ? 13 : 14);
+                if(deckByShapes[shape].length > 0 && deckByShapes[shape][0].num == topCard) return index;
+                return -1;
+            })
+            .filter(index => (index != -1)).length;
+        winExpect += initialCardCount;
+
+        // 마이티가 나한테 있고 조커가 프렌에게 있으면 프렌도 +1일거다.
+        if(hasMighty && !hasJoker) winExpect += 1;
+
+        if(maxWinExpect < winExpect) {
+            maxWinExpect = winExpect;
+            maxWinExpectShape = bidShape;
+        }
+
+        console.log(bidShape, winExpect, this.deck.toString());
+    });
+
+    if(maxWinExpect === 0) this.bidCandidate = null;
+    else {
+        this.bidCandidate = {
+            bidCount: Math.min(20 - (10 - maxWinExpect) * 2.5, 20) | 0,
+            bidShape: maxWinExpectShape
+        };
+    }
+    return this.bidCandidate;
+};
+
+
+
 /**
  * bidrq(공약 요청) 메세지를 처리. 일단은 무조건 패스하도록 했다.
  */
 AISocket.prototype.proc_bidrq = function () {
+    const bidFormat = this.getExpectedWinningTurns();
+    if(bidFormat) {
+        // 다른 사람이 공약해서 질 경우 : bidCount -> 50%정도 성공한다 본다.
+        //   이길 경우 : +1
+        //   질 경우 : -2 * (bidCount - 13)
+        // 내가 공약할 경우
+        //   이길 경우 : 4 * (bidCount - 13)
+        //   질 경우 : -3
+        const bidShape = bidFormat.bidShape;
+        const bidCount = bidFormat.bidCount;
+        const myBidStrength = bidding.getBidStrength(bidShape, bidCount);
+        console.log(bidShape, bidCount, myBidStrength, this.game.bidding.bidStrength);
+        if(myBidStrength > this.game.bidding.bidStrength) {
+            return this.cmd({
+                type: 'bid',
+                shape: bidShape,
+                num: bidCount
+            });
+        }
+    }
+
     if(this.deck.getDealMissScore() <= 1) {
         this.cmd({
             type: 'bid',
