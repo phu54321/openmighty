@@ -881,6 +881,7 @@ AISocket.prototype.proc_cprq = function(msg) {
 
             // 조커가 있는데 점수가 2개 이상 쌓일 수 있을것같으면 조커를 낸다.
             if (this.currentTrick != 1 && this.currentTrick != 10 && jokerIndex != -1) {
+                if(this.currentTrick == 9) return playIndex(jokerIndex);  // 9번 턴에선 무조건 조커
                 // console.log('d2');
                 /*
                  1 0 * ? ? -> 1 2 -> no
