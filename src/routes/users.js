@@ -92,7 +92,7 @@ router.get('/profile/:username', router.checkLogon, function (req, res, next) {
             });
         }
 
-        usergame.listUserGameLog(user.id, 0, (err, logs) => {
+        usergame.listUserGameLogs(user.id, 1, (err, logs) => {
             if(err) return next(err);
             return res.render('profile', {user: user, logs: logs});
         });

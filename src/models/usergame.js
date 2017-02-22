@@ -73,13 +73,13 @@ exports = module.exports = function (GameLog) {
 /**
  * List user game logs
  */
-exports.listUserGameLog = function (userid, page, cb) {
+exports.listUserGameLogs = function (userid, page, cb) {
     page = (page || 1) - 1;
     db('usergame')
         .select('*')
         .where({userid: userid})
         .orderBy('id', 'desc')
-        .limit(10)
-        .offset(page * 10)
+        .limit(20)
+        .offset(page * 20)
         .asCallback(cb);
 };
