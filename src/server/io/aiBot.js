@@ -65,7 +65,7 @@ AISocket.prototype.emit = function (type, msg) {
         this.onCommand(msg);
     }
     else if(type == 'err') {
-        console.log(this.userEntry.useridf, 'err', msg);
+        global.logger.error(this.userEntry.useridf, 'err', msg);
         this.cmd({ type: 'stop' });
     }
 };
@@ -163,21 +163,17 @@ AISocket.prototype.getExpectedWinningTurns = function () {
         // 마이티가 나한테 있고 조커가 프렌에게 있으면 프렌도 +1일거다.
         if(hasMighty && !hasJoker) winExpect += 1;
 
-        // 약간 optimistic하게, 프렌이 한턴정도 더 도와준다 생각한다.
-        winExpect++;
-
+        // 최대치 기록
         if(maxWinExpect < winExpect) {
             maxWinExpect = winExpect;
             maxWinExpectShape = bidShape;
         }
-
-        console.log(bidShape, winExpect, this.deck.toString());
     });
 
     if(maxWinExpect === 0) this.biddingCache = null;
     else {
         this.biddingCache = {
-            bidCount: Math.min(20 - (10 - maxWinExpect) * 2.5, 20) | 0,
+            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.5 | 0), 20),
             bidShape: maxWinExpectShape
         };
     }
@@ -203,7 +199,7 @@ AISocket.prototype.proc_bidrq = function () {
         if(bidCount >= 18) bidCount = 20;  // 18개면 그냥 20개를 달리자;
 
         const myBidStrength = bidding.getBidStrength(bidShape, bidCount);
-        console.log(bidShape, bidCount, myBidStrength, this.game.bidding.bidStrength);
+        global.logger.debug(this.deck.toString(), bidShape, bidCount, myBidStrength, this.game.bidding.bidStrength);
         if(myBidStrength > this.game.bidding.bidStrength) {
             return this.cmd({
                 type: 'bid',

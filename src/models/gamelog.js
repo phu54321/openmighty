@@ -179,7 +179,6 @@ exports.getGamelog = function (gameID, cb) {
                 let version = entry.version;
                 if(!version) {
                     const versionString = entry.gameLog[0];
-                    console.log(entry.gameLog);
 
                     // Check version string
                     if (

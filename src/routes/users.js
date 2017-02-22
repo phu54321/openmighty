@@ -92,7 +92,6 @@ router.checkLogon = function (req, res, next) {
 // Profile page
 router.get('/profile/:username', router.checkLogon, function (req, res, next) {
     const username = req.params.username || "";
-    console.log(username);
     users.getUserByUsername(username, (err, user) => {
         if(err) return next(err);
         if(user === undefined) {

@@ -66,7 +66,7 @@ exports.addUser = function (hostname, userinfo, cb) {
 
         // Send activation code
         const activateCode = crypto.randomBytes(20).toString('base64');
-        console.log(`sending mail to ${userinfo.email} with activation code ${activateCode}`);
+        global.logger.info(`sending mail to ${userinfo.email} with activation code ${activateCode}`);
 
         sendmail({
             from: 'no-reply@5ma.kr',
@@ -156,7 +156,6 @@ exports.authenticate = authenticate;
  * @param callback(err, entry)
  */
 exports.getUserByUsername = function (username, callback) {
-    console.log(username);
     db('users')
         .select(userFields)
         .where({username: username})

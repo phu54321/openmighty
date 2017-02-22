@@ -79,7 +79,7 @@ exports.listUserGameLogs = function (userid, page, cb) {
         .select('*')
         .where({userid: userid})
         .orderBy('id', 'desc')
-        .limit(20)
-        .offset(page * 20)
+        .limit(40)
+        .offset(page * 40)
         .asCallback(cb);
 };
