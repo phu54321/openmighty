@@ -41,7 +41,9 @@ exports.viewRoom = function () {
     for(let i = 0 ; i < users.length ; i++) {
         const $playerSlot = $($playerSlots[i]);
         const user = users[i];
-        $playerSlot.find('.player-name').text(user.username + ' (' + user.rating.toFixed(1) + ')');
+        $playerSlot.find('.player-name').text(user.username + ' (' + user.rating.toFixed(1) + ')').click(() => {
+            window.open('/profile/' + user.username);
+        });
         $playerSlot.find('.game-card-container').empty();
 
         if(owner === i) $playerSlot.addClass('player-owner');
