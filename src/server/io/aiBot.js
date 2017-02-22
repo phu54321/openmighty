@@ -173,7 +173,7 @@ AISocket.prototype.getExpectedWinningTurns = function () {
     if(maxWinExpect === 0) this.biddingCache = null;
     else {
         this.biddingCache = {
-            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.3 | 0), 20),
+            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.3), 20) | 0,
             bidShape: maxWinExpectShape
         };
     }
