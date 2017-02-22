@@ -7,6 +7,8 @@
 const db = require('./db');
 const bcrypt = require('bcrypt');
 const async = require('async');
+const crypto = require('crypto');
+const sendmail = require('sendmail')();
 
 // SCHEMA
 db.initScheme('users', function(table) {
@@ -15,6 +17,7 @@ db.initScheme('users', function(table) {
     table.string('email').unique();
     table.string('pwhash');
     table.boolean('activated').defaultsTo(false).index();
+    table.string('activateCode');
     table.timestamps(true, true);
 });
 
@@ -52,7 +55,7 @@ function isValidEmail(email) {
  * @param userinfo - User info in dictionary
  * @param cb - Callback
  */
-exports.addUser = function (userinfo, cb) {
+exports.addUser = function (hostname, userinfo, cb) {
     // Basic check
     if(!isValidEmail(userinfo.email) || !isValidUsername(userinfo.username)) {
         return cb(new Error('Incomplete data'));
@@ -60,17 +63,53 @@ exports.addUser = function (userinfo, cb) {
     // Create password hash
     bcrypt.hash(userinfo.password, 10, function(err, hash) {
         if(err) return cb(err);
-        db('users').insert({
-            username: userinfo.username,
-            pwhash: hash,
-            email: userinfo.email,
-        })
-            .then(function (id) {
-                cb(null, id);
-            }, function (err) {
-                cb(err);
-            });
+
+        // Send activation code
+        const activateCode = crypto.randomBytes(20).toString('base64');
+        console.log(`sending mail to ${userinfo.email} with activation code ${activateCode}`);
+
+        sendmail({
+            from: 'no-reply@5ma.kr',
+            to: userinfo.email,
+            subject: '[5ma.kr] 계정 활성화',
+            html: `<a href="https://${hostname}/activate/${activateCode}">이 링크를 눌러 계정 ${userinfo.username}을 활성화하세요.</a>`,
+        }, function(err, reply) {
+            if (err) return cb(err);
+
+            // Create user entry
+            db('users').insert({
+                username: userinfo.username,
+                pwhash: hash,
+                email: userinfo.email,
+                activateCode: activateCode
+            })
+                .then(function (id) {
+                    cb(null, id);
+                }, function (err) {
+                    cb(err);
+                });
+        });
     });
+};
+
+
+/**
+ * 유저를 activate시킨다.
+ */
+exports.activateUser = function (activateCode, cb) {
+    db('users')
+        .where({
+            activated: false,
+            activateCode: activateCode
+        })
+        .update({
+            activated: true
+        })
+        .asCallback((err, changedRows) => {
+            if(err) return cb(err);
+            if(changedRows === 0) return cb(new Error("해당하는 activateCode가 없습니다."));
+            return cb(null);
+        });
 };
 
 
@@ -85,7 +124,10 @@ function authenticate(username, password, callback) {
     async.waterfall([
         (cb) => db('users')
             .select(userFields.concat(['pwhash']))
-            .where({username: username})
+            .where({
+                username: username,
+                activated: true
+            })
             .limit(1).asCallback(cb),
         (entries, cb) => {
             if(entries.length === 0) return cb(1);

@@ -27,6 +27,7 @@ window.issueRegister = function () {
             ['email', 'email', formVerifier_NoBlank, '이메일을 입력하세요.'],
         ],
         function() {
+            window.alert("메일에 있는 링크를 클릭해서 계정을 활성화하세요.");
             window.location.href = "/";
         }
     );

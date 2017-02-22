@@ -58,14 +58,23 @@ router.post('/join', function (req, res) {
     }
 
     async.waterfall([
-        (cb) => users.addUser({username: username, password: password, email: email}, cb),
+        (cb) => users.addUser(req.headers.host, {username: username, password: password, email: email}, cb),
         (userid, cb) => users.getUserByID(userid, cb),
-        (userEntry, cb) => req.logIn(userEntry, cb)
     ], (err) => {
         if(err) {
+            global.logger.error(err);
             return res.json({error: '가입에 실패했습니다.'});
         }
         else return res.json({error: 0});
+    });
+});
+
+
+router.get('/activate/:activateCode', function (req, res, next) {
+    const activateCode = req.params.activateCode || "";
+    users.activateUser(activateCode, (err) => {
+        if(err) return next(err);
+        res.redirect('/');
     });
 });
 
