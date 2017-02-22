@@ -123,19 +123,6 @@ exports.emitGameBidding = function (room) {
     });
 };
 
-exports.emitGameDiscardRequest = function (room) {
-    const president = room.president;
-    room.gameUsers[president].emit('cmd', {
-        type: 'd3rq'
-    });
-};
-
-exports.emitGameDiscardComplete = function (room) {
-    room.emit('cmd', {
-        type: 'd3end'
-    });
-};
-
 
 exports.emitFriendSelectRequest = function (room) {
     const president = room.president;
