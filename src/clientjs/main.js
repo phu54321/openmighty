@@ -7,10 +7,7 @@
 require('./formIssuer');
 require('./roomjoin');
 require('./game/conn');
-
-$(function() {
-    $('#jokerCall').modal('open');
-});
+require('./logViewer');
 
 // Toast should disappear on click
 $(document).on('click', '#toast-container .toast', function() {

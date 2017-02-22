@@ -5,6 +5,7 @@ const express = require('express');
 const crypto = require('crypto');
 const users = require('../models/users');
 const async = require('async');
+const usergame = require('../models/usergame');
 
 
 const router = express.Router();
@@ -84,7 +85,12 @@ router.get('/profile/:username', router.checkLogon, function (req, res, next) {
     const username = req.params.gameID | "";
     users.getUserByUsername(username, (err, user) => {
         if(err) return next(err);
-        return res.render('profile', {user: user});
+
+        usergame.listUserGameLog(user.id, 0, (err, logs) => {
+            if(err) return next(err);
+            console.log(logs);
+            return res.render('profile', {user: user, logs: logs});
+        });
     });
 });
 

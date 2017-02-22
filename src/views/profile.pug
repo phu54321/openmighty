@@ -4,3 +4,22 @@ block content
     .container
         .profile
             h1= user.username
+
+            table.gamelog-table
+                thead
+                    tr
+                        th 게임 번호
+                        th(colspan=2) 플레이시간
+                        th 점수
+                tbody
+                    each log in logs
+                        tr(onclick="javascript:viewGameLog(" + log.gameid + ");")
+                            td= log.gameid
+                            td= formatTime(log.created_at)
+                            td= formatTime(log.updated_at)
+                            td= log.score
+
+    #gameLogModal.modal.modal-fixed-footer
+        .modal-content
+        .modal-footer
+            button.modal-action.modal-close.waves-effect.waves-green.btn-flat Agree
