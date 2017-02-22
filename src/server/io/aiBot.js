@@ -28,7 +28,7 @@ function AISocket(room, userEntry, playSpeed) {
     this.noShapeInfo = [{}, {}, {}, {}, {}];
     this.trustOpponentHavingJoker = 0;
 
-    this.playSpeed = playSpeed || 800;
+    this.playSpeed = playSpeed || 600;
 }
 
 
@@ -173,7 +173,7 @@ AISocket.prototype.getExpectedWinningTurns = function () {
     if(maxWinExpect === 0) this.biddingCache = null;
     else {
         this.biddingCache = {
-            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.5 | 0), 20),
+            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.3 | 0), 20),
             bidShape: maxWinExpectShape
         };
     }
@@ -195,7 +195,7 @@ AISocket.prototype.proc_bidrq = function () {
         //   이길 경우 : 4 * (bidCount - 13)
         //   질 경우 : -3
         const bidShape = bidCandidate.bidShape;
-        let bidCount = Math.min(20, bidCandidate.bidCount + 1);  // 주어오는거에서 1개 더 나오리라 믿는다.
+        let bidCount = Math.min(20, bidCandidate.bidCount + 2);  // 주어오는거에서 1개 더 나오리라 믿는다.
         if(bidCount >= 18) bidCount = 20;  // 18개면 그냥 20개를 달리자;
 
         const myBidStrength = bidding.getBidStrength(bidShape, bidCount);
