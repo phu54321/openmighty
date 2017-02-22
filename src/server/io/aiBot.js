@@ -213,7 +213,7 @@ AISocket.prototype.proc_bidrq = function () {
         }
     }
 
-    if(this.deck.getDealMissScore() <= 1) {
+    if(this.deck.getDealMissScore() <= 0.51) {
         this.cmd({
             type: 'bid',
             shape: 'dealmiss'

@@ -111,7 +111,7 @@ exports = module.exports = function (MightyRoom) {
             if(!this.bidding.canDealMiss) return "딜 미스는 처음에만 할 수 있습니다.";
 
             const dealMissScore = userEntry.deck.getDealMissScore();
-            if(dealMissScore <= 1) {  // 딜미스 요건 만족
+            if(dealMissScore <= 0.51) {  // 딜미스 요건 만족
                 cmdout.emitGameAbort(this, '딜 미스입니다. (' + dealMissScore + ')');
                 this.endGame();
                 return;
