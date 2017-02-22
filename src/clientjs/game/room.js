@@ -35,15 +35,23 @@ exports.viewRoom = function () {
 
     let self = null;
 
-    $playerSlots.find('.player-has').empty();
+    $playerSlots.find('.player-has')
+        .addClass('player-has-disabled')
+        .empty();
+    $playerSlots.find('.player-name').unbind('click');
     $('.last-trick').empty();
 
     for(let i = 0 ; i < users.length ; i++) {
         const $playerSlot = $($playerSlots[i]);
         const user = users[i];
-        $playerSlot.find('.player-name').text(user.username + ' (' + user.rating.toFixed(1) + ')').click(() => {
-            window.open('/profile/' + user.username);
-        });
+        const $playerName = $playerSlot.find('.player-name');
+        $playerName.text(user.username + ' (' + user.rating.toFixed(1) + ')');
+        if(!room.playing) {
+            $playerName.click(() => {
+                window.open('/profile/' + user.username);
+            });
+        }
+
         $playerSlot.find('.game-card-container').empty();
 
         if(owner === i) $playerSlot.addClass('player-owner');

@@ -20,6 +20,8 @@ function unbindClick() {
     $('#gameDiv .deck-card')
         .removeClass('deck-card-selected')
         .unbind('click');
+    $('.player-has-disabled')
+        .removeClass('player-has-disabled');
 }
 
 function initGame() {

@@ -58,10 +58,10 @@ router.get('/gamelog/:gameID', users.checkLogon, (req, res) => {
 
         // Simple log parser
         entry.gameLog.forEach(log => {
-            if(typeof(log) == "string") {
-                initialDeck = log.split(",");
+            if(log.type == 'ideck' ) {
+                initialDeck = log.deck.split(",");
             }
-            if(log.type == 'gusers') {
+            else if(log.type == 'gusers') {
                 gusers = log.users;
                 obtainedCardCounts = new Array(log.users.length).fill(0);
             }
