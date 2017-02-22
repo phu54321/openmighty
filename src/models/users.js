@@ -81,6 +81,7 @@ exports.addUser = function (hostname, userinfo, cb) {
                 username: userinfo.username,
                 pwhash: hash,
                 email: userinfo.email,
+                activated: false,
                 activateCode: activateCode
             })
                 .then(function (id) {
