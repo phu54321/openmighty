@@ -523,10 +523,10 @@ AISocket.prototype.proc_cprq = function(msg) {
             return playIndex(0);
         }
 
-        // 야당인 경우
+        // 여당인 경우
         if(this.isPresident || this.isFriend) {
             // console.log('z1');
-            // 2명 이상 기루다가 안뽑혔다면 기루다를 돌려야합니다.
+            // 3명 이상 기루다가 안뽑혔다면 기루다를 돌려야합니다.
             let girudaLackingOppCount = 0;
             for (let p = 0; p < 5; p++) {
                 if (p == this.selfIndex) continue;
@@ -535,17 +535,21 @@ AISocket.prototype.proc_cprq = function(msg) {
             }
 
             // 기루다가 덜 뽑혔다면
-            if (girudaLackingOppCount < 2 && deck.hasShape(game.bidShape)) {
-                // console.log('z2-1');
+            if (girudaLackingOppCount < 3 && deck.hasShape(game.bidShape)) {
+                // 기루다를 돌린다.
                 const [gStart, gEnd] = getShapeRange(deck, game.bidShape);
-                if (gStart !== null) {
-                    // console.log('gl<2', deck.toString(), gStart, gEnd);
-                    // 내가 짱카를 갖고 있다면 짱카 기루다를 돌린다.
-                    if (getCardRankInShape(deck[gStart]) === 0) return playIndex(gStart);
-                    else return playIndex(gEnd);  // 아니면 그냥 제일 낮은 기루다를 돌린다.
+                if (gStart !== null && getCardRankInShape(deck[gStart]) === 0) {  // 기루다 짱카
+                    return playIndex(gStart);
                 }
 
-                // console.log('z2-2');
+                // 조커로라도 기루다를 뽑아보자.
+                const jokerIndex = deck.indexOf(game.joker);
+                if (jokerIndex != -1) {
+                    return playIndex(jokerIndex, game.bidShape);
+                }
+
+                // 기루다를 돌린다.
+                if(gEnd !== null) return playIndex(gEnd);  // 제일 낮은 기루다.
 
                 // 기루다도 못뽑는 무능한 여당...
                 // 프렌이라면 주공에게 없는 문양을 돌린다.
@@ -560,14 +564,6 @@ AISocket.prototype.proc_cprq = function(msg) {
                             return playIndex(sEnd);  // 주공이 간 칠 기회나 만들어주자
                         }
                     }
-                }
-
-                // console.log('z2-3');
-
-                // 조커로라도 기루다를 뽑아보자.
-                const jokerIndex = deck.indexOf(game.joker);
-                if (jokerIndex != -1) {
-                    return playIndex(jokerIndex, game.bidShape);
                 }
 
                 // console.log('z2-4');
@@ -594,14 +590,33 @@ AISocket.prototype.proc_cprq = function(msg) {
 
             // 기루다도 꽤 뽑혔다. 다른 물카처리를 좀 해보자.
             else {
-                // 조커랑 마이티 빼고 암거나 내보자.
+                const partner = (this.isPresident ? game.friend : game.president);
+                if(partner !== null) {
+                    // 파트너가 대신 턴을 먹어줬으면 좋겠다.
+                    // 파트너가 간 칠 기회를 준다.
+                    if(!this.noShapeInfo[partner][game.bidShape]) {
+                        const pLackingShape = _.sample(
+                            Object.keys(this.noShapeInfo[partner])
+                                .filter(shape => this.deck.hasShape(shape))
+                        );
+                        if(pLackingShape !== undefined) {
+                            return playIndex(getShapeRange(deck, pLackingShape)[0]);
+                        }
+                    }
+                }
+
                 const mightyIndex = deck.indexOf(game.mighty);
                 const jokerIndex = deck.indexOf(game.joker);
+
+                // 조커로 부기루다를 뽑는다.
+                if(this.isPresident && jokerIndex != -1 && this.subGiruda) {
+                    return playIndex(jokerIndex, this.subGiruda);
+                }
 
                 // 조커는 늘 마지막 카든데 그게 2번째 카드
                 // 지금 조커가 효과가 있는 마지막 턴이다. 내고 죽자.
                 if(jokerIndex == 1) {
-                    return playIndex(1);
+                    return playIndex(1, deck[0].shape);
                 }
 
                 const dSelEnd = deck.length - 1 - (jokerIndex == -1 ? 0 : 1);  // 조커 제외한 카드들
