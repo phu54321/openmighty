@@ -113,6 +113,7 @@ exports.authenticate = authenticate;
  * @param callback(err, entry)
  */
 exports.getUserByUsername = function (username, callback) {
+    console.log(username);
     db('users')
         .select(userFields)
         .where({username: username})

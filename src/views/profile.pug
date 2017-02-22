@@ -1,14 +1,14 @@
 extends layout
 
 block content
-    .container
+    .container.scrollable
         .profile
             h1= user.username
 
             table.gamelog-table
                 thead
                     tr
-                        th 게임 번호
+                        th #
                         th(colspan=2) 플레이시간
                         th 점수
                 tbody

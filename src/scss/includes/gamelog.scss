@@ -38,25 +38,16 @@
     }
 
     .card-joker   {
-        &:before { content: '★ Joker'; }
+        &:before { content: '★ JK'; }
         background: -webkit-linear-gradient(top, #fff, #000);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .card-spade    { color: black; &:before { content: "♠ Spade"; }}
-    .card-clover   { color: black; &:before { content: "♣ Clover"; }}
-    .card-heart    { color: red;   &:before { content: "♥ Heart"; }}
-    .card-diamond  { color: red;   &:before { content: "♦ Diamond"; }}
-    .card-none     { color: blue;   &:before { content: "? None"; }}
-
-    @media #{$medium-and-down} {
-        .card-joker:before { content: '★ JK'; }
-        .card-spade    { color: black; &:before { content: "♠ "; }}
-        .card-clover   { color: black; &:before { content: "♣ "; }}
-        .card-heart    { color: red;   &:before { content: "♥ "; }}
-        .card-diamond  { color: red;   &:before { content: "♦ "; }}
-        .card-none     { color: blue;   &:before { content: "? "; }}
-    }
+    .card-spade    { color: black; &:before { content: "♠ "; }}
+    .card-clover   { color: black; &:before { content: "♣ "; }}
+    .card-heart    { color: red;   &:before { content: "♥ "; }}
+    .card-diamond  { color: red;   &:before { content: "♦ "; }}
+    .card-none     { color: blue;   &:before { content: "? "; }}
 
     // Leading party css
     .friend {

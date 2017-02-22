@@ -82,13 +82,18 @@ router.checkLogon = function (req, res, next) {
 
 // Profile page
 router.get('/profile/:username', router.checkLogon, function (req, res, next) {
-    const username = req.params.gameID | "";
+    const username = req.params.username || "";
+    console.log(username);
     users.getUserByUsername(username, (err, user) => {
         if(err) return next(err);
+        if(user === undefined) {
+            return res.render('error', {
+                message: `유저 ${username}은 존재하지 않습니다.`
+            });
+        }
 
         usergame.listUserGameLog(user.id, 0, (err, logs) => {
             if(err) return next(err);
-            console.log(logs);
             return res.render('profile', {user: user, logs: logs});
         });
     });

@@ -27,10 +27,13 @@ router.get('/gamelog/:gameID', users.checkLogon, (req, res, next) => {
     const gameID = req.params.gameID | 0;
 
     gamelog.getGamelog(gameID, (err, entry) => {
-        if(err) return next(err);
+        if(err) {
+            global.logger.error(err);
+            return res.send(err.message);
+        }
 
         if(entry === null) {
-            return res.render('error', {message: "로그를 불러올 수 없습니다."});
+            return res.send("로그를 불러올 수 없습니다.");
         }
 
         // Various variables
