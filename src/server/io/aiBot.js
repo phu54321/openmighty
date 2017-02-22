@@ -42,7 +42,6 @@ AISocket.prototype.cmd = function (msg) {
     "use strict";
 
     setTimeout(() => {
-        console.log(this.userEntry.useridf, 'out', JSON.stringify(msg));
         const cmdProcessor = cmdproc[msg.type];
         if (!cmdProcessor) {
             // console.log('[' + this.userEntry.useridf + '] Unknown command : ' + msg.type);
@@ -63,7 +62,6 @@ AISocket.prototype.emit = function (type, msg) {
 
     if(type == 'cmd') {
         msg = cmdcmp.decompressCommand(msg);
-        console.log(this.userEntry.useridf, 'in', JSON.stringify(msg));
         this.onCommand(msg);
     }
     else if(type == 'err') {
@@ -200,7 +198,9 @@ AISocket.prototype.proc_bidrq = function () {
         //   이길 경우 : 4 * (bidCount - 13)
         //   질 경우 : -3
         const bidShape = bidCandidate.bidShape;
-        const bidCount = Math.min(13, bidCandidate.bidCount + 2);  // 주어오는거에서 1개 더 나오리라 믿는다.
+        let bidCount = Math.min(20, bidCandidate.bidCount + 1);  // 주어오는거에서 1개 더 나오리라 믿는다.
+        if(bidCount >= 18) bidCount = 20;  // 18개면 그냥 20개를 달리자;
+
         const myBidStrength = bidding.getBidStrength(bidShape, bidCount);
         console.log(bidShape, bidCount, myBidStrength, this.game.bidding.bidStrength);
         if(myBidStrength > this.game.bidding.bidStrength) {
