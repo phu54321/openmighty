@@ -65,6 +65,7 @@ AISocket.prototype.emit = function (type, msg) {
         this.onCommand(msg);
     }
     else if(type == 'err') {
+        console.log(this.userEntry.useridf, 'err', msg);
         this.cmd({ type: 'stop' });
     }
 };
@@ -491,9 +492,11 @@ AISocket.prototype.proc_cprq = function(msg) {
             const firstCardShapes = card.cardShapes
                 .filter(shape => {
                     if (shape == 'joker') return false;
+                    else if(shape == game.bidShape) return false;  // 공약한 문양은 내지 못한다.
                     const topCardNum = (mightyShape == shape ? 13 : 14);
                     return this.deck.hasCard(card.createCard(shape, topCardNum));
                 });
+
             if (firstCardShapes.length > 0) {
                 // 마이티문양 K는 마공의 위험이 있으니까 뒤로 뺀다.
                 if (firstCardShapes[0] == mightyShape) {
@@ -504,7 +507,20 @@ AISocket.prototype.proc_cprq = function(msg) {
             }
 
             // 그 외엔 부기루다를 뽑으며 마공을 요청한다.
-            return playIndex(getShapeRange(deck, this.subGiruda)[1]);
+            if(deck.hasShape(this.subGiruda)) {
+                return playIndex(getShapeRange(deck, this.subGiruda)[1]);
+            }
+
+            // 부기루다가... 없다는건 모두가 기루다거나 초구 마이티/조커를 내야한다는 뜻입니다.
+            // 신이 내린 행운이니까 그냥 해봅시다.
+            const mightyIndex = deck.indexOf(game.mighty);
+            if(mightyIndex != -1) return playIndex(mightyIndex);
+
+            const jokerIndex = deck.indexOf(game.joker);
+            if(jokerIndex != -1) return playIndex(jokerIndex);
+
+            // 아 그냥 아무거나 내
+            return playIndex(0);
         }
 
         // 야당인 경우
@@ -691,48 +707,47 @@ AISocket.prototype.proc_cprq = function(msg) {
 
         // 여당이라면
         if (this.isPresident || this.isFriend) {
-            if(this.isFriend) {
-                // 주공이 해당 문양에서 선을 잡을 수 있다면 주공에게 선을 넘겨준다.
-                let canPresidentWin = false;
+            // 주공이 해당 문양에서 선을 잡을 수 있다면 주공에게 선을 넘겨준다.
+            const partner = (this.isPresident ? game.friend : game.president);
+            if(partner !== null) {  // 상대편이 누군지 안다면
+                let canPartnerWin = false;
 
                 // 현재 주공이 잠재적인 선이다.
-                if (game.trickWinner === game.president) {
+                if (game.trickWinner === partner) {
                     // console.log('b1');
-                    const presidentCard = game.playedCards[
-                    (game.trickWinner - game.startTurn + 5) % 5
-                        ];  // 주공이 낸 카드!
+                    const partnerCard = game.playedCards[(game.trickWinner - game.startTurn + 5) % 5];  // 주공이 낸 카드!
 
                     // 주공이 선플레이어가 아니고 간을 쳤다면 주공이 이기겠지 뭐
                     if (
                         game.president != game.startTurn &&
                         msg.shaperq !== game.bidShape &&
-                        presidentCard.shape == game.bidShape
+                        partnerCard.shape == game.bidShape
                     ) {
-                        canPresidentWin = true;
+                        canPartnerWin = true;
                     }
 
                     // 그 외 : 주공이 낸게 주공 카드 문양중에 짱칸지를 봐야한다.
                     else {
                         // 조커는 짱카 가정
-                        if (presidentCard.shape == 'joker') canPresidentWin = true;
+                        if (partnerCard.shape == 'joker') canPartnerWin = true;
 
                         // 주공이 해당 문양에서 짱카를 냈는가? (내 덱 제외)
                         else {
-                            const presidentCardRank = getCardRankInShape(presidentCard);
+                            const presidentCardRank = getCardRankInShape(partnerCard);
                             const myDeckPWC = deck.filter(
-                                (c) => (c.shape == msg.shaperq && c.num > presidentCard.num)
+                                (c) => (c.shape == msg.shaperq && c.num > partnerCard.num)
                             ).length;  // 내 덱 카드중 주공 카드를 밟는 갯수
 
                             if (presidentCardRank == myDeckPWC) {
                                 // 주공이 내 덱 제외 짱카다.
-                                canPresidentWin = true;
+                                canPartnerWin = true;
                             }
                         }
                     }
                 }
 
                 // 주공이 이길것같으면 제일 낮은 카드를 낸다.
-                if (canPresidentWin) {
+                if (canPartnerWin) {
                     // console.log('b3');
                     if (sEnd !== null) return playIndex(sEnd);
                     // 그냥 주공에게 어떻게든 턴을 넘겨줘야 하니까 기루다/마이티/조커 빼고 암거나 낸다.
@@ -740,7 +755,7 @@ AISocket.prototype.proc_cprq = function(msg) {
                 }
 
                 // 주공이 뒤에 턴을 잡는다. 주공이 물카 털 기회를 줍시다.
-                if (!hasPresidentPlayed) {
+                if (this.isFriend && !hasPresidentPlayed) {
                     // 문양으로 선을 먹을 수 있으면 제일 높은 문양을 낸다.
                     if (sStart !== null && canTakeLeadWith(sStart)) return playIndex(sStart);
 
@@ -765,6 +780,15 @@ AISocket.prototype.proc_cprq = function(msg) {
                 return playIndex(deck.indexOf(game.mighty));
             }
 
+            // 조커가 있어도 밟아준다.
+            if (
+                game.currentTrick != 1 && game.currentTrick != 10 &&
+                deck.hasCard(game.joker)
+            ) {
+                // console.log('c3');
+                return playIndex(deck.indexOf(game.joker));
+            }
+
             // 그냥 선을 먹을 수 있으면 선을 낸다.
             if (sStart !== null) {
                 // console.log('c4');
@@ -775,19 +799,11 @@ AISocket.prototype.proc_cprq = function(msg) {
                 else return playIndex(sEnd);
             }
 
-            // 조커가 있어도 밟아준다.
-            if (
-                game.currentTrick != 1 && game.currentTrick != 10 &&
-                deck.hasCard(game.joker)
-            ) {
-                // console.log('c3');
-                return playIndex(deck.indexOf(game.joker));
-            }
-
             else {
                 // console.log('c5');
                 // 주공이 간을 칠 수 있으면 주공을 믿는다.
                 if (
+                    this.isFriend &&
                     !this.noShapeInfo[game.president][game.bidShape] &&
                     this.noShapeInfo[game.president][msg.shaperq]
                 )  return playNonMJG();  // 기루다 빼고 낸다
@@ -795,8 +811,11 @@ AISocket.prototype.proc_cprq = function(msg) {
                 // console.log('c5_1');
 
                 // 아니면 간을 쳐야한다.
-                const gStart = getShapeRange(deck, game.bidShape)[0];
-                if (gStart !== null) return playIndex(gStart);
+                const [gStart, gEnd] = getShapeRange(deck, game.bidShape);
+                if (gStart !== null) {
+                    if(this.isFriend) return playIndex(gStart);
+                    else return playIndex(gEnd);
+                }
 
                 // console.log('c5_2');
 

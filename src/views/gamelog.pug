@@ -1,88 +1,91 @@
-.gamelog
-    .row
-        h1 게임 ##{gameID}
+extends layout
+
+block content
+    .gamelog
         .row
-            .right 시작 : #{formatTime(startedAt, false)}
-        .row
-            .right 종료 : #{formatTime(endedAt, false)}
-    .row &nbsp;
-
-    // 게임 인원
-    .row.gusers
-        .col.s2 인원
-        each user in gusers
-            .col.s2.user
-                span.username #{user.username}
-
-    // 플레이어 공약 정보
-    .row.pbiddings
-        .col.s2 공약
-        each pbidding, index in pbiddings
-            .col.s2.pbid(class=(index == president ? "president" : ""))
-                each pbid in pbidding
-                    div(class='card-' + pbid.bidShape) #{pbid.bidCount}
-
-    // 공약 정보
-    each bidding in biddings
-        .row.bidding
-            .col.s2 최종공약
-            .col.s10
-                | #{gusers[president].username} 님이 &nbsp;
-                span(class='card-' + bidding.bidShape) #{bidding.bidCount}
-                | &nbsp;을 공약했습니다
-
-    // 플레이 정보
-    if friendType
-        .row.friend
-            .col.s2 프렌드
-            .col.s10
-                | 프렌드 : &nbsp;
-                if friendType.ftype == 'card'
-                    span(class='card-' + friendType.args.shape) #{getCardNumString(friendType.args.num)}
-                else if friendType.ftype == 'first'
-                    | 선구 프렌드
-                else if friendType.ftype == 'player'
-                    | 지정 프렌드 - #{gusers[friendType.args].username}
-                else if friendType.ftype == 'none'
-                    | 없음
-                else
-                    | 알 수 없는 프렌드 (버그제보를 해주세요)
-
-    // 플레이 인포
-    each trick, index in tricks
-        .row.trick
-            .col.s2 트릭##{index+1}
-            each card, player in trick.cards
-                .col.s2.pcp(class=(trick.winner == player ? "pcp-winner " : "") + (card.num >= 10 ? "pcp-score " : "") + (friend === player ? "friend " : "") + (president === player ? "president " : ""))
-                    span(class='card-' + card.shape) #{getCardNumString(card.num)}
-                    if trick.occ && trick.occ[player]
-                        span.right.occ= trick.occ[player]
-
-    if result
-        .result
-            // 셋 여부
-            if result.setUser !== undefined
-                .row.set
-                    .col.s2 셋
-                    .col.s10
-                        div [셋]  #{gusers[result.setUser].username} (#{result.setUser + 1}) 님이 다음 덱으로 셋을 했습니다.
-                        .setdeck
-                            each card in result.setDeck
-                                span(class='card-' + card.shape) #{getCardNumString(card.num)}
-            .row.result
-                .col.s2 결과
-                .col.s10
-                    if (20 - result.oppcc) >= lastBidding.bidCount
-                        | [여당 승리] 여당이 공약 #{lastBidding.bidCount} 이상인 #{20 - result.oppcc}개를 달성해 승리하였습니다!
-                    else
-                        | [야당 승리] 야당이 공약저지선 #{21 - lastBidding.bidCount} 이상인 #{result.oppcc}개를 달성해 승리하였습니다!
-            .row.score
-                .col.s2 점수
-                each score in result.scores
-                    .col.s2.score= score
-
-    if abortReason
-        .row.abort
+            h1 게임 ##{gameID}
             .row
-                .col.s2 [중단]
-                .col.s10= abortReason
+                .right 시작 : #{formatTime(startedAt, false)}
+            .row
+                .right 종료 : #{formatTime(endedAt, false)}
+        .row &nbsp;
+
+        // 게임 인원
+        .row.gusers
+            .col.s2 인원
+            each user in gusers
+                .col.s2.user
+                    span.username #{user.username}
+
+        // 플레이어 공약 정보
+        .row.pbiddings
+            .col.s2 공약
+            each pbidding, index in pbiddings
+                .col.s2.pbid(class=(index == president ? "president" : ""))
+                    each pbid in pbidding
+                        div(class='card-' + pbid.bidShape) #{pbid.bidCount}
+
+        // 공약 정보
+        each bidding in biddings
+            .row.bidding
+                .col.s2 최종공약
+                .col.s10
+                    | #{gusers[president].username} 님이 &nbsp;
+                    span(class='card-' + bidding.bidShape) #{bidding.bidCount}
+                    | &nbsp;을 공약했습니다
+
+        // 플레이 정보
+        if friendType
+            .row.friend
+                .col.s2 프렌드
+                .col.s10
+                    | 프렌드 : &nbsp;
+                    if friendType.ftype == 'card'
+                        span(class='card-' + friendType.args.shape) #{getCardNumString(friendType.args.num)}
+                    else if friendType.ftype == 'first'
+                        | 선구 프렌드
+                    else if friendType.ftype == 'player'
+                        | 지정 프렌드 - #{gusers[friendType.args].username}
+                    else if friendType.ftype == 'none'
+                        | 없음
+                    else
+                        | 알 수 없는 프렌드 (버그제보를 해주세요)
+
+        // 플레이 인포
+        each trick, index in tricks
+            .row.trick
+                .col.s2 트릭##{index+1}
+                each card, player in trick.cards
+                    .col.s2.pcp(class=(trick.winner == player ? "pcp-winner " : "") + (card.num >= 10 ? "pcp-score " : "") + (friend === player ? "friend " : "") + (president === player ? "president " : ""))
+                        span(class='card-' + card.shape) #{getCardNumString(card.num)}
+                        if trick.occ && trick.occ[player]
+                            span.right.occ= trick.occ[player]
+
+        if result
+            .result
+                // 셋 여부
+                if result.setUser !== undefined
+                    .row.set
+                        .col.s2 셋
+                        .col.s10
+                            div [셋]  #{gusers[result.setUser].username} (#{result.setUser + 1}) 님이 다음 덱으로 셋을 했습니다.
+                            .setdeck
+                                each card in result.setDeck
+                                    span(class='card-' + card.shape) #{getCardNumString(card.num)}
+                .row.result
+                    .col.s2 결과
+                    .col.s10
+                        if (20 - result.oppcc) >= lastBidding.bidCount
+                            | [여당 승리] 여당이 공약 #{lastBidding.bidCount} 이상인 #{20 - result.oppcc}개를 달성해 승리하였습니다!
+                        else
+                            | [야당 승리] 야당이 공약저지선 #{21 - lastBidding.bidCount} 이상인 #{result.oppcc}개를 달성해 승리하였습니다!
+                .row.score
+                    .col.s2 점수
+                    each score in result.scores
+                        .col.s2.score= score
+
+        if abortReason
+            .row.abort
+                .row
+                    .col.s2 [중단]
+                    .col.s10= abortReason
