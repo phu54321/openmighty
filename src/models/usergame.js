@@ -16,7 +16,7 @@ db.initScheme('usergame', function (table) {
     table.timestamps(true, true);
 });
 
-module.exports = function (GameLog) {
+exports = module.exports = function (GameLog) {
     /**
      * 플레이가 끝까지 진행됬을 경우 유저들의 로그를 남긴다.
      *
@@ -67,4 +67,19 @@ module.exports = function (GameLog) {
                 }, (err) => cb(err));
         }, cb);
     };
+};
+
+
+/**
+ * List user game logs
+ */
+exports.listUserGameLog = function (userid, page, cb) {
+    page = (page || 1) - 1;
+    db('usergame')
+        .select('*')
+        .where({userid: userid})
+        .orderBy('id', 'desc')
+        .limit(10)
+        .offset(page * 10)
+        .asCallback(cb);
 };

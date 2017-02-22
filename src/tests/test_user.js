@@ -40,7 +40,7 @@ describe('User', function() {
         it('should add user to database', function (done) {
             async.waterfall([
                 (cb) => users.addUser(generateUser('test'), cb),
-                (_, cb) =>  users.findUserByUsername('test', cb),
+                (_, cb) =>  users.getUserByUsername('test', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test');
                     cb();
@@ -68,10 +68,10 @@ describe('User', function() {
             async.waterfall([
                 (cb) => users.addUser(generateUser('test1'), cb),
                 (_, cb) => users.addUser(generateUser('test2'), cb),
-                (_, cb) => users.findUserByUsername('test1', cb),
+                (_, cb) => users.getUserByUsername('test1', cb),
                 (user, cb) => {
                     assert.equal(user.username, 'test1');
-                    users.findUserByUsername('test2', cb);
+                    users.getUserByUsername('test2', cb);
                 },
                 (user, cb) => {
                     assert.equal(user.username, 'test2');

@@ -58,7 +58,7 @@ router.post('/join', function (req, res) {
 
     async.waterfall([
         (cb) => users.addUser({username: username, password: password, email: email}, cb),
-        (userid, cb) => users.findUserByID(userid, cb),
+        (userid, cb) => users.getUserByID(userid, cb),
         (userEntry, cb) => req.logIn(userEntry, cb)
     ], (err) => {
         if(err) {
@@ -80,3 +80,11 @@ router.checkLogon = function (req, res, next) {
 ///////////////////////
 
 // Profile page
+router.get('/profile/:username', router.checkLogon, function (req, res, next) {
+    const username = req.params.gameID | "";
+    users.getUserByUsername(username, (err, user) => {
+        if(err) return next(err);
+        return res.render('profile', {user: user});
+    });
+});
+

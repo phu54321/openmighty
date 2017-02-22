@@ -3,7 +3,7 @@
 window.issueLogin = function () {
     'use strict';
     issueForm(
-        '/users/login',
+        '/login',
         'loginForm',
         [
             ['username', 'username', formVerifier_NoBlank, '아이디를 입력하세요.'],
@@ -19,7 +19,7 @@ window.issueLogin = function () {
 window.issueRegister = function () {
     'use strict';
     issueForm(
-        '/users/join',
+        '/join',
         'registerForm',
         [
             ['username', 'username', formVerifier_NoBlank, '아이디를 입력하세요.'],
@@ -35,7 +35,7 @@ window.issueRegister = function () {
 window.issueLogout = function () {
     $.ajax({
         type: 'POST',
-        url: '/users/logout',
+        url: '/logout',
         success: function(data) {
             window.location.reload(true);
         },
