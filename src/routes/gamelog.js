@@ -26,6 +26,7 @@ function getCardNumString(num) {
 // Gamelog generator
 router.get('/gamelog/:gameID', users.checkLogon, (req, res) => {
     const gameID = req.params.gameID | 0;
+    const isPopup = (req.query.popup ? true : false);
 
     gamelog.getGamelog(gameID, (err, entry) => {
         if(err) {
@@ -129,7 +130,9 @@ router.get('/gamelog/:gameID', users.checkLogon, (req, res) => {
         }
         else tricks.splice(tricks.length - 1, 1);
 
-        res.render('gamelog', {
+        const templatePug = (isPopup) ? 'gamelog_popup' : 'gamelog';
+
+        res.render(templatePug, {
             gameID: req.params.gameID,
             startedAt: entry.created_at,
             endedAt: entry.updated_at,

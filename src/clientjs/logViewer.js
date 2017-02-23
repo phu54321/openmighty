@@ -11,10 +11,11 @@ window.viewGameLog = function (gameID) {
 
     $.ajax({
         type: 'GET',
-        url: '/gamelog/' + gameID,
+        url: '/gamelog/' + gameID + '?popup=1',
         success: function(data) {
             const $gameLogModal = $('#gameLogModal');
             $gameLogModal.find('.modal-content').html(data);
+            $gameLogModal.find('.modal-footer a').attr('href', '/gamelog/' + gameID);
             $gameLogModal.modal();
             $gameLogModal.modal('open');
             loadingGameLog = false;
