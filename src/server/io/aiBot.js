@@ -309,26 +309,26 @@ AISocket.prototype.proc_fsrq = function () {
 
     // 기루다 A
     else if (!this.deck.hasCard(card.createCard(bidShape, 14))) {
-        msg.shape = mightyShape;
+        msg.shape = bidShape;
         msg.num = 14;
     }
 
     // 기루다 K
     else if (!this.deck.hasCard(card.createCard(bidShape, 13))) {
-        msg.shape = mightyShape;
-        msg.num = 14;
+        msg.shape = bidShape;
+        msg.num = 13;
     }
 
     // 부기루다 A
     else if (!this.deck.hasCard(card.createCard(subGiruda, 14))) {
-        msg.shape = mightyShape;
+        msg.shape = subGiruda;
         msg.num = 14;
     }
 
     // 부기루다 K
     else if (!this.deck.hasCard(card.createCard(subGiruda, 13))) {
-        msg.shape = mightyShape;
-        msg.num = 14;
+        msg.shape = subGiruda;
+        msg.num = 13;
     }
 
     // 초구
