@@ -331,9 +331,9 @@ AISocket.prototype.proc_fsrq = function () {
         msg.num = 13;
     }
 
-    // 초구
+    // 부기루다A로 초구 돌리겠지 뭐
     else {
-        msg.ftype = 'first';
+        msg.ftype = 'none';
     }
 
     this.cmd(msg);
