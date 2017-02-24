@@ -534,7 +534,7 @@ AISocket.prototype.proc_cprq = function(msg) {
             if (girudaLackingOppCount < 3 && deck.hasShape(game.bidShape)) {
                 // 기루다를 돌린다.
                 const [gStart, gEnd] = getShapeRange(deck, game.bidShape);
-                if (gStart !== null && getCardRankInShape(deck[gStart]) === 0) {  // 기루다 짱카
+                if (gStart !== null) {  // 기루다 짱카
                     return playIndex(gStart);
                 }
 
@@ -543,9 +543,6 @@ AISocket.prototype.proc_cprq = function(msg) {
                 if (jokerIndex != -1) {
                     return playIndex(jokerIndex, game.bidShape);
                 }
-
-                // 기루다를 돌린다.
-                if(gEnd !== null) return playIndex(gEnd);  // 제일 낮은 기루다.
 
                 // 기루다도 못뽑는 무능한 여당...
                 // 프렌이라면 주공에게 없는 문양을 돌린다.
