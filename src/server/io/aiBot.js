@@ -480,7 +480,7 @@ AISocket.prototype.proc_cprq = function(msg) {
      */
     const getCardRankInShape = (card) => {
         if(card.equals(game.mighty)) return -1;
-        const isMightyShape = (card.shapee == game.mighty.shape) ? 1 : 0;
+        const isMightyShape = (card.shape == game.mighty.shape) ? 1 : 0;
         const cardNum = card.num;
         const higherCardCount = 14 - cardNum - isMightyShape;
         if(higherCardCount) {
@@ -545,7 +545,12 @@ AISocket.prototype.proc_cprq = function(msg) {
                         else return 200 - card.num;  // 주공은 낮은 기루다부터
                     }
                     else if(card.shape == 'joker') {
-                        return play(250, game.bidShape);
+                        // 기루다 짱카가 프렌인 경우는 조커로 기루다를 돌리지 않습니다.
+                        if(!(
+                            game.friendCard &&
+                            game.friendCard.shape == game.bidShape &&
+                            getCardRankInShape(game.friendCard) === 0
+                        )) return play(250, game.bidShape);
                     }
                     else if(card.equals(game.mighty)) return -100;  // 마이티 초구는 X
 
