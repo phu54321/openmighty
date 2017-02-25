@@ -738,9 +738,7 @@ AISocket.prototype.proc_cprq = function(msg) {
                 else {
                     // 간을 칠 수 있으면 친다.
                     if(card.shape == game.bidShape) {
-                        if(card.num == 12 || card.num == 13) return 500;  // KQ는 일단 남기자
-                        if(card.num == 10 || card.num == 11) return 530;  // J10은 턴다 (주공에게 준다)
-                        return 500 + card.num;
+                        if(canTakeLeadWith(index)) return 500 - card.num;
                     }
 
                     // 같은 편까지 가야한다면
