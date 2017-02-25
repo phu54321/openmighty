@@ -79,9 +79,14 @@ exports = module.exports = function (MightyRoom) {
 
         const initialBidder = bidding.currentBidder;
         let nextBidder = (bidding.currentBidder + 1) % 5;
+        if(nextBidder === 0) {
+            bidding.canDealMiss = false;
+        }
         while(nextBidder != initialBidder && bidding.passStatus[nextBidder] === true) {
             nextBidder = (nextBidder + 1) % 5;
-            if(nextBidder === 0) this.bidding.canDealMiss = false;
+            if(nextBidder === 0) {
+                bidding.canDealMiss = false;
+            }
         }
 
         // All passed or only initialBidder left
@@ -107,6 +112,7 @@ exports = module.exports = function (MightyRoom) {
         const bidCount = bidType.num;
 
         // 딜미스 처리
+        console.log(!this.bidding.canDealMiss);
         if(bidShape == 'dealmiss') {
             if(!this.bidding.canDealMiss) return "딜 미스는 처음에만 할 수 있습니다.";
 
