@@ -486,7 +486,7 @@ AISocket.prototype.proc_cprq = function(msg) {
         if(higherCardCount) {
             // 현재까지 버려진 카드 + 내 덱에서 주공 현재 카드보다 쎈 카드를 구한다.
             const discardedPWC = game.discardedCards.filter(
-                (c) => (c.shape == msg.shaperq && c.num > cardNum)
+                (c) => (c.shape == card.shape && c.num > cardNum)
             ).length;
             return higherCardCount - discardedPWC;
         }
