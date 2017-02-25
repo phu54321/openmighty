@@ -538,6 +538,13 @@ AISocket.prototype.proc_cprq = function(msg) {
                 if (this.noShapeInfo[p][game.bidShape]) girudaLackingOppCount++;
             }
 
+            // 카드 수를 세서 볼수도 있다.
+            if(girudaLackingOppCount < 3 && this.isPresident) {
+                const myGiruda = deck.filter(c => c.shape == game.bidShape).length;
+                const discardedGiruda = game.discardedCards.filter(c => c.shape == game.bidShape).length;
+                if(myGiruda + discardedGiruda == 14) girudaLackingOppCount = 3;  // 카운팅 결과 다 뽑힘
+            }
+
             // 기루다가 덜 뽑혔다면
             if (girudaLackingOppCount < 3 && deck.hasShape(game.bidShape)) {
                 return playScored((card) => {
