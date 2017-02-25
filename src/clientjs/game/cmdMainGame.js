@@ -279,7 +279,7 @@ exports = module.exports = function (cmdTranslatorMap) {
         let $modal;
 
         // 셋으로 끝났으면 -> 그에 맞게 화면을 꾸며준다.
-        if(msg.setUser) {
+        if(msg.setUser !== undefined) {
             $modal = $('#gameEndWithSetModal');
             $modal.find('.set').text(
                 '게임 결과 - 셋 (' + game.gameUsers[msg.setUser].username + ')'
