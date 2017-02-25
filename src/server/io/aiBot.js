@@ -430,10 +430,12 @@ AISocket.prototype.proc_cprq = function(msg) {
         const scoreRank = _.shuffle(_.range(scores.length));
         scoreRank.sort((a, b) => scores[b][0] - scores[a][0]);
 
+        /*
         for(let i = 0 ; i < scoreRank.length ; i++) {
             const idx = scoreRank[i];
             console.log(deck[idx].toString(), scores[idx][0]);
         }
+         */
 
         const idx = scoreRank[0];
         return playIndex(idx, scores[idx][1], scores[idx][2]);
