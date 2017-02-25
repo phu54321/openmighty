@@ -28,7 +28,7 @@ function AISocket(room, userEntry, playSpeed) {
     this.noShapeInfo = [{}, {}, {}, {}, {}];
     this.trustOpponentHavingJoker = 0;
 
-    this.playSpeed = playSpeed || 1000;
+    this.playSpeed = playSpeed || 800;
 }
 
 
@@ -595,6 +595,7 @@ AISocket.prototype.proc_cprq = function(msg) {
                     if(card.equals(game.mighty)) return -100;  // 마이티는... 나중에 씁시다.
 
                     // 어쩔 수 없지
+                    if(card.shape == game.bidShape) return -10;
                     else return 0;
                 });
             }
