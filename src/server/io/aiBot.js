@@ -591,65 +591,36 @@ AISocket.prototype.proc_cprq = function(msg) {
 
         // 야당의 전략
         else {
-            // ******* 마프가 아니고 조커콜이 가능하면 조콜을 한다.
-            // 조건 : 조커 프렌드거나 17 공약 이상
-            if(
-                (game.bidCount >= 17 || game.friendCard.equals(game.joker)) &&
-                (game.friendType != 'card' || !game.friendCard.equals(game.mighty)) &&
-                deck.hasCard(game.jokerCall) &&
-                !game.discardedCards.hasShape('joker') &&
-                !deck.hasCard(game.joker)  // 내가 조콜/조를 다 가진 야당일 경우엔 콜을 안한다.
-            ) {
-                // console.log('y_1');
-                return playIndex(deck.indexOf(game.jokerCall), undefined, true);
-            }
-
-            // console.log('y1');
-            // 마이티가 안 뽑혔다면 마공
-            const mightyShape = game.mighty.shape;
-            if(deck.hasShape(mightyShape) && !game.discardedCards.hasCard(game.mighty)) {
-                const msEnd = getShapeRange(deck, mightyShape)[1];
-                return playIndex(msEnd);  // 어차피 마공인데 제일 작은걸로 딜 넣는다.
-            }
-
-            // console.log('y2');
-            // 아니라면 주공에게 있을만한 기루다가 아닌 문양을 돌린다
-            // 그런 문양이 다 망하면 주공에게 없는 문양들도 돌린다.
-            const pLackingShapes = _.shuffle(Object.keys(this.noShapeInfo[game.president]));
-            const pHavingShapes = ['spade', 'heart', 'diamond', 'clover'].filter(
-                s => (s != game.bidShape && pLackingShapes.indexOf(s) == -1));
-            const pShapes = _.shuffle(pHavingShapes).concat(pLackingShapes);
-            // console.log(pShapes);
-            // 여기까지 하면 pShapes는 기루다/조커를를 제외한 모든 문양을 갖고 있고
-            // 주공에게 있을 가능성이 있는 문양들이 pShapes 앞에 오게 된다.
-            //   cf) 주공이 기루다가 없으면 pShapes에 기루다가 포함될 수 있다. 이러면 주공이 ㅂㅅ
-            for (let i = 0; i < pShapes.length; i++) {
-                const shape = pShapes[i];
-                const [sStart, sEnd] = getShapeRange(deck, shape);
-                if (sStart !== null) {
-                    // 그 문양 짱카가 마이티면 고려해본다.
-                    // 주공이 마이티도 없이 마프를 안부른게 이상하긴 하지만 그런 일도 있을 수 있으니 체크는 하자.
-                    if (deck[sStart].equals(game.mighty)) {
-                        if(sStart != sEnd) return playIndex(sStart + 1);  // 마이티 다음 짱카
-                        else continue;
-                    }
-                    return playIndex(sStart);  // 그 문양 짱카
+            const hasJoker = deck.hasShape('joker');
+            const jokerDiscarded = game.discardedCards.hasCard(game.joker);
+            const mightyDiscarded = game.discardedCards.hasCard(game.mighty);
+            return playScored((card) => {
+                // 조커 프렌드거나 17 공약 이상인 경우 여당에게 조커가 있을 가능성 농후
+                if(
+                    card.equals(game.jokerCall) &&
+                    !hasJoker &&
+                    (game.bidCount >= 17 || game.friendCard.equals(game.joker)) &&
+                    !jokerDiscarded
+                ) {
+                    return play(9999, undefined, true);  // 무조건 조커콜!
                 }
-            }
 
-            // console.log('y3');
+                if(!mightyDiscarded) {  // 마공
+                    if(card.shape == game.mighty.shape) {
+                        return 1000 - card.num;
+                    }
+                }
 
-            // 놀랍게도 여기까지 왔다면 내가 야당 주제에 기루다/마이티/조커만 있다는 뜻이다.
-            // 이상황에서는 백런을 노리는게 맞다.
+                // 주공이 가지고있을만한 문양
+                if(!this.noShapeInfo[game.president][card.shape]) {
+                    return 500 + card.num;
+                }
 
-            // 조커가 있다면 기루다 플레이를 해서 주공을 괴롭힌다.
-            if(deck[deck.length - 1].shape == 'joker') {
-                return playIndex(deck.length - 1, game.bidShape);
-            }
-
-            // console.log('y4');
-            // 아니면 낮은 기루다/마이티를 계속 돌려준다.
-            return playIndex(deck.length - 1);
+                if(card.equals(game.joker)) return -100;
+                if(card.equals(game.mighty)) return -50;
+                if(card.isScoreCard()) return -20;
+                return -card.num;
+            });
         }
     }
 
@@ -852,28 +823,15 @@ AISocket.prototype.proc_cprq = function(msg) {
             // 주공이 이미 냈을경우 : 주공이 무섭지 않다.
             // 점수를 마구마구 실어주자.
             if (!isLeadingTeamWinning && hasPresidentPlayed) {
-                // console.log('d3');
-                if(sStart !== null) {
-                    // console.log('d3_1');
-                    let minimumScoreCard = sStart;
-                    while (minimumScoreCard < sEnd) {
-                        if (!deck[minimumScoreCard + 1].isScoreCard()) break;
-                        minimumScoreCard++;
-                    }
-                    return playIndex(minimumScoreCard);  // 야당/안밝혀진 프렌에겐 점수를 싣는다.
-                }
-                else { // 기루다가 아닌 아무 점수나 내자.
-                    // console.log('d3_2');
-                    const playable = [];
-                    this.deck.forEach((card, index) => {
-                        if(card.shape == game.bidShape) return;
-                        if(card.isScoreCard()) playable.push(index);
-                    });
-                    if(playable.length > 0) playIndex(_.sample(playable));
-                }
+                return playScored((card) => {
+                    const nonGirudaScore = (card.shape == game.bidShape) ? 0 : 100;
+                    if(card.equals(game.mighty)) return -500;
+                    if(card.num == 10 || card.num == 11 || card.num == 12) return nonGirudaScore + 20 + card.num;
+                    if(card.num == 13) return nonGirudaScore + 20;
+                    if(card.num == 14) return nonGirudaScore + 15;
+                    return nonGirudaScore - card.num;
+                });
             }
-
-            // console.log('d03');
 
             // 마프고 조커가 안 빠졌고 (조커가 야당에게 있겠지? 란 기대로)
             // 내가 2번째 턴이고 첫턴이 점카고 조커가 안 빠졌으면 이 턴에 실어주는걸 고려해봐야한다.
@@ -886,50 +844,20 @@ AISocket.prototype.proc_cprq = function(msg) {
                 Math.random() < 0.7 &&  // 70% 확률로 싣는다.
                 !game.discardedCards.hasShape('joker')
             ) {
-                // console.log('d4');
-                let minimumScoreCard = null;
-
-                // 문양중 제일 작은 점수카드.
-                if(sStart !== null && deck[sStart].isScoreCard()) {
-                    minimumScoreCard = sStart;
-                    while (minimumScoreCard < sEnd) {
-                        if (!deck[minimumScoreCard + 1].isScoreCard()) break;
-                        minimumScoreCard++;
-                    }
-                }
-
-                else { // 기루다가 아닌 아무 점수카드.
-                    const playable = [];
-                    this.deck.forEach((card, index) => {
-                        if(card.shape == game.bidShape) return;
-                        if(card.isScoreCard()) playable.push(index);
-                    });
-                    if(playable.length > 0) minimumScoreCard =_.sample(playable);
-                }
-
-                // console.log('d4_1');
-
-                if(minimumScoreCard !== null) {
-                    // 지금 돌고있는게 기루다면 J/10만 싣는다.
-                    if (msg.shaperq == game.bidShape) {
-                        // console.log('d4_1_1');
-                        const cardNum = deck[minimumScoreCard].num;
-                        if (cardNum == 10 || cardNum == 11) {
-                            this.trustOpponentHavingJoker++;
-                            return playIndex(minimumScoreCard);
-                        }
-                    }
-
-                    // 아니면 그냥 제일 낮은 점카를 싣는다.
-                    else {
-                        // console.log('d4_1_2');
-                        this.trustOpponentHavingJoker++;
-                        return playIndex(minimumScoreCard);
-                    }
-                }
+                return playScored((card) => {
+                    const nonGirudaScore = (card.shape == game.bidShape) ? 0 : 100;
+                    if(card.equals(game.mighty)) return -500;
+                    if(card.num == 10 || card.num == 11 || card.num == 12) return nonGirudaScore + 20 + card.num;
+                    if(card.num == 13) return nonGirudaScore + 20;
+                    if(card.num == 14) return nonGirudaScore + 15;
+                    return nonGirudaScore - card.num;
+                });
             }
 
-            // console.log('d5');
+            // 조커를 쓴다
+            if(game.currentTrick == 9 && jokerIndex != -1) {
+                return playIndex(jokerIndex);
+            }
 
             // 그냥 제일 낮은 카드를 싣는다.
             if(sEnd !== null) return playIndex(sEnd);
