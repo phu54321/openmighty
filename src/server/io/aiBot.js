@@ -163,6 +163,9 @@ AISocket.prototype.getExpectedWinningTurns = function () {
         // 마이티가 나한테 있고 조커가 프렌에게 있으면 프렌도 +1일거다.
         if(hasMighty && !hasJoker) winExpect += 1;
 
+        // 한턴정도 프렌이 해주겠지
+        if(winExpect <= 7) winExpect++;
+
         // 최대치 기록
         if(maxWinExpect < winExpect) {
             maxWinExpect = winExpect;
@@ -173,7 +176,7 @@ AISocket.prototype.getExpectedWinningTurns = function () {
     if(maxWinExpect === 0) this.biddingCache = null;
     else {
         this.biddingCache = {
-            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.3), 20) | 0,
+            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.5), 20) | 0,
             bidShape: maxWinExpectShape
         };
     }
@@ -253,10 +256,12 @@ AISocket.prototype.proc_fsrq = function () {
             (this.game.bidShape != bidShape && newBidStrength <= this.bidStrength + 1) ||
             (this.game.bidShape == bidShape && this.game.bidCount > bidCount)
         )) {
-        msg.bidch2 = {
-            shape: bidShape,
-            num: bidCount
-        };
+        if(!(bidShape == this.game.bidShape && bidCount == this.game.bidCount)) {
+            msg.bidch2 = {
+                shape: bidShape,
+                num: bidCount
+            };
+        }
     }
     else {
         bidShape = this.game.bidShape;
@@ -374,6 +379,7 @@ function getShapeRange(deck, shape) {
 }
 
 
+
 /**
  * 특정 숫자를 제외한 랜덤
  */
@@ -396,7 +402,6 @@ AISocket.prototype.proc_cprq = function(msg) {
 
     // 유틸리티 함수
     const playIndex = (index, shapeRequest, jcall) => {
-        // TODO: 노기루다에서 애초에 기루다 조커콜을 부르지 않도록 하자.
         // 만일의 경우 노기루다에서 조커로 기루다 플레이를 시도할수도 있다.
         // 이 경우에는 그냥 조커콜을 무시.
         if(shapeRequest == 'none') shapeRequest = undefined;
@@ -409,28 +414,38 @@ AISocket.prototype.proc_cprq = function(msg) {
         });
     };
 
+    const play = (score, srq, jcall) => {
+        return [score, srq, jcall];
+    };
+
+    const playScored = (cb) => {
+        let scores = deck.map(cb).map(s => {
+            if(Array.isArray(s)) return s;
+            else return [s];
+        });
+        const scoreRank = _.shuffle(_.range(scores.length));
+        scoreRank.sort((a, b) => scores[b][0] - scores[a][0]);
+
+        for(let i = 0 ; i < scoreRank.length ; i++) {
+            const idx = scoreRank[i];
+            console.log(deck[idx].toString(), scores[idx][0]);
+        }
+
+        const idx = scoreRank[0];
+        return playIndex(idx, scores[idx][1], scores[idx][2]);
+    };
+
 
     /**
      * 마이티/조커/기루다를 제외하고 아무거나 낸다.
      */
     const playNonMJG = () => {
-        const playable = [];
-        this.deck.forEach((card, index) => {
-            if(card.equals(game.mighty)) return;
-            else if(card.shape == 'joker') return;
-            else if(card.shape == game.bidShape) return;
-            playable.push(index);
+        playScored((card) => {
+            if(card.equals(game.mighty)) return -200;
+            else if(card.shape == 'joker') return -100;
+            else if(card.shape == game.bidShape) return -50;
+            else return 0;
         });
-        if(playable.length > 0) return playIndex(_.sample(playable));
-
-        // 전부 마이티/조커/기루다 - 기루다를 아무거나.
-        this.deck.forEach((card, index) => {
-            if(card.shape == game.bidShape) playable.push(index);
-        });
-        if(playable.length > 0) return playIndex(_.sample(playable));
-
-        // 모르겠다 그냥 조커/마이티 순으로 내자.
-        return playIndex(deck.length - 1);
     };
 
 
@@ -460,7 +475,7 @@ AISocket.prototype.proc_cprq = function(msg) {
      * 카드가 해당 문양에서 몇위의 순위 정도인지
      */
     const getCardRankInShape = (card) => {
-        if(card.equals(game.mighty)) return 0;
+        if(card.equals(game.mighty)) return -1;
         const isMightyShape = (card.shapee == game.mighty.shape) ? 1 : 0;
         const cardNum = card.num;
         const higherCardCount = 14 - cardNum - isMightyShape;
@@ -483,45 +498,32 @@ AISocket.prototype.proc_cprq = function(msg) {
     if(this.selfIndex == game.startTurn) {
         // 주공 초구인 경우
         if(this.isPresident && game.currentTrick == 1) {
-            // 짱카를 낸다.
-            const mightyShape = game.mighty.shape;
-            const firstCardShapes = card.cardShapes
-                .filter(shape => {
-                    if (shape == 'joker') return false;
-                    else if(shape == game.bidShape) return false;  // 공약한 문양은 내지 못한다.
-                    const topCardNum = (mightyShape == shape ? 13 : 14);
-                    return this.deck.hasCard(card.createCard(shape, topCardNum));
-                });
+            return playScored((card) => {
+                // 기루다는 못낸다.
+                if(card.shape == game.bidShape) return -500 + card.num;
 
-            if (firstCardShapes.length > 0) {
-                // 마이티문양 K는 마공의 위험이 있으니까 뒤로 뺀다.
-                if (firstCardShapes[0] == mightyShape) {
-                    firstCardShapes.splice(0, 1);
-                    firstCardShapes.push(mightyShape);
+                // 짱카 우선시
+                if(getCardRankInShape(card) === 0) {
+                    if(card.shape == game.mighty.shape) return 200;  // 마공 위험이 있으므로 약간 점수 낮게
+                    else return 201;
                 }
-                return playIndex(getShapeRange(deck, firstCardShapes[0])[0]);
-            }
 
-            // 그 외엔 부기루다를 뽑으며 마공을 요청한다.
-            if(deck.hasShape(this.subGiruda)) {
-                return playIndex(getShapeRange(deck, this.subGiruda)[1]);
-            }
+                // 부기루다, 낮은 카드 우선시
+                else if(card.shape == this.subGiruda) {
+                    return 100 - card.num;
+                }
 
-            // 부기루다가... 없다는건 모두가 기루다거나 초구 마이티/조커를 내야한다는 뜻입니다.
-            // 신이 내린 행운이니까 그냥 해봅시다.
-            const mightyIndex = deck.indexOf(game.mighty);
-            if(mightyIndex != -1) return playIndex(mightyIndex);
+                else if(card.equals(game.mighty)) return -10;  // 마이티 지양
+                else if(card.num == 10 || card.num == 11) return -100;  // 10, J는 더 지양
+                else if(card.num == 12 || card.num == 13) return -200;  // Q, K는 나중에 짱카가 되니까 더 더 지양
+                else if(card.shape == 'joker') return -300;  // 조커는 완전 지
 
-            const jokerIndex = deck.indexOf(game.joker);
-            if(jokerIndex != -1) return playIndex(jokerIndex);
-
-            // 아 그냥 아무거나 내
-            return playIndex(0);
+                else return 0;
+            });
         }
 
         // 여당인 경우
         if(this.isPresident || this.isFriend) {
-            // console.log('z1');
             // 3명 이상 기루다가 안뽑혔다면 기루다를 돌려야합니다.
             let girudaLackingOppCount = 0;
             for (let p = 0; p < 5; p++) {
@@ -532,109 +534,58 @@ AISocket.prototype.proc_cprq = function(msg) {
 
             // 기루다가 덜 뽑혔다면
             if (girudaLackingOppCount < 3 && deck.hasShape(game.bidShape)) {
-                // 기루다를 돌린다.
-                const [gStart, gEnd] = getShapeRange(deck, game.bidShape);
-                if (gStart !== null) {  // 기루다 짱카
-                    return playIndex(gStart);
-                }
-
-                // 조커로라도 기루다를 뽑아보자.
-                const jokerIndex = deck.indexOf(game.joker);
-                if (jokerIndex != -1) {
-                    return playIndex(jokerIndex, game.bidShape);
-                }
-
-                // 기루다도 못뽑는 무능한 여당...
-                // 프렌이라면 주공에게 없는 문양을 돌린다.
-                if(this.isFriend) {
-                    const pLackingShapes = _.shuffle(Object.keys(this.noShapeInfo[game.president]));
-                    for (let i = 0; i < pLackingShapes.length; i++) {
-                        const shape = pLackingShapes[i];
-                        const sEnd = getShapeRange(deck, shape)[1];
-                        if (sEnd !== null) {
-                            // 근데 얘가 미이티면 고려해보자.
-                            if (deck[sEnd].equals(game.mighty)) continue;
-                            return playIndex(sEnd);  // 주공이 간 칠 기회나 만들어주자
-                        }
+                return playScored((card) => {
+                    if(card.shape == game.bidShape) {
+                        if(getCardRankInShape(card) === 0) return 300;  // 기루다 짱카
+                        else if(this.isFriend) return 200 + card.num;  // 프렌은 높은 기루다부터
+                        else return 200 - card.num;  // 주공은 낮은 기루다부터
                     }
-                }
+                    else if(card.shape == 'joker') {
+                        return play(250, game.bidShape);
+                    }
+                    else if(card.equals(game.mighty)) return -100;  // 마이티 초구는 X
 
-                // console.log('z2-4');
+                    // 낮은 카드로 주공이 간을 칠 수 있도록 한다.
+                    else if(this.isFriend && this.noShapeInfo[game.president][card.shape]) {
+                        return 150 - card.num;
+                    }
 
-                // 너무나도 무능한 여당이다. 점카 아닌걸로 맞자.
-                const nonScoreCards = [];
-                deck.forEach((card, index) => {
-                    if (!card.isScoreCard()) nonScoreCards.push(index);
+                    // 점카가 아닌걸로 내자.
+                    else if(!card.isScoreCard()) return 100;
+
+                    // 어쩔 수 없지
+                    else return 0;
                 });
-                if (nonScoreCards.length > 0) return playIndex(_.sample(nonScoreCards));
-
-                // 남은것도 다 점카라고 한다. 마이티 빼고 암거나 내자
-                // 마이티밖에 안남았을경우를 대비해 length==1은 특별처리
-                if (deck.length == 1) return playIndex(0);
-                else if (deck.hasCard(game.mighty)) {
-                    let cardIdx = _.random(1, deck.length - 1);
-                    while(deck[cardIdx].equals(game.mighty)) {
-                        cardIdx = _.random(1, deck.length - 1);
-                    }
-                    return playIndex(cardIdx);
-                }
-                else return playIndex(_.random(0, deck.length - 1));
             }
 
             // 기루다도 꽤 뽑혔다. 다른 물카처리를 좀 해보자.
             else {
-                // 다른 짱카가 있으면 그 문양도 걷어보자.
-                const topCards = card.cardShapes
-                    .filter((shape) => !(shape == 'joker' || shape == game.bidShape))
-                    .map(shape => {
-                        const sStart = getShapeRange(deck, shape)[0];
-                        if(sStart !== null && getCardRankInShape(deck[sStart]) === 0) {
-                            return sStart;
-                        }
-                        else return null;
-                    })
-                    .filter(x => x !== null);
-                if(topCards.length) {
-                    return playIndex(_.sample(topCards));
-                }
+                return playScored((card) => {
+                    // 다른 문양 짱카
+                    if(getCardRankInShape(card) === 0) return 300;
 
-                // 파트너의 간을 믿어보자.
-                const partner = (this.isPresident ? game.friend : game.president);
-                if(partner !== null) {
-                    // 파트너가 대신 턴을 먹어줬으면 좋겠다.
-                    // 파트너가 간 칠 기회를 준다.
-                    if(!this.noShapeInfo[partner][game.bidShape]) {
-                        const pLackingShape = _.sample(
-                            Object.keys(this.noShapeInfo[partner])
-                                .filter(shape => this.deck.hasShape(shape))
-                        );
-                        if(pLackingShape !== undefined) {
-                            return playIndex(getShapeRange(deck, pLackingShape)[0]);
+                    // 파트너 간 믿기
+                    const partner = (this.isFriend) ? game.president : game.friend;
+                    if(partner !== null) {
+                        if (!this.noShapeInfo[partner][game.bidShape]) {
+                            if (this.noShapeInfo[partner][card.shape]) return 200 - card.num;
                         }
                     }
-                }
 
-                const mightyIndex = deck.indexOf(game.mighty);
-                const jokerIndex = deck.indexOf(game.joker);
+                    // 조커
+                    if(card.shape == 'joker') {
+                        if(deck.length == 2) return play(9999, deck[0].shape);  // 마지막에서 2번째에 턴다
+                        else if(this.subGiruda) return play(250, this.subGiruda);  // 부기루다 콜
+                    }
 
-                // 조커로 부기루다를 뽑는다.
-                if(this.isPresident && jokerIndex != -1 && this.subGiruda) {
-                    return playIndex(jokerIndex, this.subGiruda);
-                }
+                    // 점카가 아닌걸로 내자.
+                    if(!card.isScoreCard()) return 100;
 
-                // 조커는 늘 마지막 카든데 그게 2번째 카드
-                // 지금 조커가 효과가 있는 마지막 턴이다. 내고 죽자.
-                if(jokerIndex == 1) {
-                    return playIndex(1, deck[0].shape);
-                }
+                    if(card.equals(game.mighty)) return -100;  // 마이티는... 나중에 씁시다.
 
-                const dSelEnd = deck.length - 1 - (jokerIndex == -1 ? 0 : 1);  // 조커 제외한 카드들
-
-                // randomExcluding은 mightyIndex가 유일한 남은 인덱스일 경우 무한루프에 걸린다.
-                // 그래서 dSelEnd == mightyIndex == 0인 경우에 저 함수는 무한루프에 빠진다.
-                // 이를 방지하기 위해 dSelIndex == 0인경우는 따로 미리 처리해야 한다.
-                if(dSelEnd === 0) return playIndex(0);
-                else return playIndex(randomExcluding(0, dSelEnd, mightyIndex));
+                    // 어쩔 수 없지
+                    else return 0;
+                });
             }
         }
 
@@ -738,7 +689,6 @@ AISocket.prototype.proc_cprq = function(msg) {
 
                 // 현재 주공이 잠재적인 선이다.
                 if (game.trickWinner === partner) {
-                    // console.log('b1');
                     const partnerCard = game.playedCards[(game.trickWinner - game.startTurn + 5) % 5];  // 주공이 낸 카드!
 
                     // 주공이 선플레이어가 아니고 간을 쳤다면 주공이 이기겠지 뭐
@@ -780,7 +730,7 @@ AISocket.prototype.proc_cprq = function(msg) {
                 // 주공이 뒤에 턴을 잡는다. 주공이 물카 털 기회를 줍시다.
                 if (this.isFriend && !hasPresidentPlayed) {
                     // 문양으로 선을 먹을 수 있으면 제일 높은 문양을 낸다.
-                    if (sStart !== null && canTakeLeadWith(sStart)) return playIndex(sStart);
+                    if (sStart !== null && getCardRankInShape(deck[sStart]) === 0) return playIndex(sStart);
 
                     // 간을 칠 수 있고 기루다 플레이를 할 수 있으면 제일 높은 간을 친다.
                     if (sStart === null && deck.hasShape(game.bidShape)) {
@@ -790,61 +740,45 @@ AISocket.prototype.proc_cprq = function(msg) {
                 }
             }
 
-            // console.log('b4');
-            // 기루다를 내야 하고 내가 더 높은 기루다를 낼 수 있으면 기루다를 낸다.
-            if (sStart !== null && msg.shaperq == game.bidShape && canTakeLeadWith(sStart)) {
-                // console.log('c1');
-                return playIndex(sStart);
-            }
-
-            // 마이티가 있으면 밟아준다.
-            if (deck.hasCard(game.mighty)) {
-                // console.log('c2');
-                return playIndex(deck.indexOf(game.mighty));
-            }
-
-            // 조커가 있어도 밟아준다.
-            if (
-                game.currentTrick != 1 && game.currentTrick != 10 &&
-                deck.hasCard(game.joker)
-            ) {
-                // console.log('c3');
-                return playIndex(deck.indexOf(game.joker));
-            }
-
-            // 그냥 선을 먹을 수 있으면 선을 낸다.
-            if (sStart !== null) {
-                // console.log('c4');
-                // 내가 선을 먹을 수 있다면 제일 쎈걸로
-                // (더 쎈걸로 밟힐수도 있으니까 어중간한게 쎈거 말고 그냥 제일 쎈걸로 낸다)
-                if (getCardRankInShape(deck[sStart]) === 0) return playIndex(sStart);
-                // 아님 야당에게 힘 실어주지 말고 제일 낮은거 내자.
-                else return playIndex(sEnd);
-            }
-
-            else {
-                // console.log('c5');
-                // 주공이 간을 칠 수 있으면 주공을 믿는다.
-                if (
-                    this.isFriend &&
-                    !this.noShapeInfo[game.president][game.bidShape] &&
-                    this.noShapeInfo[game.president][msg.shaperq]
-                )  return playNonMJG();  // 기루다 빼고 낸다
-
-                // console.log('c5_1');
-
-                // 아니면 간을 쳐야한다.
-                const [gStart, gEnd] = getShapeRange(deck, game.bidShape);
-                if (gStart !== null) {
-                    if(this.isFriend) return playIndex(gStart);
-                    else return playIndex(gEnd);
+            return playScored((card, index) => {
+                if(card.equals(game.mighty)) return 5001;
+                if(card.equals(game.joker)) {
+                    if(game.currentTrick == 9) return 5002;
+                    else return 5000;
                 }
 
-                // console.log('c5_2');
+                // 카드를 낼 수 있다면
+                if(msg.shaperq == card.shape) {
+                    if(getCardRankInShape(card) === 0) return 9999; // 짱카를 낼 수 있으면 낸다
+                    else if(card.isScoreCard()) return 1000;  // 점수는 싣지 않는다
+                    else if(canTakeLeadWith(index)) return 1200;  // 밟을 수 있으면 밟는다
+                    else return 1100 - card.num;  // 낮은 문양부터 낸다
+                }
 
-                // 할 수 있는것도 없다. 점수나 싣지 말자.
-                return playNonScore();
-            }
+                else {
+                    // 간을 칠 수 있으면 친다.
+                    if(card.shape == game.bidShape) {
+                        if(card.num == 12 || card.num == 13) return 500;  // KQ는 일단 남기자
+                        if(card.num == 10 || card.num == 11) return 530;  // J10은 턴다 (주공에게 준다)
+                        return 500 + card.num;
+                    }
+
+                    // 같은 편까지 가야한다면
+                    if(partner !== null) {
+                        // 같은 편을 믿자
+                        if(
+                            !this.noShapeInfo[partner][game.bidShape] &&
+                            this.noShapeInfo[partner][msg.shaperq]) {
+                            if(card.num == 12 || card.num == 13) return 0;  // KQ는 일단 남기자
+                            if(card.num == 10 || card.num == 11) return 200;  // J10은 턴다 (주공에게 준다)
+                            else return 100 - card.num;  // 나머지는 비등비등..
+                        }
+                    }
+
+                    // 점수 싣지 말자.
+                    return 50 - card.num;
+                }
+            });
         }
 
         // 야당이라면 전략이 달라진다.
