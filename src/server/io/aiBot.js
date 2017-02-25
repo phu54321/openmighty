@@ -176,7 +176,7 @@ AISocket.prototype.getExpectedWinningTurns = function () {
     if(maxWinExpect === 0) this.biddingCache = null;
     else {
         this.biddingCache = {
-            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.5), 20) | 0,
+            bidCount: Math.min(20 - ((10 - maxWinExpect) * 2.3), 20) | 0,
             bidShape: maxWinExpectShape
         };
     }
@@ -198,17 +198,21 @@ AISocket.prototype.proc_bidrq = function () {
         //   이길 경우 : 4 * (bidCount - 13)
         //   질 경우 : -3
         const bidShape = bidCandidate.bidShape;
-        let bidCount = Math.min(20, bidCandidate.bidCount + 2);  // 주어오는거에서 1개 더 나오리라 믿는다.
+        let bidCount = bidCandidate.bidCount;
         if(bidCount >= 18) bidCount = 20;  // 18개면 그냥 20개를 달리자;
+        let maxBidCount = Math.min(20, bidCount + 2);  // 주어오는거에서 1개 더 나오리라 믿는다.
 
-        const myBidStrength = bidding.getBidStrength(bidShape, bidCount);
-        global.logger.debug(this.deck.toString(), bidShape, bidCount, myBidStrength, this.game.bidding.bidStrength);
-        if(myBidStrength > this.game.bidding.bidStrength) {
-            return this.cmd({
-                type: 'bid',
-                shape: bidShape,
-                num: bidCount
-            });
+        while(bidCount <= maxBidCount) {
+            const myBidStrength = bidding.getBidStrength(bidShape, bidCount);
+            global.logger.debug(this.deck.toString(), bidShape, bidCount, myBidStrength, this.game.bidding.bidStrength);
+            if (myBidStrength > this.game.bidding.bidStrength) {
+                return this.cmd({
+                    type: 'bid',
+                    shape: bidShape,
+                    num: bidCount
+                });
+            }
+            bidCount++;
         }
     }
 
@@ -253,10 +257,10 @@ AISocket.prototype.proc_fsrq = function () {
     const newBidStrength = bidding.getBidStrength(bidShape, bidCount);
 
     if (!(
-            (this.game.bidShape != bidShape && newBidStrength <= this.bidStrength + 1) ||
-            (this.game.bidShape == bidShape && this.game.bidCount > bidCount)
+            (this.game.bidShape != bidShape && newBidStrength <= this.game.bidStrength + 1) ||
+            (this.game.bidShape == bidShape && bidCount < this.game.bidCount)
         )) {
-        if(!(bidShape == this.game.bidShape && bidCount == this.game.bidCount)) {
+        if (!(bidShape == this.game.bidShape && bidCount == this.game.bidCount)) {
             msg.bidch2 = {
                 shape: bidShape,
                 num: bidCount
@@ -824,12 +828,14 @@ AISocket.prototype.proc_cprq = function(msg) {
             // 점수를 마구마구 실어주자.
             if (!isLeadingTeamWinning && hasPresidentPlayed) {
                 return playScored((card) => {
-                    const nonGirudaScore = (card.shape == game.bidShape) ? 0 : 100;
+                    let shapeScore = (card.shape == game.bidShape) ? 0 : 100;
+                    if(card.shape == msg.shaperq) shapeScore += 1000;
+
                     if(card.equals(game.mighty)) return -500;
-                    if(card.num == 10 || card.num == 11 || card.num == 12) return nonGirudaScore + 20 + card.num;
-                    if(card.num == 13) return nonGirudaScore + 20;
-                    if(card.num == 14) return nonGirudaScore + 15;
-                    return nonGirudaScore - card.num;
+                    if(card.num == 10 || card.num == 11 || card.num == 12) return shapeScore + 20 + card.num;
+                    if(card.num == 13) return shapeScore + 20;
+                    if(card.num == 14) return shapeScore + 15;
+                    return shapeScore - card.num;
                 });
             }
 
@@ -845,12 +851,14 @@ AISocket.prototype.proc_cprq = function(msg) {
                 !game.discardedCards.hasShape('joker')
             ) {
                 return playScored((card) => {
-                    const nonGirudaScore = (card.shape == game.bidShape) ? 0 : 100;
+                    let shapeScore = (card.shape == game.bidShape) ? 0 : 100;
+                    if(card.shape == msg.shaperq) shapeScore += 1000;
+
                     if(card.equals(game.mighty)) return -500;
-                    if(card.num == 10 || card.num == 11 || card.num == 12) return nonGirudaScore + 20 + card.num;
-                    if(card.num == 13) return nonGirudaScore + 20;
-                    if(card.num == 14) return nonGirudaScore + 15;
-                    return nonGirudaScore - card.num;
+                    if(card.num == 10 || card.num == 11 || card.num == 12) return shapeScore + 20 + card.num;
+                    if(card.num == 13) return shapeScore + 20;
+                    if(card.num == 14) return shapeScore + 15;
+                    return shapeScore - card.num;
                 });
             }
 
