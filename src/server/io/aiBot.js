@@ -583,6 +583,22 @@ AISocket.prototype.proc_cprq = function(msg) {
 
             // 기루다도 꽤 뽑혔다. 다른 물카처리를 좀 해보자.
             else {
+                // 다른 짱카가 있으면 그 문양도 걷어보자.
+                const topCards = card.cardShapes
+                    .filter((shape) => !(shape == 'joker' || shape == game.bidShape))
+                    .map(shape => {
+                        const sStart = getShapeRange(deck, shape)[0];
+                        if(sStart !== null && getCardRankInShape(deck[sStart]) === 0) {
+                            return sStart;
+                        }
+                        else return null;
+                    })
+                    .filter(x => x !== null);
+                if(topCards.length) {
+                    return playIndex(_.sample(topCards));
+                }
+
+                // 파트너의 간을 믿어보자.
                 const partner = (this.isPresident ? game.friend : game.president);
                 if(partner !== null) {
                     // 파트너가 대신 턴을 먹어줬으면 좋겠다.
@@ -756,7 +772,6 @@ AISocket.prototype.proc_cprq = function(msg) {
 
                 // 주공이 이길것같으면 제일 낮은 카드를 낸다.
                 if (canPartnerWin) {
-                    // console.log('b3');
                     if (sEnd !== null) return playIndex(sEnd);
                     // 그냥 주공에게 어떻게든 턴을 넘겨줘야 하니까 기루다/마이티/조커 빼고 암거나 낸다.
                     else return playNonMJG();
