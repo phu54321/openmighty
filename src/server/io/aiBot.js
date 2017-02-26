@@ -579,11 +579,11 @@ AISocket.prototype.proc_cprq = function(msg) {
             // 기루다도 꽤 뽑혔다. 다른 물카처리를 좀 해보자.
             else {
                 return playScored((card) => {
-                    // 기루다는 나중에
-                    if(card.shape == game.bidShape) return -10;
-
                     // 다른 문양 짱카
-                    if(getCardRankInShape(card) === 0) return 300;
+                    if(
+                        card.shape !== game.bidShape &&
+                        getCardRankInShape(card) === 0
+                    ) return 300;
 
                     // 파트너 간 믿기
                     const partner = (this.isFriend) ? game.president : game.friend;
@@ -600,13 +600,10 @@ AISocket.prototype.proc_cprq = function(msg) {
                     }
 
                     // 점카가 아닌걸로 내자.
-                    if(!card.isScoreCard()) return 100;
-
-
                     if(card.equals(game.mighty)) return -100;  // 마이티는... 나중에 씁시다.
-
-                    // 어쩔 수 없지
-                    return 0;
+                    if(card.shape == game.bidShape) return -10;  // 기루다도 아낍시다.
+                    if(card.isScoreCard()) return -1; // 점수카드도 아낍시다
+                    else return 0;
                 });
             }
         }
