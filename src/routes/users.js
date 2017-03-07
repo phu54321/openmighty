@@ -24,6 +24,7 @@ router.post('/login', function (req, res, next) {
             if (err) {
                 return next(err);
             }
+            req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
             return res.json({error: 0});
         });
     })(req, res, next);
