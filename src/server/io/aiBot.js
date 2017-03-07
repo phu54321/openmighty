@@ -141,8 +141,11 @@ AISocket.prototype.getExpectedWinningTurns = function () {
 
         // A가 없을 때 : 물카(마프) -> 1턴을 돌릴 수 있다. A나 K는
         let winExpect = girudaCount;
-        if(!hasJoker && deckByShapes[bidShape][0].num != 14) {
+        if(deckByShapes[bidShape][0].num != 14) {
             winExpect--;  // 에이스가 없으면 한 턴은 뺏김
+            if(deckByShapes[bidShape][0].num != 13) {
+                winExpect--;  // K도 없으면 한턴 더 뺏김
+            }
         }
 
         // 마이티는 여당에 있으니까 한턴은 먹고 들어간다.
@@ -427,15 +430,14 @@ AISocket.prototype.proc_cprq = function(msg) {
             if(Array.isArray(s)) return s;
             else return [s];
         });
+
+        // Prevent unplayable card from being played
+        scores.forEach((s, index) => {
+            if(!game.canPlayCard(deck[index])) s[0] = -1000;
+        });
+
         const scoreRank = _.shuffle(_.range(scores.length));
         scoreRank.sort((a, b) => scores[b][0] - scores[a][0]);
-
-        /*
-        for(let i = 0 ; i < scoreRank.length ; i++) {
-            const idx = scoreRank[i];
-            console.log(deck[idx].toString(), scores[idx][0]);
-        }
-         */
 
         const idx = scoreRank[0];
         return playIndex(idx, scores[idx][1], scores[idx][2]);
@@ -712,21 +714,39 @@ AISocket.prototype.proc_cprq = function(msg) {
 
                 // 주공이 이길것같으면 제일 낮은 카드를 낸다.
                 if (canPartnerWin) {
-                    if (sEnd !== null) return playIndex(sEnd);
-                    // 그냥 주공에게 어떻게든 턴을 넘겨줘야 하니까 기루다/마이티/조커 빼고 암거나 낸다.
-                    else return playNonMJG();
+                    return playScored((card) => {
+                        if(card.equals(game.mighty)) return -1000;
+                        if(card.equals(game.joker)) return -1000;
+
+                        let shapeBonus = 0;
+                        if(card.shape == msg.shaperq) shapeBonus = 100;
+                        else if(card.shape == game.bidShape) shapeBonus = -100;
+
+                        if(card.num == 14) return shapeBonus;
+                        else if(card.num == 13) return shapeBonus + 1;
+                        else if(card.num >= 10) return shapeBonus + card.num;  // 10~12
+                        else return shapeBonus + 11 - card.num;  // 9~2
+                    });
                 }
 
                 // 주공이 뒤에 턴을 잡는다. 주공이 물카 털 기회를 줍시다.
                 if (this.isFriend && !hasPresidentPlayed) {
-                    // 문양으로 선을 먹을 수 있으면 제일 높은 문양을 낸다.
-                    if (sStart !== null && getCardRankInShape(deck[sStart]) === 0) return playIndex(sStart);
+                    return playScored((card, index) => {
+                        if(card.equals(game.mighty)) return 400;
+                        if(card.equals(game.joker)) return 300;
 
-                    // 간을 칠 수 있고 기루다 플레이를 할 수 있으면 제일 높은 간을 친다.
-                    if (sStart === null && deck.hasShape(game.bidShape)) {
-                        const gStart = getShapeRange(deck, game.bidShape)[0];
-                        return playIndex(gStart);
-                    }
+                        let shapeBonus = 0;
+                        if(card.shape != msg.shaperq) {
+                            if(sStart !== null) return -100; // 어차피 못내는 카드다.
+                            if(card.shape == game.bidShape) shapeBonus = 100;
+                        }
+
+                        if(canTakeLeadWith(index)) {
+                            if(getCardRankInShape(card) === 0) return 1000;  // 해당 문양 짱카
+                            else return shapeBonus + 20 + card.num;
+                        }
+                        else return shapeBonus + 13 - card.num;
+                    });
                 }
             }
 
