@@ -71,3 +71,4 @@ jspm_packages
 /knexfile.js
 /signature/
 errorgames
+database.db

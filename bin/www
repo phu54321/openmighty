@@ -8,12 +8,7 @@
 
 const app = require('../app');
 const debug = require('debug')('openmighty:server');
-const spdy = require('spdy');
-const fs = require('fs');
-const options = {
-    key: fs.readFileSync(__dirname + '/../signature/server.key'),
-    cert: fs.readFileSync(__dirname + '/../signature/server.pem'),
-};
+const http = require('http');
 
 
 /**
@@ -27,7 +22,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-const server = spdy.createServer(options, app);
+const server = http.createServer(app);
 const io = require('socket.io')(server);
 app.initSocketIO(io);
 

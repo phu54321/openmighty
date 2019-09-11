@@ -5,7 +5,7 @@
 "use strict";
 
 const db = require('./db');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const async = require('async');
 const crypto = require('crypto');
 const sendmail = require('sendmail')();
@@ -69,9 +69,9 @@ exports.addUser = function (hostname, userinfo, cb) {
         global.logger.info(`sending mail to ${userinfo.email} with activation code ${activateCode}`);
 
         sendmail({
-            from: 'no-reply@5ma.kr',
+            from: 'no-reply@trgksoft.com',
             to: userinfo.email,
-            subject: '[5ma.kr] 계정 활성화',
+            subject: '[mighty.trgksoft.com] 계정 활성화',
             html: `<a href="https://${hostname}/activate/${activateCode}">이 링크를 눌러 계정 ${userinfo.username}을 활성화하세요.</a>`,
         }, function(err, reply) {
             if (err) return cb(err);
