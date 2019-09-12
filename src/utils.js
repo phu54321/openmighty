@@ -9,6 +9,12 @@
  */
 exports.formatTime = function (time, useMillisecond) {
     if(useMillisecond === undefined) useMillisecond = true;
+    if (typeof time === 'string') time = new Date(time);
+    else if (typeof time === 'number') {
+        let newDate = new Date(0);
+        newDate.setUTCMilliseconds(time);
+        time = newDate;
+    }
 
     const yyyy = time.getFullYear();
     const mm = time.getMonth() < 9 ? "0" + (time.getMonth() + 1) : (time.getMonth() + 1); // getMonth() is zero-based

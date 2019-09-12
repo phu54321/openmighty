@@ -26,7 +26,9 @@ function compareCard(a, b) {
 class Deck extends Array {
     constructor(cards) {
         super();
-        Deck.prototype.splice.apply(this, [0, 0].concat(cards));
+        for(let i = 0 ; i < cards.length ; i++) {
+            this[i] = cards[i];
+        }
     }
 
     slice(start, end) {

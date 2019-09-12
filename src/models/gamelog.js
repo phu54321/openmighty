@@ -30,7 +30,7 @@ exports.createGamelog = function (game, cb) {
         players: game.gameUsers.map(user => user.useridf).join(','),
         gameLog: `[]`
     })
-        .then(function (gameID) {
+        .then(function ([gameID]) {
             cb(null, new GameLog(game, gameID));
         }, function(err) {
             cb(err);

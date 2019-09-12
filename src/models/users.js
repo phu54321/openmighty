@@ -84,7 +84,7 @@ exports.addUser = function (hostname, userinfo, cb) {
                 activated: false,
                 activateCode: activateCode
             })
-                .then(function (id) {
+                .then(function ([id]) {
                     cb(null, id);
                 }, function (err) {
                     cb(err);
