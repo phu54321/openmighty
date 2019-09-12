@@ -28,6 +28,6 @@ a {
 
 .scrollable {
   max-height: 100%;
-  overflow: scroll;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
 }

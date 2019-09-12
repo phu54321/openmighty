@@ -2,19 +2,30 @@
  * Created by whyask37 on 2017. 2. 17..
  */
 
+ function normalizeTime (time) {
+    if (typeof time === 'string') {
+        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(time)) {
+            return new Date(time + " UTC");
+        } else {
+            return new Date(time);
+        }
+    } else if (typeof time === 'number') {
+        const newDate = new Date(0);
+        newDate.setUTCMilliseconds(time);
+        return newDate;
+    } else return time;
+ }
+ exports.normalizeTime = normalizeTime;
+ 
 /**
  * Format date
  * @param time
  * @returns {string}
  */
 exports.formatTime = function (time, useMillisecond) {
+    time = normalizeTime(time);
+
     if(useMillisecond === undefined) useMillisecond = true;
-    if (typeof time === 'string') time = new Date(time);
-    else if (typeof time === 'number') {
-        let newDate = new Date(0);
-        newDate.setUTCMilliseconds(time);
-        time = newDate;
-    }
 
     const yyyy = time.getFullYear();
     const mm = time.getMonth() < 9 ? "0" + (time.getMonth() + 1) : (time.getMonth() + 1); // getMonth() is zero-based

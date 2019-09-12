@@ -14,8 +14,8 @@ block content
                 each log in logs
                     tr(onclick="javascript:viewGameLog(" + log.gameid + ");")
                         td= log.gameid
-                        td= formatTime(log.created_at)
-                        td= formatTime(log.updated_at)
+                        td= formatTime(log.created_at, false)
+                        td= formatTime(log.updated_at, false)
                         td= log.score
 
     #gameLogModal.modal.modal-fixed-footer
