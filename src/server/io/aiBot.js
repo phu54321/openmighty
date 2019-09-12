@@ -701,8 +701,12 @@ AISocket.prototype.proc_cprq = function(msg) {
                         else {
                             const presidentCardRank = getCardRankInShape(partnerCard);
                             const myDeckPWC = deck.filter(
-                                (c) => (c.shape == msg.shaperq && c.num > partnerCard.num)
+                                (c) => (
+                                    c.shape == msg.shaperq && c.num > partnerCard.num &&
+                                    !c.equals(game.mighty)
+                                )
                             ).length;  // 내 덱 카드중 주공 카드를 밟는 갯수
+                            console.log(partnerCard, presidentCardRank, myDeckPWC, deck)
 
                             if (presidentCardRank == myDeckPWC) {
                                 // 주공이 내 덱 제외 짱카다.
