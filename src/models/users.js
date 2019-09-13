@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const async = require('async');
 const crypto = require('crypto');
 const sendmail = require('sendmail')();
+const nanoid = require('nanoid');
 
 // SCHEMA
 db.initScheme('users', function(table) {
@@ -65,7 +66,7 @@ exports.addUser = function (hostname, userinfo, cb) {
         if(err) return cb(err);
 
         // Send activation code
-        const activateCode = crypto.randomBytes(20).toString('base64');
+        const activateCode = nanoid();
         global.logger.info(`sending mail to ${userinfo.email} with activation code ${activateCode}`);
 
         sendmail({

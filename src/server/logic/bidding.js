@@ -112,7 +112,6 @@ exports = module.exports = function (MightyRoom) {
         const bidCount = bidType.num;
 
         // 딜미스 처리
-        console.log(!this.bidding.canDealMiss);
         if(bidShape == 'dealmiss') {
             if(!this.bidding.canDealMiss) return "딜 미스는 처음에만 할 수 있습니다.";
 

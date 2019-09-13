@@ -37,8 +37,6 @@ exports = module.exports = function (GameLog) {
             this.completed = true;  // Barrier!
             delete this.logText;
 
-            console.log(this);
-
             const game = this.game;
             const gameID = this.gameID;
 
