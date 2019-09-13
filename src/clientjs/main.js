@@ -9,6 +9,14 @@ require('./roomjoin');
 require('./game/conn');
 require('./logViewer');
 
+function isKakaoTalkBrowser () {
+    return (navigator.userAgent || '').toUpperCase().indexOf('KAKAOTALK') != -1;
+}
+
+if (isKakaoTalkBrowser()) {
+    alert("카카오톡 브라우저에서 플레이하던 중 채팅으로 되돌아가면 게임에서 나가질 수 있습니다. 새로운 브라우저 창에서 게임을 실행해주세요.");
+}
+
 // Toast should disappear on click
 $(document).on('click', '#toast-container .toast', function() {
     $(this).fadeOut(function(){
