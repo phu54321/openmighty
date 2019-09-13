@@ -706,7 +706,6 @@ AISocket.prototype.proc_cprq = function(msg) {
                                     !c.equals(game.mighty)
                                 )
                             ).length;  // 내 덱 카드중 주공 카드를 밟는 갯수
-                            console.log(partnerCard, presidentCardRank, myDeckPWC, deck)
 
                             if (presidentCardRank == myDeckPWC) {
                                 // 주공이 내 덱 제외 짱카다.
@@ -726,8 +725,14 @@ AISocket.prototype.proc_cprq = function(msg) {
                         if(card.shape == msg.shaperq) shapeBonus = 100;
                         else if(card.shape == game.bidShape) shapeBonus = -100;
 
+                        // 기루다 → 제일 낮은걸 낸다.
+                        if (card.shape == game.bidShape) {
+                            return shapeBonus + 14 - card.num;
+                        }
+
+                        // 다른 문양 → 점카를 실을 수 있으면 싣자.
                         if(card.num == 14) return shapeBonus;
-                        else if(card.num == 13) return shapeBonus + 1;
+                        else if(card.num >= 10) return shapeBonus + 14 - card.num;
                         else if(card.num >= 10) return shapeBonus + card.num;  // 10~12
                         else return shapeBonus + 11 - card.num;  // 9~2
                     });
@@ -846,7 +851,6 @@ AISocket.prototype.proc_cprq = function(msg) {
             // 조커가 있는데 점수가 2개 이상 쌓일 수 있을것같으면 조커를 낸다.
             if (this.currentTrick != 1 && this.currentTrick != 10 && jokerIndex != -1) {
                 if(this.currentTrick == 9) return playIndex(jokerIndex);  // 9번 턴에선 무조건 조커
-                // console.log('d2');
                 /*
                  1 0 * ? ? -> 1 2 -> no
                  1 * ? ? ? -> 1 3 -> yes
@@ -858,14 +862,12 @@ AISocket.prototype.proc_cprq = function(msg) {
                     0.4 * Math.max(remainingTurns, 0) // 앞으로 나올 점카 갯수 예상치
                 );
                 if (expectedScoreCount >= 2) {
-                    // 마이티가 나왔으면
+                    // 마이티가 나왔으면 조커를 내면 안된다!
                     if (!game.playedCards.hasCard(game.mighty)) {
                         return playIndex(jokerIndex);
                     }
                 }
             }
-
-            // console.log('d02');
 
             // 주공이 이미 냈을경우 : 주공이 무섭지 않다.
             // 점수를 마구마구 실어주자.
