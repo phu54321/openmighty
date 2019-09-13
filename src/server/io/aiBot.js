@@ -144,7 +144,12 @@ AISocket.prototype.getExpectedWinningTurns = function () {
         if(deckByShapes[bidShape][0].num != 14) {
             winExpect--;  // 에이스가 없으면 한 턴은 뺏김
             if(deckByShapes[bidShape][0].num != 13) {
-                winExpect--;  // K도 없으면 한턴 더 뺏김
+                winExpect--;  // K조차 도 없으면 한턴 더 뺏김
+            }
+        } else {
+            // 6장 이하인데 K/Q가 없으면 한턴 뺏긴다 보자. conservative
+            if(deckByShapes[bidShape][1].num <= 11 && girudaCount <= 5) {
+                winExpect--;
             }
         }
 
