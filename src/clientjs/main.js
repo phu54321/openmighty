@@ -14,7 +14,7 @@ function isKakaoTalkBrowser () {
 }
 
 if (isKakaoTalkBrowser()) {
-    alert("카카오톡 브라우저에서 플레이하던 중 채팅으로 되돌아가면 게임에서 나가질 수 있습니다. 새로운 브라우저 창에서 게임을 실행해주세요.");
+    Materialize.toast("카카오톡 브라우저에서 플레이하던 중 채팅으로 되돌아가면 게임에서 나가질 수 있습니다. 새로운 브라우저 창에서 게임을 실행해주세요.", 15000);
 }
 
 // Toast should disappear on click
