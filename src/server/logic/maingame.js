@@ -275,7 +275,7 @@ module.exports = function (MightyRoom) {
     /**
      * 게임이 끝났을 경우
      */
-    MightyRoom.prototype.onGameEnd = function (setUser) {
+    MightyRoom.prototype.onGameEnd = function (setUser) {   
         let oppObtainedCardCount = 0;
         for(let i = 0 ; i < 5 ; i++) {
             if(i != this.president && i != this.friend) {
@@ -285,11 +285,14 @@ module.exports = function (MightyRoom) {
 
         // set으로 끝났으면
         if(setUser !== undefined) {
+            // 프렌이 아직 밝혀지지 않았다면///
             // 카드 프렌드였으면 해당 카드가 남은 플레이어를 프렌드로 지정
             if(this.friend === null && this.friendType == 'card') {
                 for (let i = 0; i < 5; i++) {
                     if (this.gameUsers[i].deck.hasCard(this.friendCard)) {
                         this.friend = i;
+                        // 위에서 더해둔거 취소
+                        oppObtainedCardCount -= this.obtainedCards[i].length;
                         break;
                     }
                 }
