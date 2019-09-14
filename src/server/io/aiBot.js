@@ -42,6 +42,7 @@ AISocket.prototype.cmd = function (msg) {
     "use strict";
 
     setTimeout(() => {
+        global.logger.debug(`[cmd ${this.useridf} ${JSON.stringify(msg)}`);
         const cmdProcessor = cmdproc[msg.type];
         if (!cmdProcessor) {
             // console.log('[' + this.userEntry.useridf + '] Unknown command : ' + msg.type);
@@ -488,7 +489,7 @@ AISocket.prototype.proc_cprq = function(msg) {
      * 카드가 해당 문양에서 몇위의 순위 정도인지
      */
     const getCardRankInShape = (card) => {
-        if(card.equals(game.mighty)) return -1;
+        if(card.equals(game.mighty)) return 0;
         const isMightyShape = (card.shape == game.mighty.shape) ? 1 : 0;
         const cardNum = card.num;
         const higherCardCount = 14 - cardNum - isMightyShape;
@@ -925,10 +926,7 @@ AISocket.prototype.proc_cprq = function(msg) {
 
     // 여기까지 왔으면 아마 조커로 문양지정 없이 냈겠지..?
     // 나도 모르겠다. 아무거나 낸다.
-    this.cmd({
-        type: 'cp',
-        cardIdx: _.random(0, deck.length - 1)
-    });
+    return playNonScore();
 };
 
 
