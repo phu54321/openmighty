@@ -112,9 +112,9 @@ module.exports = function (MightyRoom) {
             userEntry.socket = new AISocket(this, userEntry);
             userEntry.socket.deck = userEntry.deck;
             if(userEntry.lastCommand) {
-                const lastCommand = _.clone(userEntry.lastCommand);
+                const lastCommand = cmdcmp.decompressCommand(userEntry.lastCommand);
                 lastCommand.jcall = this.jokerCalled;
-                userEntry.emit('cmd', lastCommand);
+                userEntry.emit('cmd', cmdcmp.compressCommand(lastCommand));
             }
         }
 
