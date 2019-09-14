@@ -42,7 +42,7 @@ AISocket.prototype.cmd = function (msg) {
     "use strict";
 
     setTimeout(() => {
-        global.logger.debug(`[cmd ${this.useridf} ${JSON.stringify(msg)}`);
+        global.logger.debug(`[cmd ${this.userEntry.useridf} ${JSON.stringify(msg)}`);
         const cmdProcessor = cmdproc[msg.type];
         if (!cmdProcessor) {
             // console.log('[' + this.userEntry.useridf + '] Unknown command : ' + msg.type);
