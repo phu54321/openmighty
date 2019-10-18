@@ -29,6 +29,7 @@
     "mathjs": "^3.9.0",
     "morgan": "~1.7.0",
     "mysql": "^2.13.0",
+    "nanoid": "^2.1.4",
     "node-mysql": "^0.4.2",
     "node-sass-middleware": "^0.11.0",
     "orm": "^3.2.3",
