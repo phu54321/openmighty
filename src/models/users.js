@@ -239,11 +239,7 @@ exports.getPlayCount = function (userId, cb) {
  * @param cb
  */
 exports.getUserRating = function (userId, cb) {
-    db('usergame').avg('score as rating')
-        .where({userid: userId})
-        // Consider only 100 last games
-        .orderBy('id', 'desc')
-        .limit(100)
+    db.raw('select avg(score) as rating from (select score from usergame where userid=? order by id desc limit ?)', [userId, 100])
         .asCallback(function (err, r) {
             if(err) return cb(err);
             return cb(null, r[0].rating);
