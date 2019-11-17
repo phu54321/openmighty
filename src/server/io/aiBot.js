@@ -439,7 +439,7 @@ AISocket.prototype.proc_cprq = function(msg) {
 
         // Prevent unplayable card from being played
         scores.forEach((s, index) => {
-            if(!game.canPlayCard(deck[index])) s[0] = -1000;
+            if(!game.canPlayCard(deck[index])) s[0] = -9999999;
         });
 
         const scoreRank = _.shuffle(_.range(scores.length));
