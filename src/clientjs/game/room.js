@@ -45,7 +45,7 @@ exports.viewRoom = function () {
         const $playerSlot = $($playerSlots[i]);
         const user = users[i];
         const $playerName = $playerSlot.find('.player-name');
-        $playerName.text(user.username + ' (' + user.rating.toFixed(1) + ')');
+        $playerName.text(user.username + ' (' + user.rating.toFixed(2) + ')');
         if(!room.playing) {
             $playerName.click(() => {
                 window.open('/profile/' + user.username);
