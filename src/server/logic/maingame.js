@@ -292,7 +292,9 @@ module.exports = function (MightyRoom) {
                     if (this.gameUsers[i].deck.hasCard(this.friendCard)) {
                         this.friend = i;
                         // 위에서 더해둔거 취소
-                        oppObtainedCardCount -= this.obtainedCards[i].length;
+                        if (i !== this.president) {
+                            oppObtainedCardCount -= this.obtainedCards[i].length;
+                        }
                         break;
                     }
                 }
