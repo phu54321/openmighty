@@ -52,7 +52,7 @@ const sessionStore = new RedisStore({
     host: '127.0.0.1',
     port: 6379
 });
-const SESSION_SECRET = 'kefahdskjjhjkhvihkjbhtkgkjgb';
+const SESSION_SECRET = require('./secret.json')
 
 const sessionMiddleware = session({
     store: sessionStore,
