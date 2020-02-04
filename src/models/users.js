@@ -70,9 +70,9 @@ exports.addUser = function (hostname, userinfo, cb) {
         global.logger.info(`sending mail to ${userinfo.email} with activation code ${activateCode}`);
 
         sendmail({
-            from: 'no-reply@trgksoft.com',
+            from: `no-reply@${hostname}`,
             to: userinfo.email,
-            subject: '[mighty.trgksoft.com] 계정 활성화',
+            subject: '[${hostname}] 계정 활성화',
             html: `<a href="https://${hostname}/activate/${activateCode}">이 링크를 눌러 계정 ${userinfo.username}을 활성화하세요.</a>`,
         }, function(err, reply) {
             if (err) return cb(err);
