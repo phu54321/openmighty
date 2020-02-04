@@ -72,7 +72,7 @@ exports.addUser = function (hostname, userinfo, cb) {
         sendmail({
             from: `no-reply@${hostname}`,
             to: userinfo.email,
-            subject: '[${hostname}] 계정 활성화',
+            subject: `[${hostname}] 계정 활성화`,
             html: `<a href="https://${hostname}/activate/${activateCode}">이 링크를 눌러 계정 ${userinfo.username}을 활성화하세요.</a>`,
         }, function(err, reply) {
             if (err) return cb(err);
