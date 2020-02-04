@@ -68,7 +68,7 @@ jspm_packages
 # Python thing
 *.pyc
 *.pyo
-/knexfile.js
+*.sqlite3
 /signature/
 errorgames
 database.db
