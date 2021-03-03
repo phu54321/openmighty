@@ -36,7 +36,7 @@
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport.socketio": "^3.7.0",
-    "pug": "^2.0.0-beta10",
+    "pug": "^3.0.1",
     "queryize": "^2.0.0",
     "sendmail": "^1.1.1",
     "serve-favicon": "^2.5.0",
