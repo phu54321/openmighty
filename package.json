@@ -43,7 +43,7 @@
     "socket.io": "^1.7.2",
     "socket.io-cookie-parser": "^1.0.0",
     "sqlite3": "^4.1.1",
-    "underscore": "^1.8.3",
+    "underscore": "^1.12.1",
     "winston": "^2.3.1",
     "winston-color": "^1.0.0",
     "winston-error": "^1.0.1"
